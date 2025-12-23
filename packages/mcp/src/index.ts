@@ -158,7 +158,21 @@ async function analyzeFile(filePath: string, threshold = 0): Promise<string> {
 
   const content = fs.readFileSync(absolutePath, 'utf-8');
   const sourceFile = parseSourceFile(absolutePath, content);
-  const results: any[] = [];
+  const results: Array<{
+    name: string;
+    line: number;
+    mccabe: number;
+    cognitive: number;
+    dimensional: {
+      weighted: number;
+      control: number;
+      nesting: number;
+      state: number;
+      async: number;
+      coupling: number;
+    };
+    ratio: number;
+  }> = [];
 
   function visit(node: ts.Node) {
     const funcInfo = extractFunctionInfo(node, sourceFile);
@@ -242,7 +256,15 @@ async function getHotspots(directory: string, topN = 10, pattern = '**/*.{ts,tsx
     absolute: true,
   });
 
-  const hotspots: any[] = [];
+  const hotspots: Array<{
+    name: string;
+    file: string;
+    line: number;
+    mccabe: number;
+    dimensional: number;
+    ratio: number;
+    primaryDimension: string;
+  }> = [];
 
   for (const file of files) {
     try {
@@ -267,7 +289,7 @@ async function getHotspots(directory: string, topN = 10, pattern = '**/*.{ts,tsx
       }
 
       ts.forEachChild(sourceFile, visit);
-    } catch (e) {
+    } catch {
       // Skip unparseable files
     }
   }
@@ -290,7 +312,15 @@ async function compareMccabeDimensional(filePath: string, functionName?: string)
 
   const content = fs.readFileSync(absolutePath, 'utf-8');
   const sourceFile = parseSourceFile(absolutePath, content);
-  const comparisons: any[] = [];
+  const comparisons: Array<{
+    name: string;
+    line: number;
+    mccabe: number;
+    dimensional: number;
+    ratio: number;
+    hiddenComplexity: string;
+    interpretation: string;
+  }> = [];
 
   function visit(node: ts.Node) {
     const funcInfo = extractFunctionInfo(node, sourceFile);

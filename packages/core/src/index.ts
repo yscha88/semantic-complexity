@@ -62,6 +62,85 @@ export {
 // Context
 export { ContextCollector, quickAnalyze } from './context/index.js';
 
+// Canonical (v0.0.2)
+export type {
+  ModuleType,
+  ModuleTypeInfo,
+  MetaDimensions,
+  MetaWeights,
+  Range,
+  CanonicalLevel,
+  CanonicalProfile,
+  Vector3D,
+  Deviation,
+  ConvergenceResult,
+  Snapshot,
+  ConvergenceStatus,
+  ConvergenceAdvice,
+} from './canonical/index.js';
+
+export {
+  MODULE_TYPE_INFO,
+  DEFAULT_META_WEIGHTS,
+  LEVEL_RANGES,
+  CANONICAL_PROFILES,
+  levelToRange,
+  levelToMidpoint,
+  getIdealMetaDimensions,
+  getProfile,
+  isWithinCanonicalRange,
+  isCanonical,
+  inferModuleType,
+  calculateDeviation,
+  calculateConvergenceVector,
+  calculateConvergenceRate,
+  analyzeConvergence,
+  analyzeAllModuleTypes,
+  findBestFitModuleType,
+  getConvergenceStatus,
+  generateConvergenceAdvice,
+} from './canonical/index.js';
+
+// Gates (v0.0.2)
+export type {
+  GateType,
+  GateInfo,
+  ViolationSeverity,
+  Violation,
+  DeltaAnalysis,
+  DeltaThresholds,
+  GateDecision,
+  GateResult,
+  GatePipelineResult,
+} from './gates/index.js';
+
+export {
+  GATE_RESPONSIBILITIES,
+  GATE_INFO,
+  DEFAULT_DELTA_THRESHOLDS,
+  calculateDelta,
+  calculateDeltaPercent,
+  detectViolations,
+  analyzeDelta,
+  checkGate,
+  runGatePipeline,
+  createSnapshot,
+} from './gates/index.js';
+
+// Meta Dimensions (v0.0.2)
+export {
+  calculateSecurity,
+  calculateContext,
+  calculateBehavior,
+  toMetaDimensions,
+  calculateMetaWeightedSum,
+  normalizeMetaDimensions,
+  metaDistance,
+  addMetaDimensions,
+  subtractMetaDimensions,
+  ZERO_META,
+} from './metrics/meta.js';
+
 // ─── Convenience Functions ───────────────────────────────────────
 
 import * as fs from 'node:fs';

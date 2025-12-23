@@ -1,0 +1,39 @@
+name: Publish Go Package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'go/**'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Test
+        working-directory: go/semanticcomplexity
+        run: go test ./...
+
+      - name: Verify module
+        working-directory: go/semanticcomplexity
+        run: |
+          go mod tidy
+          go mod verify
+
+      # Go packages are published via git tags
+      # Users install with: go get github.com/yscha88/semantic-complexity/go/semanticcomplexity
+      - name: Tag info
+        run: |
+          echo "Go packages are published via git tags."
+          echo "To release: git tag go/v0.0.1 && git push origin go/v0.0.1"

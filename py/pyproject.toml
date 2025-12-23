@@ -1,0 +1,61 @@
+[project]
+name = "semantic-complexity"
+version = "0.0.1"
+description = "Multi-dimensional code complexity analyzer"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "yscha88", email = "clmfkilu@gmail.com" }
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+]
+keywords = ["complexity", "code-analysis", "cyclomatic", "cognitive", "metrics"]
+
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.8.0",
+]
+
+[project.scripts]
+semantic-complexity = "semantic_complexity.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yscha88/semantic-complexity"
+Repository = "https://github.com/yscha88/semantic-complexity"
+Issues = "https://github.com/yscha88/semantic-complexity/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["semantic_complexity"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=semantic_complexity"

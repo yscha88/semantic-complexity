@@ -1,6 +1,6 @@
 {
   "name": "semantic-complexity",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Multi-dimensional code complexity analyzer",
   "type": "module",
   "main": "./dist/index.js",
@@ -25,6 +25,14 @@
     "./context": {
       "types": "./dist/context/index.d.ts",
       "import": "./dist/context/index.js"
+    },
+    "./canonical": {
+      "types": "./dist/canonical/index.d.ts",
+      "import": "./dist/canonical/index.js"
+    },
+    "./gates": {
+      "types": "./dist/gates/index.d.ts",
+      "import": "./dist/gates/index.js"
     }
   },
   "files": [
