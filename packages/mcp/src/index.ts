@@ -348,45 +348,22 @@ function calculateTensorFromPython(
 // ─────────────────────────────────────────────────────────────────
 
 const TOOLS: Tool[] = [
-  {
-    name: 'analyze_file',
-    description: 'Analyze complexity of a source file. Supports TypeScript/JavaScript (.ts, .tsx, .js, .jsx), Python (.py), and Go (.go). Returns McCabe cyclomatic, cognitive, and dimensional complexity for each function.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        filePath: {
-          type: 'string',
-          description: 'Absolute or relative path to the file to analyze (.ts, .tsx, .js, .jsx, .py, .go)',
-        },
-        threshold: {
-          type: 'number',
-          description: 'Minimum dimensional complexity to include in results (default: 0)',
-        },
-      },
-      required: ['filePath'],
-    },
-  },
-  {
-    name: 'analyze_function',
-    description: 'Analyze a specific function by name in a file. Supports TypeScript/JavaScript, Python, and Go. Returns detailed dimensional complexity breakdown.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        filePath: {
-          type: 'string',
-          description: 'Path to the file containing the function (.ts, .tsx, .js, .jsx, .py, .go)',
-        },
-        functionName: {
-          type: 'string',
-          description: 'Name of the function to analyze',
-        },
-      },
-      required: ['filePath', 'functionName'],
-    },
-  },
+  // ═══════════════════════════════════════════════════════════════
+  // [ENTRY POINT] - 코드 품질 분석의 시작점
+  // ═══════════════════════════════════════════════════════════════
   {
     name: 'get_hotspots',
-    description: 'Find the most complex functions in a directory. Supports TypeScript/JavaScript, Python, and Go. Returns top N functions sorted by dimensional complexity.',
+    description: `[ENTRY POINT] Find complexity hotspots in a codebase.
+
+USE THIS FIRST when user mentions:
+- "refactoring", "리팩토링", "개선"
+- "code quality", "코드 품질"
+- "what should I improve?", "뭐 고쳐야 해?"
+- "복잡한 코드", "복잡도"
+- Starting code review or PR review
+
+Returns top N functions sorted by dimensional complexity.
+Supports TypeScript/JavaScript, Python, and Go.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -411,27 +388,82 @@ const TOOLS: Tool[] = [
       required: ['directory'],
     },
   },
+  // ═══════════════════════════════════════════════════════════════
+  // File-level Analysis
+  // ═══════════════════════════════════════════════════════════════
   {
-    name: 'compare_mccabe_dimensional',
-    description: 'Compare McCabe cyclomatic complexity with dimensional complexity for a file or function. Highlights hidden complexity that McCabe misses.',
+    name: 'analyze_file',
+    description: `Analyze complexity of all functions in a source file.
+
+USE when:
+- User opens or mentions a specific file
+- After get_hotspots identifies a problematic file
+- User asks "이 파일 분석해줘", "analyze this file"
+
+Returns McCabe, cognitive, and dimensional complexity for each function.
+Supports: .ts, .tsx, .js, .jsx, .py, .go`,
     inputSchema: {
       type: 'object',
       properties: {
         filePath: {
           type: 'string',
-          description: 'Path to the file to analyze',
+          description: 'Absolute or relative path to the file to analyze',
         },
-        functionName: {
-          type: 'string',
-          description: 'Optional: specific function to compare',
+        threshold: {
+          type: 'number',
+          description: 'Minimum dimensional complexity to include in results (default: 0)',
         },
       },
       required: ['filePath'],
     },
   },
+  // ═══════════════════════════════════════════════════════════════
+  // Function-level Deep Analysis (통합: breakdown + compare)
+  // ═══════════════════════════════════════════════════════════════
+  {
+    name: 'analyze_function',
+    description: `Deep analysis of a specific function with full dimensional breakdown.
+
+USE when:
+- User asks about a specific function
+- After get_hotspots/analyze_file identifies a complex function
+- User wants to understand WHY a function is complex
+
+Returns:
+- McCabe vs Dimensional comparison (hidden complexity ratio)
+- 5-dimension breakdown (Control, Nesting, State, Async, Coupling)
+- Contribution percentages for each dimension
+- Weighted scores with interpretation
+
+Supports: TypeScript/JavaScript, Python, Go`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filePath: {
+          type: 'string',
+          description: 'Path to the file containing the function',
+        },
+        functionName: {
+          type: 'string',
+          description: 'Name of the function to analyze',
+        },
+      },
+      required: ['filePath', 'functionName'],
+    },
+  },
+  // ═══════════════════════════════════════════════════════════════
+  // Refactoring Suggestions
+  // ═══════════════════════════════════════════════════════════════
   {
     name: 'suggest_refactor',
-    description: 'Get refactoring suggestions for a complex function based on its dimensional complexity profile.',
+    description: `Get actionable refactoring suggestions based on complexity profile.
+
+USE when:
+- User asks "어떻게 고쳐?", "how to fix?"
+- After analyze_function shows high complexity
+- User mentions "리팩토링", "refactor"
+
+Returns prioritized suggestions based on the dominant complexity dimension.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -447,27 +479,19 @@ const TOOLS: Tool[] = [
       required: ['filePath', 'functionName'],
     },
   },
-  {
-    name: 'get_dimension_breakdown',
-    description: 'Get detailed breakdown of each complexity domain (Control, Nesting, State, Async, Coupling) for a function.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        filePath: {
-          type: 'string',
-          description: 'Path to the file',
-        },
-        functionName: {
-          type: 'string',
-          description: 'Name of the function',
-        },
-      },
-      required: ['filePath', 'functionName'],
-    },
-  },
+  // ═══════════════════════════════════════════════════════════════
+  // Visualization
+  // ═══════════════════════════════════════════════════════════════
   {
     name: 'generate_graph',
-    description: 'Generate dependency or call graph for a file or directory. Returns Mermaid or DOT format.',
+    description: `Generate dependency or call graph visualization.
+
+USE when:
+- User asks about dependencies, "의존성", "구조"
+- User wants to see relationships between modules
+- Architecture review
+
+Returns Mermaid or DOT format for rendering.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -489,27 +513,20 @@ const TOOLS: Tool[] = [
       required: ['path'],
     },
   },
+  // ═══════════════════════════════════════════════════════════════
+  // Validation (통합: infer_module_type + check_canonical)
+  // ═══════════════════════════════════════════════════════════════
   {
-    name: 'infer_module_type',
-    description: 'Infer the most suitable module type (api, lib, app, web, data, infra, deploy) from complexity profile.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        filePath: {
-          type: 'string',
-          description: 'Path to the file to analyze',
-        },
-        functionName: {
-          type: 'string',
-          description: 'Optional: specific function to analyze. If not provided, analyzes file average.',
-        },
-      },
-      required: ['filePath'],
-    },
-  },
-  {
-    name: 'check_canonical',
-    description: 'Check if a function fits within canonical complexity bounds for a module type.',
+    name: 'validate_complexity',
+    description: `Validate if code fits within canonical complexity bounds.
+
+USE when:
+- After writing new code (CI integration)
+- PR review quality gate
+- User asks "이거 괜찮아?", "is this okay?"
+
+Auto-infers module type (api/lib/app/web/data/infra/deploy) and checks bounds.
+Returns pass/fail status with specific violation details.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -519,15 +536,15 @@ const TOOLS: Tool[] = [
         },
         functionName: {
           type: 'string',
-          description: 'Name of the function',
+          description: 'Name of the function (optional: if omitted, validates entire file)',
         },
         moduleType: {
           type: 'string',
-          enum: ['api', 'lib', 'app', 'web', 'data', 'infra', 'deploy', 'unknown'],
+          enum: ['api', 'lib', 'app', 'web', 'data', 'infra', 'deploy', 'auto'],
           description: 'Expected module type (default: auto-infer)',
         },
       },
-      required: ['filePath', 'functionName'],
+      required: ['filePath'],
     },
   },
 ];
@@ -675,52 +692,82 @@ async function analyzeFunction(filePath: string, functionName: string): Promise<
   }
 
   if (language === 'python') {
-    // Python 분석
+    // Python 분석 (통합: breakdown + compare)
     const pyResult = analyzePythonFunction(absolutePath, functionName);
     if (!pyResult) {
       return JSON.stringify({ error: `Function '${functionName}' not found in ${filePath}` });
     }
+
+    const d = pyResult.dimensional;
+    const ratio = pyResult.cyclomatic > 0 ? d.weighted / pyResult.cyclomatic : 0;
+    const stateScore = d.state.state_mutations;
+    const asyncScore = d.async_.async_boundaries;
+    const couplingScore = d.coupling.global_access + d.coupling.side_effects;
+    const total = d.control + d.nesting * 1.5 + stateScore * 2 + asyncScore * 2.5 + couplingScore * 3;
+
     return JSON.stringify({
       name: pyResult.name,
       location: `${path.basename(absolutePath)}:${pyResult.lineno}`,
       language: 'python',
-      mccabe: pyResult.cyclomatic,
-      cognitive: pyResult.cognitive,
-      dimensional: {
-        weighted: pyResult.dimensional.weighted,
-        control: pyResult.dimensional.control,
-        nesting: pyResult.dimensional.nesting,
-        state: pyResult.dimensional.state,
-        async: pyResult.dimensional.async_,
-        coupling: pyResult.dimensional.coupling,
+      // McCabe vs Dimensional 비교
+      comparison: {
+        mccabe: pyResult.cyclomatic,
+        dimensional: Math.round(d.weighted * 10) / 10,
+        ratio: Math.round(ratio * 100) / 100,
+        hiddenComplexity: ratio > 2 ? 'HIGH' : ratio > 1.5 ? 'MEDIUM' : 'LOW',
+        interpretation: getInterpretationFromRatio(ratio),
       },
+      // 차원별 상세 breakdown
+      dimensions: {
+        control: { score: d.control, weight: 1.0, weighted: d.control, percent: total > 0 ? Math.round(d.control / total * 100) : 0 },
+        nesting: { score: d.nesting, weight: 1.5, weighted: d.nesting * 1.5, percent: total > 0 ? Math.round(d.nesting * 1.5 / total * 100) : 0 },
+        state: { score: stateScore, weight: 2.0, weighted: stateScore * 2, percent: total > 0 ? Math.round(stateScore * 2 / total * 100) : 0, details: d.state },
+        async: { score: asyncScore, weight: 2.5, weighted: asyncScore * 2.5, percent: total > 0 ? Math.round(asyncScore * 2.5 / total * 100) : 0, details: d.async_ },
+        coupling: { score: couplingScore, weight: 3.0, weighted: couplingScore * 3, percent: total > 0 ? Math.round(couplingScore * 3 / total * 100) : 0, details: d.coupling },
+      },
+      primaryDimension: getPrimaryDimensionFromPython(pyResult),
+      cognitive: pyResult.cognitive,
     }, null, 2);
   }
 
   if (language === 'go') {
-    // Go 분석
+    // Go 분석 (통합: breakdown + compare)
     const goResult = analyzeGoFunction(absolutePath, functionName);
     if (!goResult) {
       return JSON.stringify({ error: `Function '${functionName}' not found in ${filePath}` });
     }
+
+    const d = goResult.dimensional;
+    const ratio = goResult.cyclomatic > 0 ? d.weighted / goResult.cyclomatic : 0;
+    const stateScore = d.state.state_mutations;
+    const asyncScore = d.async_.async_boundaries;
+    const couplingScore = d.coupling.global_access + d.coupling.side_effects;
+    const total = d.control + d.nesting * 1.5 + stateScore * 2 + asyncScore * 2.5 + couplingScore * 3;
+
     return JSON.stringify({
       name: goResult.name,
       location: `${path.basename(absolutePath)}:${goResult.lineno}`,
       language: 'go',
-      mccabe: goResult.cyclomatic,
-      cognitive: goResult.cognitive,
-      dimensional: {
-        weighted: goResult.dimensional.weighted,
-        control: goResult.dimensional.control,
-        nesting: goResult.dimensional.nesting,
-        state: goResult.dimensional.state,
-        async: goResult.dimensional.async_,
-        coupling: goResult.dimensional.coupling,
+      comparison: {
+        mccabe: goResult.cyclomatic,
+        dimensional: Math.round(d.weighted * 10) / 10,
+        ratio: Math.round(ratio * 100) / 100,
+        hiddenComplexity: ratio > 2 ? 'HIGH' : ratio > 1.5 ? 'MEDIUM' : 'LOW',
+        interpretation: getInterpretationFromRatio(ratio),
       },
+      dimensions: {
+        control: { score: d.control, weight: 1.0, weighted: d.control, percent: total > 0 ? Math.round(d.control / total * 100) : 0 },
+        nesting: { score: d.nesting, weight: 1.5, weighted: d.nesting * 1.5, percent: total > 0 ? Math.round(d.nesting * 1.5 / total * 100) : 0 },
+        state: { score: stateScore, weight: 2.0, weighted: stateScore * 2, percent: total > 0 ? Math.round(stateScore * 2 / total * 100) : 0, details: d.state },
+        async: { score: asyncScore, weight: 2.5, weighted: asyncScore * 2.5, percent: total > 0 ? Math.round(asyncScore * 2.5 / total * 100) : 0, details: d.async_ },
+        coupling: { score: couplingScore, weight: 3.0, weighted: couplingScore * 3, percent: total > 0 ? Math.round(couplingScore * 3 / total * 100) : 0, details: d.coupling },
+      },
+      primaryDimension: getPrimaryDimensionFromPython(goResult),
+      cognitive: goResult.cognitive,
     }, null, 2);
   }
 
-  // TypeScript/JavaScript 분석
+  // TypeScript/JavaScript 분석 (통합: breakdown + compare)
   const content = fs.readFileSync(absolutePath, 'utf-8');
   const sourceFile = parseSourceFile(absolutePath, content);
   let found: ExtendedComplexityResult | null = null;
@@ -740,13 +787,66 @@ async function analyzeFunction(filePath: string, functionName: string): Promise<
   }
 
   const f = found as ExtendedComplexityResult;
+  const d = f.dimensional;
+  const ratio = f.cyclomatic > 0 ? d.weighted / f.cyclomatic : 0;
+  const stateScore = d.state.stateMutations + d.state.stateReads * 0.5;
+  const asyncScore = d.async.asyncBoundaries + d.async.promiseChains + d.async.callbackDepth;
+  const couplingScore = d.coupling.globalAccess.length * 2 + d.coupling.sideEffects.length * 3 + d.coupling.closureCaptures.length;
+  const total = d.control + d.nesting * 1.5 + stateScore * 2 + asyncScore * 2.5 + couplingScore;
+
   return JSON.stringify({
     name: f.function.name,
     location: `${path.basename(absolutePath)}:${f.function.location.startLine}`,
     language: 'typescript',
-    mccabe: f.cyclomatic,
+    comparison: {
+      mccabe: f.cyclomatic,
+      dimensional: Math.round(d.weighted * 10) / 10,
+      ratio: Math.round(ratio * 100) / 100,
+      hiddenComplexity: ratio > 2 ? 'HIGH' : ratio > 1.5 ? 'MEDIUM' : 'LOW',
+      interpretation: getInterpretation(f),
+    },
+    dimensions: {
+      control: { score: d.control, weight: 1.0, weighted: d.control, percent: total > 0 ? Math.round(d.control / total * 100) : 0 },
+      nesting: { score: d.nesting, weight: 1.5, weighted: d.nesting * 1.5, percent: total > 0 ? Math.round(d.nesting * 1.5 / total * 100) : 0 },
+      state: {
+        score: Math.round(stateScore),
+        weight: 2.0,
+        weighted: Math.round(stateScore * 2),
+        percent: total > 0 ? Math.round(stateScore * 2 / total * 100) : 0,
+        details: {
+          enumStates: d.state.enumStates,
+          stateMutations: d.state.stateMutations,
+          stateReads: d.state.stateReads,
+          stateBranches: d.state.stateBranches,
+        },
+      },
+      async: {
+        score: Math.round(asyncScore),
+        weight: 2.5,
+        weighted: Math.round(asyncScore * 2.5),
+        percent: total > 0 ? Math.round(asyncScore * 2.5 / total * 100) : 0,
+        details: {
+          asyncBoundaries: d.async.asyncBoundaries,
+          promiseChains: d.async.promiseChains,
+          callbackDepth: d.async.callbackDepth,
+        },
+      },
+      coupling: {
+        score: Math.round(couplingScore),
+        weight: 3.0,
+        weighted: Math.round(couplingScore * 3),
+        percent: total > 0 ? Math.round(couplingScore * 3 / total * 100) : 0,
+        details: {
+          globalAccess: d.coupling.globalAccess.length,
+          sideEffects: d.coupling.sideEffects.length,
+          closureCaptures: d.coupling.closureCaptures.length,
+          implicitIO: d.coupling.implicitIO.length,
+        },
+      },
+    },
+    primaryDimension: getPrimaryDimension(f),
     cognitive: f.cognitive,
-    dimensional: f.dimensional,
+    contributions: d.contributions,
   }, null, 2);
 }
 
@@ -857,89 +957,7 @@ async function getHotspots(
   }, null, 2);
 }
 
-async function compareMccabeDimensional(filePath: string, functionName?: string): Promise<string> {
-  const absolutePath = path.resolve(filePath);
-
-  if (!fs.existsSync(absolutePath)) {
-    return JSON.stringify({ error: `File not found: ${absolutePath}` });
-  }
-
-  const language = detectLanguage(absolutePath);
-
-  if (language === 'unsupported') {
-    return JSON.stringify({
-      error: `Unsupported file type: ${path.extname(absolutePath)}. Supported: .ts, .tsx, .js, .jsx, .py, .go`,
-    });
-  }
-
-  const comparisons: Array<{
-    name: string;
-    line: number;
-    mccabe: number;
-    dimensional: number;
-    ratio: number;
-    hiddenComplexity: string;
-    interpretation: string;
-  }> = [];
-
-  if (language === 'python') {
-    // Python 분석
-    const pyResults = analyzePythonFile(absolutePath);
-    for (const r of pyResults) {
-      if (functionName && r.name !== functionName) continue;
-      const ratio = r.cyclomatic > 0 ? r.dimensional.weighted / r.cyclomatic : 0;
-
-      comparisons.push({
-        name: r.name,
-        line: r.lineno,
-        mccabe: r.cyclomatic,
-        dimensional: Math.round(r.dimensional.weighted * 10) / 10,
-        ratio: Math.round(ratio * 100) / 100,
-        hiddenComplexity: ratio > 2 ? 'HIGH' : ratio > 1.5 ? 'MEDIUM' : 'LOW',
-        interpretation: getInterpretationFromRatio(ratio),
-      });
-    }
-  } else {
-    // TypeScript/JavaScript 분석
-    const content = fs.readFileSync(absolutePath, 'utf-8');
-    const sourceFile = parseSourceFile(absolutePath, content);
-
-    function visit(node: ts.Node) {
-      const funcInfo = extractFunctionInfo(node, sourceFile);
-      if (funcInfo && (!functionName || funcInfo.name === functionName)) {
-        const result = analyzeFunctionExtended(node, sourceFile, funcInfo);
-        const ratio = result.cyclomatic > 0 ? result.dimensional.weighted / result.cyclomatic : 0;
-
-        comparisons.push({
-          name: funcInfo.name,
-          line: funcInfo.location.startLine,
-          mccabe: result.cyclomatic,
-          dimensional: Math.round(result.dimensional.weighted * 10) / 10,
-          ratio: Math.round(ratio * 100) / 100,
-          hiddenComplexity: ratio > 2 ? 'HIGH' : ratio > 1.5 ? 'MEDIUM' : 'LOW',
-          interpretation: getInterpretation(result),
-        });
-      }
-      ts.forEachChild(node, visit);
-    }
-
-    ts.forEachChild(sourceFile, visit);
-  }
-
-  const count = comparisons.length || 1; // prevent division by zero
-
-  return JSON.stringify({
-    file: path.basename(absolutePath),
-    language,
-    comparisons: comparisons.sort((a, b) => b.ratio - a.ratio),
-    summary: {
-      avgMccabe: Math.round(comparisons.reduce((s, c) => s + c.mccabe, 0) / count * 10) / 10,
-      avgDimensional: Math.round(comparisons.reduce((s, c) => s + c.dimensional, 0) / count * 10) / 10,
-      avgRatio: Math.round(comparisons.reduce((s, c) => s + c.ratio, 0) / count * 100) / 100,
-      highHiddenComplexity: comparisons.filter(c => c.hiddenComplexity === 'HIGH').length,
-    },
-  }, null, 2);
-}
+// compareMccabeDimensional - 통합됨: analyze_function에서 comparison 필드로 제공
 
 async function suggestRefactor(filePath: string, functionName: string): Promise<string> {
   const absolutePath = path.resolve(filePath);
@@ -1037,220 +1055,7 @@ async function suggestRefactor(filePath: string, functionName: string): Promise<
   }, null, 2);
 }
 
-async function getDimensionBreakdown(filePath: string, functionName: string): Promise<string> {
-  const absolutePath = path.resolve(filePath);
-
-  if (!fs.existsSync(absolutePath)) {
-    return JSON.stringify({ error: `File not found: ${absolutePath}` });
-  }
-
-  const language = detectLanguage(absolutePath);
-
-  if (language === 'unsupported') {
-    return JSON.stringify({
-      error: `Unsupported file type: ${path.extname(absolutePath)}. Supported: .ts, .tsx, .js, .jsx, .py, .go`,
-    });
-  }
-
-  if (language === 'python') {
-    // Python 분석
-    const pyResult = analyzePythonFunction(absolutePath, functionName);
-    if (!pyResult) {
-      return JSON.stringify({ error: `Function '${functionName}' not found` });
-    }
-
-    const d = pyResult.dimensional;
-    const stateScore = d.state.state_mutations;
-    const asyncScore = d.async_.async_boundaries;
-    const couplingScore = d.coupling.global_access + d.coupling.side_effects;
-
-    return JSON.stringify({
-      function: functionName,
-      language: 'python',
-      dimensions: {
-        control: {
-          score: d.control,
-          weight: 1.0,
-          weighted: d.control * 1.0,
-          description: 'Branch points (if, elif, for, while)',
-        },
-        nesting: {
-          score: d.nesting,
-          weight: 1.5,
-          weighted: d.nesting * 1.5,
-          description: 'Nesting depth penalty',
-        },
-        state: {
-          score: stateScore,
-          weight: 2.0,
-          weighted: stateScore * 2.0,
-          details: {
-            stateMutations: d.state.state_mutations,
-          },
-          description: 'State variables and mutations',
-        },
-        async: {
-          score: asyncScore,
-          weight: 2.5,
-          weighted: asyncScore * 2.5,
-          details: {
-            asyncBoundaries: d.async_.async_boundaries,
-          },
-          description: 'async/await, asyncio patterns',
-        },
-        coupling: {
-          score: couplingScore,
-          weight: 3.0,
-          weighted: couplingScore * 3.0,
-          details: {
-            globalAccess: d.coupling.global_access,
-            sideEffects: d.coupling.side_effects,
-          },
-          description: 'Hidden dependencies and side effects',
-        },
-      },
-      totalWeighted: Math.round(d.weighted * 10) / 10,
-    }, null, 2);
-  }
-
-  if (language === 'go') {
-    // Go 분석
-    const goResult = analyzeGoFunction(absolutePath, functionName);
-    if (!goResult) {
-      return JSON.stringify({ error: `Function '${functionName}' not found` });
-    }
-
-    const d = goResult.dimensional;
-    const stateScore = d.state.state_mutations;
-    const asyncScore = d.async_.async_boundaries;
-    const couplingScore = d.coupling.global_access + d.coupling.side_effects;
-
-    return JSON.stringify({
-      function: functionName,
-      language: 'go',
-      dimensions: {
-        control: {
-          score: d.control,
-          weight: 1.0,
-          weighted: d.control * 1.0,
-          description: 'Branch points (if, for, switch, select)',
-        },
-        nesting: {
-          score: d.nesting,
-          weight: 1.5,
-          weighted: d.nesting * 1.5,
-          description: 'Nesting depth penalty',
-        },
-        state: {
-          score: stateScore,
-          weight: 2.0,
-          weighted: stateScore * 2.0,
-          details: {
-            stateMutations: d.state.state_mutations,
-          },
-          description: 'State variables and mutations',
-        },
-        async: {
-          score: asyncScore,
-          weight: 2.5,
-          weighted: asyncScore * 2.5,
-          details: {
-            asyncBoundaries: d.async_.async_boundaries,
-          },
-          description: 'Goroutines and channel operations',
-        },
-        coupling: {
-          score: couplingScore,
-          weight: 3.0,
-          weighted: couplingScore * 3.0,
-          details: {
-            globalAccess: d.coupling.global_access,
-            sideEffects: d.coupling.side_effects,
-          },
-          description: 'Hidden dependencies and side effects',
-        },
-      },
-      totalWeighted: Math.round(d.weighted * 10) / 10,
-    }, null, 2);
-  }
-
-  // TypeScript/JavaScript 분석
-  const content = fs.readFileSync(absolutePath, 'utf-8');
-  const sourceFile = parseSourceFile(absolutePath, content);
-  let found: ExtendedComplexityResult | null = null;
-
-  function visit(node: ts.Node) {
-    const funcInfo = extractFunctionInfo(node, sourceFile);
-    if (funcInfo && funcInfo.name === functionName) {
-      found = analyzeFunctionExtended(node, sourceFile, funcInfo);
-    }
-    ts.forEachChild(node, visit);
-  }
-
-  ts.forEachChild(sourceFile, visit);
-
-  if (!found) {
-    return JSON.stringify({ error: `Function '${functionName}' not found` });
-  }
-
-  const f = found as ExtendedComplexityResult;
-  const d = f.dimensional;
-
-  return JSON.stringify({
-    function: functionName,
-    language: 'typescript',
-    dimensions: {
-      control: {
-        score: d.control,
-        weight: 1.0,
-        weighted: d.control * 1.0,
-        description: 'Branch points (if, switch, loops)',
-      },
-      nesting: {
-        score: d.nesting,
-        weight: 1.5,
-        weighted: d.nesting * 1.5,
-        description: 'Nesting depth penalty',
-      },
-      state: {
-        score: d.state,
-        weight: 2.0,
-        details: {
-          enumStates: d.state.enumStates,
-          stateMutations: d.state.stateMutations,
-          stateReads: d.state.stateReads,
-          stateBranches: d.state.stateBranches,
-        },
-        description: 'State variables and mutations',
-      },
-      async: {
-        score: d.async,
-        weight: 2.5,
-        details: {
-          asyncBoundaries: d.async.asyncBoundaries,
-          promiseChains: d.async.promiseChains,
-          callbackDepth: d.async.callbackDepth,
-          concurrencyPatterns: d.async.concurrencyPatterns.length,
-        },
-        description: 'Async/await, Promises, callbacks',
-      },
-      coupling: {
-        score: d.coupling,
-        weight: 3.0,
-        details: {
-          globalAccess: d.coupling.globalAccess.length,
-          implicitIO: d.coupling.implicitIO.length,
-          sideEffects: d.coupling.sideEffects.length,
-          envDependency: d.coupling.envDependency.length,
-          closureCaptures: d.coupling.closureCaptures.length,
-        },
-        description: 'Hidden dependencies and side effects',
-      },
-    },
-    totalWeighted: Math.round(d.weighted * 10) / 10,
-    contributions: d.contributions,
-  }, null, 2);
-}
+// getDimensionBreakdown - 통합됨: analyze_function에서 dimensions 필드로 제공
 
 // ─────────────────────────────────────────────────────────────────
 // 그래프 생성
@@ -1322,99 +1127,16 @@ async function generateGraph(
   }, null, 2);
 }
 
-// ─────────────────────────────────────────────────────────────────
-// 모듈 타입 추론
-// ─────────────────────────────────────────────────────────────────
-
-async function inferModuleType(filePath: string, functionName?: string): Promise<string> {
-  const absolutePath = path.resolve(filePath);
-
-  if (!fs.existsSync(absolutePath)) {
-    return JSON.stringify({ error: `File not found: ${absolutePath}` });
-  }
-
-  const language = detectLanguage(absolutePath);
-
-  if (language === 'unsupported') {
-    return JSON.stringify({
-      error: `Unsupported file type: ${path.extname(absolutePath)}`,
-    });
-  }
-
-  // TypeScript/JavaScript only for now
-  if (language !== 'typescript') {
-    return JSON.stringify({ error: 'Module type inference only supports TypeScript/JavaScript for now' });
-  }
-
-  const content = fs.readFileSync(absolutePath, 'utf-8');
-  const sourceFile = parseSourceFile(absolutePath, content);
-  const vectors: Vector5D[] = [];
-
-  function visit(node: ts.Node) {
-    const funcInfo = extractFunctionInfo(node, sourceFile);
-    if (funcInfo && (!functionName || funcInfo.name === functionName)) {
-      const result = analyzeFunctionExtended(node, sourceFile, funcInfo);
-      vectors.push({
-        control: result.dimensional.control,
-        nesting: result.dimensional.nesting,
-        state: result.dimensional.state.stateMutations,
-        async: result.dimensional.async.asyncBoundaries,
-        coupling: result.dimensional.coupling.globalAccess.length + result.dimensional.coupling.sideEffects.length,
-      });
-    }
-    ts.forEachChild(node, visit);
-  }
-
-  ts.forEachChild(sourceFile, visit);
-
-  if (vectors.length === 0) {
-    return JSON.stringify({ error: functionName ? `Function '${functionName}' not found` : 'No functions found' });
-  }
-
-  // Average vector if multiple functions
-  const avgVector: Vector5D = {
-    control: vectors.reduce((s, v) => s + v.control, 0) / vectors.length,
-    nesting: vectors.reduce((s, v) => s + v.nesting, 0) / vectors.length,
-    state: vectors.reduce((s, v) => s + v.state, 0) / vectors.length,
-    async: vectors.reduce((s, v) => s + v.async, 0) / vectors.length,
-    coupling: vectors.reduce((s, v) => s + v.coupling, 0) / vectors.length,
-  };
-
-  const bestFit = findBestTensorModuleType(avgVector);
-
-  return JSON.stringify({
-    file: path.basename(absolutePath),
-    functionCount: vectors.length,
-    averageVector: avgVector,
-    inferredModuleType: bestFit.type,
-    confidence: Math.round((1 - bestFit.distance / 50) * 100) / 100, // Normalize to 0-1
-    distance: bestFit.distance,
-    recommendation: getModuleTypeRecommendation(bestFit.type),
-  }, null, 2);
-}
-
-function getModuleTypeRecommendation(moduleType: TensorModuleType): string {
-  const recommendations: Record<TensorModuleType, string> = {
-    api: 'Keep controllers thin. Move business logic to services.',
-    lib: 'Focus on pure functions. Minimize side effects.',
-    app: 'Consider state management patterns. Handle async errors.',
-    web: 'Reduce component nesting. Extract custom hooks.',
-    data: 'Keep DTOs simple. Validate at boundaries.',
-    infra: 'Abstract external dependencies. Handle connection failures.',
-    deploy: 'Keep scripts idempotent and simple.',
-    unknown: 'Consider restructuring based on primary responsibility.',
-  };
-  return recommendations[moduleType];
-}
+// inferModuleType, checkCanonical - 통합됨: validate_complexity에서 제공
 
 // ─────────────────────────────────────────────────────────────────
-// 정준성 체크
+// 통합 검증 (infer_module_type + check_canonical)
 // ─────────────────────────────────────────────────────────────────
 
-async function checkCanonical(
+async function validateComplexity(
   filePath: string,
-  functionName: string,
-  moduleType?: TensorModuleType
+  functionName?: string,
+  moduleType?: TensorModuleType | 'auto'
 ): Promise<string> {
   const absolutePath = path.resolve(filePath);
 
@@ -1425,65 +1147,89 @@ async function checkCanonical(
   const language = detectLanguage(absolutePath);
 
   if (language !== 'typescript') {
-    return JSON.stringify({ error: 'Canonical check only supports TypeScript/JavaScript for now' });
+    return JSON.stringify({ error: 'Validation only supports TypeScript/JavaScript for now' });
   }
 
   const content = fs.readFileSync(absolutePath, 'utf-8');
   const sourceFile = parseSourceFile(absolutePath, content);
-  let found: ExtendedComplexityResult | null = null;
+
+  interface FunctionValidation {
+    name: string;
+    line: number;
+    vector: Vector5D;
+    moduleType: TensorModuleType;
+    confidence: number;
+    isCanonical: boolean;
+    status: string;
+    violationDimensions: string[];
+  }
+
+  const results: FunctionValidation[] = [];
 
   function visit(node: ts.Node) {
     const funcInfo = extractFunctionInfo(node, sourceFile);
-    if (funcInfo && funcInfo.name === functionName) {
-      found = analyzeFunctionExtended(node, sourceFile, funcInfo);
+    if (funcInfo && (!functionName || funcInfo.name === functionName)) {
+      const result = analyzeFunctionExtended(node, sourceFile, funcInfo);
+      const vector: Vector5D = {
+        control: result.dimensional.control,
+        nesting: result.dimensional.nesting,
+        state: result.dimensional.state.stateMutations,
+        async: result.dimensional.async.asyncBoundaries,
+        coupling: result.dimensional.coupling.globalAccess.length + result.dimensional.coupling.sideEffects.length,
+      };
+
+      // Auto-infer or use provided module type
+      const bestFit = findBestTensorModuleType(vector);
+      const targetModuleType = (moduleType && moduleType !== 'auto') ? moduleType : bestFit.type;
+      const profile = getCanonicalProfile(targetModuleType);
+      const isWithinBounds = isWithinCanonicalBounds(vector, profile);
+      const deviation = analyzeDeviation(vector, targetModuleType);
+
+      results.push({
+        name: funcInfo.name,
+        line: funcInfo.location.startLine,
+        vector,
+        moduleType: targetModuleType,
+        confidence: Math.round((1 - bestFit.distance / 50) * 100) / 100,
+        isCanonical: isWithinBounds,
+        status: deviation.status,
+        violationDimensions: deviation.violationDimensions,
+      });
     }
     ts.forEachChild(node, visit);
   }
 
   ts.forEachChild(sourceFile, visit);
 
-  if (!found) {
-    return JSON.stringify({ error: `Function '${functionName}' not found` });
+  if (results.length === 0) {
+    return JSON.stringify({ error: functionName ? `Function '${functionName}' not found` : 'No functions found' });
   }
 
-  const f = found as ExtendedComplexityResult;
-  const vector: Vector5D = {
-    control: f.dimensional.control,
-    nesting: f.dimensional.nesting,
-    state: f.dimensional.state.stateMutations,
-    async: f.dimensional.async.asyncBoundaries,
-    coupling: f.dimensional.coupling.globalAccess.length + f.dimensional.coupling.sideEffects.length,
-  };
-
-  // Auto-infer module type if not provided
-  const targetModuleType = moduleType || findBestTensorModuleType(vector).type;
-  const profile = getCanonicalProfile(targetModuleType);
-  const isWithinBounds = isWithinCanonicalBounds(vector, profile);
-  const deviation = analyzeDeviation(vector, targetModuleType);
+  const passed = results.filter(r => r.isCanonical).length;
+  const failed = results.filter(r => !r.isCanonical).length;
+  const overallStatus = failed === 0 ? 'PASS' : failed > passed ? 'FAIL' : 'WARNING';
 
   return JSON.stringify({
-    function: functionName,
-    moduleType: targetModuleType,
-    vector,
-    isCanonical: isWithinBounds,
-    status: deviation.status,
-    profile: {
-      control: profile.control,
-      nesting: profile.nesting,
-      state: profile.state,
-      async: profile.async,
-      coupling: profile.coupling,
+    file: path.basename(absolutePath),
+    language: 'typescript',
+    summary: {
+      total: results.length,
+      passed,
+      failed,
+      status: overallStatus,
     },
-    deviation: {
-      euclidean: deviation.euclideanDistance,
-      mahalanobis: deviation.mahalanobisDistance,
-      maxDimension: deviation.maxDimensionDeviation,
-      normalized: deviation.normalizedDeviation,
-    },
-    violationDimensions: deviation.violationDimensions,
-    recommendation: isWithinBounds
-      ? 'Function is within canonical bounds for this module type.'
-      : `Consider reducing: ${deviation.violationDimensions.join(', ')}`,
+    functions: results.map(r => ({
+      name: r.name,
+      line: r.line,
+      moduleType: r.moduleType,
+      confidence: r.confidence,
+      status: r.isCanonical ? 'PASS' : 'FAIL',
+      violations: r.violationDimensions,
+      vector: r.vector,
+    })),
+    recommendation: overallStatus === 'PASS'
+      ? 'All functions are within canonical bounds.'
+      : `${failed} function(s) exceed canonical bounds. Review: ${results.filter(r => !r.isCanonical).map(r => r.name).join(', ')}`,
   }, null, 2);
 }
 
@@ -1666,7 +1412,7 @@ function generateSuggestionsFromGo(r: GoFunctionResult): string[] {
 const server = new Server(
   {
     name: 'semantic-complexity-mcp',
-    version: '0.0.4',
+    version: '0.0.6',
   },
   {
     capabilities: {
@@ -1688,12 +1434,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     let result: string;
 
     switch (name) {
-      case 'analyze_file':
-        result = await analyzeFile(args.filePath as string, args.threshold as number);
-        break;
-      case 'analyze_function':
-        result = await analyzeFunction(args.filePath as string, args.functionName as string);
-        break;
+      // 6개 통합 도구
       case 'get_hotspots':
         result = await getHotspots(
           args.directory as string,
@@ -1702,14 +1443,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           (args.language as 'typescript' | 'python' | 'go' | 'all') || 'all'
         );
         break;
-      case 'compare_mccabe_dimensional':
-        result = await compareMccabeDimensional(args.filePath as string, args.functionName as string);
+      case 'analyze_file':
+        result = await analyzeFile(args.filePath as string, args.threshold as number);
+        break;
+      case 'analyze_function':
+        result = await analyzeFunction(args.filePath as string, args.functionName as string);
         break;
       case 'suggest_refactor':
         result = await suggestRefactor(args.filePath as string, args.functionName as string);
-        break;
-      case 'get_dimension_breakdown':
-        result = await getDimensionBreakdown(args.filePath as string, args.functionName as string);
         break;
       case 'generate_graph':
         result = await generateGraph(
@@ -1718,14 +1459,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           (args.format as 'mermaid' | 'dot') || 'mermaid'
         );
         break;
-      case 'infer_module_type':
-        result = await inferModuleType(args.filePath as string, args.functionName as string | undefined);
-        break;
-      case 'check_canonical':
-        result = await checkCanonical(
+      case 'validate_complexity':
+        result = await validateComplexity(
           args.filePath as string,
-          args.functionName as string,
-          args.moduleType as TensorModuleType | undefined
+          args.functionName as string | undefined,
+          (args.moduleType as TensorModuleType | 'auto') || 'auto'
         );
         break;
       default:

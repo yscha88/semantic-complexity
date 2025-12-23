@@ -4,6 +4,39 @@
 
 ---
 
+## [0.0.6] - 2024-12-23
+
+### MCP 도구 통합 & LLM 최적화 설명
+
+#### 도구 통합 (9개 → 6개)
+
+| 이전 | 이후 | 변경 |
+|------|------|------|
+| `compare_mccabe_dimensional` | → `analyze_function` | 통합 (comparison 필드) |
+| `get_dimension_breakdown` | → `analyze_function` | 통합 (dimensions 필드) |
+| `infer_module_type` | → `validate_complexity` | 통합 |
+| `check_canonical` | → `validate_complexity` | 통합 |
+
+**통합된 6개 도구:**
+1. `get_hotspots` - [진입점] 복잡도 핫스팟 검색
+2. `analyze_file` - 파일 수준 분석
+3. `analyze_function` - 함수 심층 분석 (breakdown + comparison 포함)
+4. `suggest_refactor` - 리팩토링 제안
+5. `generate_graph` - 의존성/호출 그래프 시각화
+6. `validate_complexity` - Canonical 경계 검증 (모듈 타입 추론 포함)
+
+#### LLM 최적화 도구 설명
+
+자율적 도구 선택을 위한 상황별 사용 힌트 추가:
+```
+USE THIS FIRST when user mentions:
+- "refactoring", "리팩토링", "개선"
+- "code quality", "코드 품질"
+- "what should I improve?", "뭐 고쳐야 해?"
+```
+
+---
+
 ## [0.0.5] - 2024-12-23
 
 ### 빌드 & 보안 수정
