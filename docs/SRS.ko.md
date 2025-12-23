@@ -1,8 +1,6 @@
 # 소프트웨어 요구사항 명세서 (SRS)
 # semantic-complexity v1.0
 
-English | [한국어](./SRS.ko.md)
-
 ---
 
 ## 1. 서론
@@ -45,8 +43,7 @@ semantic-complexity가 **맞는** 것:
 
 - McCabe, T. (1976). A Complexity Measure
 - Huntsman, S. (2020). Generalizing cyclomatic complexity via path homology
-- SonarSource (2017). Cognitive Complexity
-- Muñoz Barón et al. (2020). Empirical Validation of Cognitive Complexity
+- Miller, G. (1956). The Magical Number Seven, Plus or Minus Two (작업 기억 한계)
 - 햄 샌드위치 정리 (Borsuk-Ulam)
 - 슈페르너 정리
 
@@ -151,36 +148,37 @@ E(v)를 감소시키는 모든 리팩토링은 안정 방향으로 이동한다.
 
 **입력:** 소스 코드 AST
 
-**출력:** 맥락 밀도 점수 및 핫스팟
+**출력:** 인지 가능 여부 판정 결과
+
+**핵심 정의:**
+
+```
+🧀 Cheese = 사람과 LLM이 인지할 수 있는 범위 내에 있는가?
+```
+
+**인지 가능 조건 (모두 충족해야 함):**
+
+| 조건 | 기준 | 근거 |
+|------|------|------|
+| 중첩 깊이 | ≤ N (설정 가능) | 한눈에 구조 파악 |
+| 개념 수 | ≤ 5개/함수 | 작업 기억 한계 |
+| 숨겨진 의존성 | 최소화 | 컨텍스트 완결성 |
+| state×async×retry | 2개 이상 공존 금지 | 동시 추론 불가 |
 
 **요구사항:**
 
 | ID | 요구사항 | 우선순위 |
 |----|----------|----------|
-| FR-3.1.2.1 | Cognitive Complexity 계산 (SonarSource 방식) | MUST |
+| FR-3.1.2.1 | 인지 가능 여부 판정 (4가지 조건) | MUST |
 | FR-3.1.2.2 | state×async×retry 동시 존재 탐지 | MUST |
-| FR-3.1.2.3 | 숨은 의존성 카운트 (암묵적 I/O, 전역) | MUST |
-| FR-3.1.2.4 | 깊이 패널티 기반 중첩 측정 (개수 아님) | MUST |
-| FR-3.1.2.5 | 함수당 개념 수 탐지 (> 5 = 경고) | SHOULD |
-| FR-3.1.2.6 | Persistent Homology 계산 (구조 생존) | MAY |
+| FR-3.1.2.3 | 숨겨진 의존성 탐지 (전역, 환경변수, 암묵적 I/O, 클로저) | MUST |
+| FR-3.1.2.4 | 중첩 깊이 측정 | MUST |
+| FR-3.1.2.5 | 함수당 개념 수 계산 (> 5 = 위반) | MUST |
 
-**메트릭:**
-- Cognitive Complexity 점수
-- State×Async×Retry 위반 플래그
-- 숨은 의존성 수
-- 중첩 깊이 패널티 (Σdepth, 개수 아님)
-- 개념 밀도 점수
-
-**현재 구현에서의 핵심 변경:**
-
-```
-현재 (McCabe):
-  switch 10 cases → control += 10
-
-필요 (Cognitive):
-  switch 10 cases → control += 1 (단일 분기 구조)
-  nested if 3 depth → control += 1 + 2 + 3 = 6 (깊이 패널티)
-```
+**출력:**
+- 인지 가능 여부 (Boolean)
+- 위반 시 사유
+- 각 조건별 측정값
 
 #### FR-3.1.3 행동 축 (🥓) 분석
 
@@ -496,7 +494,7 @@ interface Recommendation {
 
 | ID | 요구사항 | 목표 |
 |----|----------|------|
-| NFR-4.2.1 | Cognitive Complexity가 SonarSource와 일치 | 95% |
+| NFR-4.2.1 | 인지 가능 조건 판정 정확도 | 95% |
 | NFR-4.2.2 | 모듈 타입 자동 탐지 정확도 | 90% |
 | NFR-4.2.3 | 위반 false positive 비율 | < 10% |
 
@@ -676,7 +674,7 @@ interface HiddenCoupling {
 
 ### 7.3 구현 제약
 
-1. 🧀 축에는 반드시 Cognitive Complexity 사용 (McCabe 아님)
+1. 🧀 축은 인지 가능 여부 4가지 조건으로 판정
 2. 점진적 분석 지원 필수 (PR 수준)
 3. delta 분석을 위해 git과 통합 필수
 
@@ -684,21 +682,20 @@ interface HiddenCoupling {
 
 ## 8. 부록
 
-### A. Cognitive Complexity 계산 (필수)
-
-McCabe 순환복잡도와 다름:
+### A. 인지 가능 조건 (🧀)
 
 ```
-McCabe: 각 결정점 = +1
-        switch 10 cases = +10
+🧀 Cheese = 사람과 LLM이 인지할 수 있는 범위 내에 있는가?
 
-Cognitive:
-  - 구조적 증분: 제어 구조에 +1
-  - 중첩 패널티: 깊이 N에 +N
-  - 증분 없음: switch cases (fan-out, 사이클 아님)
+인지 가능 조건 (모두 충족):
+┌─────────────────────────────────────────────────────────────┐
+│ 1. 중첩 깊이 ≤ N        - 한눈에 구조 파악 가능             │
+│ 2. 개념 수 ≤ 5/함수      - 작업 기억(Working Memory) 한계   │
+│ 3. 숨겨진 의존성 최소    - 컨텍스트 완결성                  │
+│ 4. state×async×retry    - 2개 이상 공존 금지 (동시 추론 불가)│
+└─────────────────────────────────────────────────────────────┘
 
-        switch 10 cases = +1 (단일 구조)
-        nested if (depth 3) = +1 + +2 + +3 = +6
+위반 시 → 인지 불가 (🧀 실패)
 ```
 
 ### B. 슈페르너 정리 적용
