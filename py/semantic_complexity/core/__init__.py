@@ -1,12 +1,18 @@
 """
-Core complexity analysis engine.
+Core complexity analysis engine (v0.0.3).
 
-Dimensions:
-- 1D Control: Cyclomatic complexity (branches, loops)
-- 2D Nesting: Depth penalty
-- 3D State: State mutations and transitions
-- 4D Async: Async/await, coroutines
-- 5D Coupling: Hidden dependencies, side effects
+Dimensions (5D Domain Space):
+- 1D Control: Cyclomatic complexity - dim H₁(G) + 1 (First Betti number)
+- 2D Nesting: Depth penalty - Σᵢ depth(nodeᵢ)
+- 3D State: State mutations - |∂Γ/∂t| (State transition rate)
+- 4D Async: Async boundaries - π₁(async-flow) (Fundamental group)
+- 5D Coupling: Hidden dependencies - deg(v) in G_dep
+
+v0.0.3 Features:
+- Second-order tensor: score = v^T M v + ⟨v, w⟩
+- ε-regularization for convergence
+- Module-type canonical profiles
+- Hodge decomposition of complexity space
 """
 
 from __future__ import annotations
@@ -15,6 +21,37 @@ import ast
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import NamedTuple
+
+from semantic_complexity.core.canonical import (
+    CANONICAL_PROFILES,
+    CanonicalProfile,
+    ComplexityLevel,
+    DeviationResult,
+    HodgeDecomposition,
+    analyze_deviation,
+    classify_complexity_level,
+    find_best_module_type,
+    hodge_decomposition,
+)
+from semantic_complexity.core.convergence import (
+    ConvergenceResult,
+    ConvergenceStatus,
+    IterationHistory,
+    RefactoringRecommendation,
+    analyze_convergence,
+    convergence_score,
+    recommend_refactoring,
+)
+
+# v0.0.3 imports
+from semantic_complexity.core.tensor import (
+    InteractionMatrix,
+    ModuleType,
+    TensorScore,
+    Vector5D,
+    calculate_tensor_score,
+    extract_vector,
+)
 
 
 class DimensionalWeights(NamedTuple):
@@ -424,6 +461,7 @@ def analyze_functions(
 
 
 __all__ = [
+    # v0.0.2 exports
     "DimensionalWeights",
     "DEFAULT_WEIGHTS",
     "StateComplexity",
@@ -434,4 +472,29 @@ __all__ = [
     "analyze_source",
     "analyze_file",
     "analyze_functions",
+    # v0.0.3 Tensor
+    "ModuleType",
+    "Vector5D",
+    "InteractionMatrix",
+    "TensorScore",
+    "extract_vector",
+    "calculate_tensor_score",
+    # v0.0.3 Convergence
+    "ConvergenceStatus",
+    "ConvergenceResult",
+    "IterationHistory",
+    "RefactoringRecommendation",
+    "convergence_score",
+    "analyze_convergence",
+    "recommend_refactoring",
+    # v0.0.3 Canonical
+    "ComplexityLevel",
+    "CanonicalProfile",
+    "DeviationResult",
+    "HodgeDecomposition",
+    "CANONICAL_PROFILES",
+    "analyze_deviation",
+    "find_best_module_type",
+    "classify_complexity_level",
+    "hodge_decomposition",
 ]

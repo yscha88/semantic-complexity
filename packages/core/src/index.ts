@@ -1,7 +1,13 @@
 /**
- * semantic-complexity - Multi-dimensional code complexity analyzer
+ * semantic-complexity - Multi-dimensional code complexity analyzer (v0.0.3)
  *
  * Core 엔진 모듈
+ *
+ * v0.0.3 Features:
+ * - Second-order tensor: score = v^T M v + <v, w>
+ * - ε-regularization for convergence
+ * - Module-type canonical profiles
+ * - Hodge decomposition of complexity space
  */
 
 // Types
@@ -140,6 +146,75 @@ export {
   subtractMetaDimensions,
   ZERO_META,
 } from './metrics/meta.js';
+
+// ─── v0.0.3: Tensor Module ─────────────────────────────────────────
+
+// Tensor types
+export type {
+  Vector5D,
+  ModuleType as TensorModuleType,
+  Matrix5x5,
+  TensorScore,
+  ConvergenceStatus as TensorConvergenceStatus,
+  ConvergenceAnalysis,
+  HodgeDecomposition,
+  ComplexityLevel,
+  DeviationResult,
+  RefactoringRecommendation,
+  CanonicalBounds,
+} from './tensor/index.js';
+
+// Tensor constants
+export {
+  IDX_CONTROL,
+  IDX_NESTING,
+  IDX_STATE,
+  IDX_ASYNC,
+  IDX_COUPLING,
+  DEFAULT_MATRIX,
+  MODULE_MATRICES,
+  DEFAULT_WEIGHTS,
+  CANONICAL_5D_PROFILES,
+} from './tensor/index.js';
+
+// Tensor matrix operations
+export {
+  getInteractionMatrix,
+  vectorToArray,
+  arrayToVector,
+  zeroVector,
+  vectorNorm,
+  dotProduct,
+  quadraticForm,
+  isPositiveSemidefinite,
+  euclideanDistance,
+  mahalanobisDistance,
+} from './tensor/index.js';
+
+// Tensor scoring
+export {
+  calculateTensorScore,
+  convergenceScore,
+  estimateLipschitz,
+  analyzeConvergence as analyzeTensorConvergence,
+  hodgeDecomposition,
+  classifyComplexityLevel,
+  recommendRefactoring,
+  isSafe,
+  needsReview,
+  isViolation,
+} from './tensor/index.js';
+
+// Tensor canonical profiles
+export {
+  getCanonicalProfile,
+  getProfileCentroid,
+  isWithinCanonicalBounds,
+  getViolationDimensions,
+  isOrphan,
+  analyzeDeviation,
+  findBestModuleType as findBestTensorModuleType,
+} from './tensor/index.js';
 
 // ─── Convenience Functions ───────────────────────────────────────
 

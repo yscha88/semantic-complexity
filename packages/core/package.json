@@ -1,6 +1,6 @@
 {
   "name": "semantic-complexity",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Multi-dimensional code complexity analyzer",
   "type": "module",
   "main": "./dist/index.js",
@@ -33,6 +33,10 @@
     "./gates": {
       "types": "./dist/gates/index.d.ts",
       "import": "./dist/gates/index.js"
+    },
+    "./tensor": {
+      "types": "./dist/tensor/index.d.ts",
+      "import": "./dist/tensor/index.js"
     }
   },
   "files": [
