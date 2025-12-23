@@ -1,1 +1,1 @@
-# Tests for semantic-complexity
+"""semantic-complexity tests"""
