@@ -21,6 +21,25 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+.coverage
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+ENV/
+py/.venv/
+py/uv.lock
+
+# Test reports (generated)
+*-report.md
 
 # Temp files
 *.tmp
