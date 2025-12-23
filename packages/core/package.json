@@ -1,6 +1,6 @@
 {
   "name": "semantic-complexity",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Multi-dimensional code complexity analyzer",
   "type": "module",
   "main": "./dist/index.js",
@@ -75,7 +75,7 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "rimraf": "^6.0.1",
-    "vitest": "^2.1.8"
+    "vitest": "^4.0.16"
   },
   "peerDependencies": {
     "typescript": ">=5.0.0"

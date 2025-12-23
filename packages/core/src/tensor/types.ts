@@ -19,7 +19,7 @@ export interface Vector5D {
 /**
  * Module type for context-aware analysis
  */
-export type ModuleType = 'api' | 'lib' | 'app' | 'web' | 'deploy' | 'unknown';
+export type ModuleType = 'api' | 'lib' | 'app' | 'web' | 'data' | 'infra' | 'deploy' | 'unknown';
 
 /**
  * Dimension indices
@@ -43,6 +43,10 @@ export type Matrix5x5 = [
 
 /**
  * Tensor score result
+ *
+ * Dual-metric approach inspired by CDR (Clinical Dementia Rating):
+ * - tensorScore (CDR Global style): Algorithm-based, captures interactions
+ * - rawSum (CDR-SOB style): Simple sum, better for tracking changes
  */
 export interface TensorScore {
   /** Linear component: <v, w> */
@@ -53,7 +57,7 @@ export interface TensorScore {
   raw: number;
   /** Regularization term: ε‖v‖² */
   regularization: number;
-  /** Final regularized score */
+  /** Final regularized score (CDR Global style) */
   regularized: number;
   /** Epsilon value used */
   epsilon: number;
@@ -61,6 +65,14 @@ export interface TensorScore {
   moduleType: ModuleType;
   /** Complexity vector */
   vector: Vector5D;
+
+  // CDR-SOB style metrics
+  /** Simple sum of dimensions: C + N + S + A + Λ (CDR-SOB style) */
+  rawSum: number;
+  /** Threshold for rawSum based on canonical upper bounds */
+  rawSumThreshold: number;
+  /** rawSum / rawSumThreshold ratio (0-1 = safe, >1 = violation) */
+  rawSumRatio: number;
 }
 
 /**

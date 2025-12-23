@@ -1,6 +1,6 @@
 {
   "name": "semantic-complexity-cli",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "CLI for semantic complexity analysis and reporting",
   "type": "module",
   "bin": {

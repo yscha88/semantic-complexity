@@ -12,6 +12,8 @@ import {
   analyzeFunctionExtended,
   type ExtendedComplexityResult,
   type DimensionalWeights,
+  // v0.0.3 Tensor
+  calculateTensorScore,
 } from 'semantic-complexity';
 
 /** ExtendedComplexityResult with relativePath for CLI */
@@ -54,6 +56,13 @@ export interface ProjectReport {
   refactorPriority: RefactorItem[];
 }
 
+export interface TensorSummary {
+  safeCount: number;
+  reviewCount: number;
+  violationCount: number;
+  averageRawSumRatio: number;
+}
+
 export interface ProjectSummary {
   totalFiles: number;
   totalFunctions: number;
@@ -64,6 +73,15 @@ export interface ProjectSummary {
   averageRatio: number;
   filesAboveThreshold: number;
   functionsAboveThreshold: number;
+  tensor?: TensorSummary;
+}
+
+export interface TensorScoreOutput {
+  regularized: number;
+  rawSum: number;
+  rawSumThreshold: number;
+  rawSumRatio: number;
+  zone: 'safe' | 'review' | 'violation';
 }
 
 export interface Hotspot {
@@ -75,6 +93,7 @@ export interface Hotspot {
   ratio: number;
   primaryDimension: string;
   issues: string[];
+  tensor?: TensorScoreOutput;
 }
 
 export interface DimensionBreakdown {
@@ -248,6 +267,24 @@ function generateReport(
     functionsAboveThreshold,
   };
 
+  // 텐서 점수 계산
+  const tensorScores = allFunctions.map((f) => calculateTensorScoreForFunction(f));
+
+  // 텐서 요약
+  const safeCount = tensorScores.filter((t) => t.zone === 'safe').length;
+  const reviewCount = tensorScores.filter((t) => t.zone === 'review').length;
+  const violationCount = tensorScores.filter((t) => t.zone === 'violation').length;
+  const avgRawSumRatio = tensorScores.length > 0
+    ? tensorScores.reduce((sum, t) => sum + t.rawSumRatio, 0) / tensorScores.length
+    : 0;
+
+  summary.tensor = {
+    safeCount,
+    reviewCount,
+    violationCount,
+    averageRawSumRatio: Math.round(avgRawSumRatio * 1000) / 1000,
+  };
+
   // 핫스팟 (상위 20개)
   const hotspots: Hotspot[] = allFunctions
     .filter((f) => f.dimensional.weighted > 10)
@@ -262,6 +299,7 @@ function generateReport(
       ratio: f.cyclomatic > 0 ? Math.round((f.dimensional.weighted / f.cyclomatic) * 100) / 100 : 0,
       primaryDimension: getPrimaryDimension(f),
       issues: getIssues(f),
+      tensor: calculateTensorScoreForFunction(f),
     }));
 
   // 차원별 분석
@@ -315,6 +353,38 @@ function getIssues(f: ExtendedComplexityResult): string[] {
   }
 
   return issues;
+}
+
+/**
+ * 텐서 점수 계산 (v0.0.3)
+ */
+function calculateTensorScoreForFunction(f: ExtendedComplexityResult): TensorScoreOutput {
+  const d = f.dimensional;
+  const vector = {
+    control: d.control,
+    nesting: d.nesting,
+    state: d.state.stateMutations,
+    async: d.async.asyncBoundaries + d.async.callbackDepth,
+    coupling: d.coupling.globalAccess.length + d.coupling.sideEffects.length,
+  };
+
+  const tensorScore = calculateTensorScore(vector, 'unknown', 2.0);
+
+  // Zone 결정 (rawSumRatio 기반)
+  let zone: 'safe' | 'review' | 'violation' = 'safe';
+  if (tensorScore.rawSumRatio >= 1.0) {
+    zone = 'violation';
+  } else if (tensorScore.rawSumRatio >= 0.7) {
+    zone = 'review';
+  }
+
+  return {
+    regularized: Math.round(tensorScore.regularized * 100) / 100,
+    rawSum: Math.round(tensorScore.rawSum * 100) / 100,
+    rawSumThreshold: tensorScore.rawSumThreshold,
+    rawSumRatio: Math.round(tensorScore.rawSumRatio * 1000) / 1000,
+    zone,
+  };
 }
 
 function scoreState(f: ExtendedComplexityResult): number {
