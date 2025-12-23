@@ -4,6 +4,36 @@
 
 **다차원 코드 복잡도 분석기** — 대수적 위상학과 텐서 분석을 기반으로 코드의 실제 유지보수 난이도를 정량화합니다.
 
+## v0.0.7: Native Tensor/Canonical 통합
+
+### 아키텍처 수정
+Python/Go CLI가 기본 분석 결과만 반환하던 버그 수정. 이제 각 언어의 native tensor/canonical/hodge 결과를 반환하고 MCP가 직접 사용.
+
+| 컴포넌트 | 이전 | 이후 |
+|----------|------|------|
+| Python CLI | 기본 분석만 | 전체: tensor, canonical, hodge, recommendations |
+| Go CLI | 기본 분석만 | 전체: tensor, canonical, hodge, recommendations |
+| MCP | TS로 재계산 | 각 언어의 native 결과 사용 |
+
+### MCP 도구 (6개)
+| 도구 | 설명 |
+|------|------|
+| `get_hotspots` | [진입점] 복잡도 핫스팟 검색 |
+| `analyze_file` | 파일 수준 분석 |
+| `analyze_function` | 함수 심층 분석 (breakdown + comparison 포함) |
+| `suggest_refactor` | 리팩토링 제안 |
+| `generate_graph` | 의존성/호출 그래프 시각화 |
+| `validate_complexity` | Canonical 경계 검증 (모듈 타입 추론 포함) |
+
+---
+
+## v0.0.6: MCP 도구 통합
+
+- **도구 통합 (9 → 6)**: 중복 도구 병합으로 API 간소화
+- **LLM 최적화 설명**: 자율적 도구 선택을 위한 상황별 사용 힌트 추가
+
+---
+
 ## v0.0.5: 빌드 & 보안 수정
 
 ### 주요 변경사항

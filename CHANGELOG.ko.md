@@ -4,6 +4,57 @@
 
 ---
 
+## [0.0.7] - 2024-12-24
+
+### Native Tensor/Canonical 통합 (아키텍처 수정)
+
+#### 버그 수정: 크로스 언어 아키텍처
+
+**문제**: Python/Go CLI가 기본 분석 결과만 반환하고, MCP가 TypeScript core로 tensor/canonical을 재계산하고 있었음. 각 언어는 자체 AST 파서와 분석 패턴이 있어 이 방식은 구조적으로 잘못됨.
+
+**해결**: 각 언어가 native tensor/canonical/hodge 결과를 반환하도록 수정.
+
+| 컴포넌트 | 이전 | 이후 |
+|----------|------|------|
+| Python CLI | 기본 분석만 | 전체: tensor, canonical, hodge, recommendations |
+| Go CLI | 기본 분석만 | 전체: tensor, canonical, hodge, recommendations |
+| MCP | TS core로 재계산 | 각 언어의 native 결과 사용 |
+
+#### Python CLI (`py/semantic_complexity/cli`)
+
+응답에 포함되는 정보:
+```json
+{
+  "tensor": { "score": 12.5, "zone": "review", "rawSum": 8, ... },
+  "moduleType": { "inferred": "lib", "confidence": 0.85 },
+  "canonical": { "profile": "lib", "deviation": 0.12, ... },
+  "hodge": { "algorithmic": 3, "balanced": 2, "architectural": 3 },
+  "recommendations": [{ "priority": 1, "suggestion": "..." }]
+}
+```
+
+#### Go CLI (`go/semanticcomplexity`)
+
+`FunctionResult` struct 확장:
+```go
+type FunctionResult struct {
+    // ... 기존 필드
+    Tensor          TensorScoreOutput      `json:"tensor"`
+    ModuleType      ModuleTypeOutput       `json:"moduleType"`
+    Canonical       CanonicalOutput        `json:"canonical"`
+    Hodge           HodgeOutput            `json:"hodge"`
+    Recommendations []RecommendationOutput `json:"recommendations"`
+}
+```
+
+#### MCP 서버
+
+- Python/Go 결과에서 native tensor/canonical 사용
+- TypeScript core는 native 결과 없을 때만 fallback으로 사용
+- 비-TypeScript 언어에 대한 불필요한 재계산 제거
+
+---
+
 ## [0.0.6] - 2024-12-23
 
 ### MCP 도구 통합 & LLM 최적화 설명

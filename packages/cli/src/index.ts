@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * @nxt/complexity-cli
+ * semantic-complexity-cli
  *
- * 프로젝트 전체 복잡도 분석 및 리포트 생성
+ * Project-wide complexity analysis and report generation
  */
 
 import { Command } from 'commander';
@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { scanProject, type ProjectReport } from './scanner.js';
 import { generateReportFile, type ReportFormat } from './reporter.js';
 import {
@@ -20,12 +21,16 @@ import {
   parseSourceFile,
 } from 'semantic-complexity';
 
+// Read version from package.json
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8'));
+
 const program = new Command();
 
 program
-  .name('nxt-complexity')
+  .name('semantic-complexity')
   .description('Project-wide complexity analysis with dimensional metrics')
-  .version('0.1.0');
+  .version(packageJson.version);
 
 // ─────────────────────────────────────────────────────────────────
 // analyze 명령어
