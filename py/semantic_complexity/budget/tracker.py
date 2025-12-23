@@ -13,11 +13,13 @@ PR당 변경 예산 추적 및 검사
 | deploy        | ≤ 2        | N/A    | N/A        | ADR+Review|
 """
 
+__module_type__ = "lib/domain"
+
 from dataclasses import dataclass, field
 from typing import Literal
 
-from ..types import ModuleType, ChangeBudget, get_canonical_profile
-from ..analyzers import CognitiveResult
+from ..types import ModuleType, ChangeBudget, get_canonical_profile, DEFAULT_MODULE_TYPE
+from ..analyzers import CognitiveAnalysis
 
 
 @dataclass
@@ -105,7 +107,7 @@ class BudgetTracker:
             ))
 
         # ΔPublicAPI 검사 (app 제외)
-        if self.module_type != ModuleType.APP:
+        if self.module_type != DEFAULT_MODULE_TYPE:
             if delta.public_api > self.budget.delta_public_api:
                 violations.append(BudgetViolation(
                     dimension="ΔPublicAPI",
@@ -135,8 +137,8 @@ class BudgetTracker:
 
 
 def calculate_delta(
-    before: CognitiveResult,
-    after: CognitiveResult,
+    before: CognitiveAnalysis,
+    after: CognitiveAnalysis,
 ) -> Delta:
     """
     두 분석 결과 간의 변경량 계산
@@ -148,8 +150,18 @@ def calculate_delta(
     Returns:
         Delta: 변경량
     """
+    # 인지 가능 여부 기반 복잡도 점수 계산
+    def score(result: CognitiveAnalysis) -> int:
+        if result.accessible:
+            return 0
+        return (
+            result.max_nesting * 2 +
+            len(result.hidden_dependencies) +
+            (10 if result.state_async_retry.violated else 0)
+        )
+
     return Delta(
-        cognitive=after.cognitive_complexity - before.cognitive_complexity,
+        cognitive=score(after) - score(before),
         state_transitions=0,  # TODO: 상태 전이 분석 필요
         public_api=0,  # TODO: Public API 분석 필요
         breaking_changes=False,  # TODO: Breaking change 탐지 필요

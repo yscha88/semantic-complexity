@@ -21,7 +21,9 @@ classifiers = [
 keywords = ["complexity", "code-analysis", "cyclomatic", "cognitive", "metrics"]
 
 dependencies = [
-    "mcp>=1.0.0",
+    "click>=8.0",
+    "rich>=13.0",
+    "mcp>=1.25",
 ]
 
 [project.optional-dependencies]

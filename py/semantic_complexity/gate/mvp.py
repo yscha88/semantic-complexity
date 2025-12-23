@@ -10,12 +10,13 @@ PoC → MVP 진입 조건 검사
 🥓 Golden tests exist for critical flows
 """
 
+__module_type__ = "lib/domain"
+
 from dataclasses import dataclass, field
 from typing import Literal
 
-from ..types import Axis, ModuleType, SandwichScore, get_canonical_profile
+from ..types import Axis, ModuleType, SandwichScore, get_canonical_profile, DEFAULT_MODULE_TYPE
 from ..analyzers import BreadResult, CognitiveAnalysis, HamResult
-from ..canonical.detector import DEFAULT_MODULE_TYPE
 
 
 @dataclass

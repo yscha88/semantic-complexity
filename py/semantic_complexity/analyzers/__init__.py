@@ -6,6 +6,8 @@
 - 🥓 Ham (Behavioral): 행동 보존 및 유지보수성
 """
 
+__module_type__ = "lib/domain"
+
 from .bread import analyze_bread, BreadResult, TrustBoundary, SecretPattern
 from .cheese import (
     # 핵심 API

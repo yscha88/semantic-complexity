@@ -7,6 +7,8 @@
 - Critical path 보호 상태
 """
 
+__module_type__ = "lib/domain"
+
 import re
 from dataclasses import dataclass
 from pathlib import Path
