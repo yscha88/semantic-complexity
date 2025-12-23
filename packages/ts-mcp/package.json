@@ -1,12 +1,12 @@
 {
-  "name": "semantic-complexity-mcp",
-  "version": "0.0.7",
-  "description": "MCP server for semantic complexity analysis - integrate with Claude and other LLMs",
+  "name": "semantic-complexity-ts-mcp",
+  "version": "0.0.8",
+  "description": "MCP server for TypeScript/JavaScript complexity analysis",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "semantic-complexity-mcp": "./dist/index.js"
+    "semantic-complexity-ts-mcp": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -21,7 +21,9 @@
     "complexity",
     "semantic",
     "claude",
-    "llm"
+    "llm",
+    "typescript",
+    "javascript"
   ],
   "license": "MIT",
   "publishConfig": {
@@ -30,7 +32,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yscha88/semantic-complexity.git",
-    "directory": "packages/mcp"
+    "directory": "packages/ts-mcp"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

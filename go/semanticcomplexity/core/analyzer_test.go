@@ -339,7 +339,7 @@ func testMakeChannel() chan int {
 // Coupling Tests
 // ─────────────────────────────────────────────────────────────────
 
-func TestAnalyzeFmtSideEffect(t *testing.T) {
+func TestAnalyzeFmtConsoleIO(t *testing.T) {
 	source := `package main
 
 import "fmt"
@@ -354,8 +354,9 @@ func testFmt() {
 	}
 
 	fn := results[0]
-	if fn.Dimensional.Coupling.SideEffects < 1 {
-		t.Errorf("fmt.Println should add side effect, got %d", fn.Dimensional.Coupling.SideEffects)
+	// v0.0.8: fmt.Println은 ConsoleIO로 분류 (낮은 가중치)
+	if fn.Dimensional.Coupling.ConsoleIO < 1 {
+		t.Errorf("fmt.Println should add console IO, got %d", fn.Dimensional.Coupling.ConsoleIO)
 	}
 }
 

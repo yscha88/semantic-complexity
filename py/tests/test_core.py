@@ -15,7 +15,7 @@ from semantic_complexity import (
 
 def test_version():
     """Test package version."""
-    assert __version__ == "0.0.3"
+    assert __version__ == "0.0.8"
 
 
 def test_default_weights():
@@ -61,7 +61,8 @@ def hello():
 '''
     result = analyze_source(source)
     assert result.control == 0  # No branches
-    assert result.coupling.implicit_io == 1  # print is IO
+    # v0.0.8: print is console_io (낮은 가중치)
+    assert result.coupling.console_io == 1
 
 
 def test_analyze_syntax_error():
@@ -346,7 +347,9 @@ def log_message(msg):
         f.write(msg)
 '''
     result = analyze_source(source)
-    assert result.coupling.implicit_io >= 2  # print + open
+    # v0.0.8: print는 console_io, open은 implicit_io로 분리
+    assert result.coupling.console_io >= 1  # print
+    assert result.coupling.implicit_io >= 1  # open
 
 
 def test_coupling_env():

@@ -573,11 +573,18 @@ function scoreAsyncComplexity(async: AsyncComplexity): number {
 
 /**
  * 결합 복잡도를 스칼라 점수로 변환
+ *
+ * v0.0.8: console 출력은 낮은 가중치 (디버깅/로깅 목적, 실제 결합도 낮음)
  */
 function scoreCouplingComplexity(coupling: CouplingComplexity): number {
+  // console.log 등 출력 함수는 낮은 가중치 (실제 복잡도 기여 낮음)
+  const consoleIO = coupling.implicitIO.filter((io) => io.kind === 'console').length;
+  const otherIO = coupling.implicitIO.filter((io) => io.kind !== 'console').length;
+
   return (
     coupling.globalAccess.length * 2 +
-    coupling.implicitIO.length * 2 +
+    consoleIO * 0.5 + // console은 낮은 가중치
+    otherIO * 2 + // 다른 I/O는 기존 가중치
     coupling.sideEffects.length * 3 +
     coupling.envDependency.length * 2 +
     coupling.closureCaptures.length * 1

@@ -42,6 +42,7 @@ type AsyncComplexity struct {
 type CouplingComplexity struct {
 	GlobalAccess int `json:"global_access"`
 	SideEffects  int `json:"side_effects"`
+	ConsoleIO    int `json:"console_io"` // v0.0.8: fmt.Print 등 (낮은 가중치)
 }
 
 // DimensionalComplexity holds the complete complexity analysis result.

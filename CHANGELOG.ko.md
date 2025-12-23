@@ -4,7 +4,88 @@
 
 ---
 
-## [0.0.7] - 2024-12-24
+## [0.0.8] - 2025-12-24
+
+### 언어별 독립 MCP 서버 & Class 재활용율 분석
+
+#### 언어별 독립 MCP 서버
+
+각 언어가 자체 MCP 서버를 가짐:
+
+| 패키지 | 설치 | 명령어 |
+|--------|------|--------|
+| **TypeScript/JS** | `npm i -g semantic-complexity-ts-mcp` | `semantic-complexity-ts-mcp` |
+| **Python** | `pip install semantic-complexity` | `semantic-complexity-py-mcp` |
+| **Go** | `go install .../mcp/main` | `go-complexity-mcp` |
+
+**장점:**
+- 서브프로세스 오버헤드 없음 (각 MCP가 네이티브 코드 실행)
+- 성능과 신뢰성 향상
+- 모든 언어에서 일관된 5개 도구 인터페이스
+
+#### Class 재활용율 분석 (TypeScript/JavaScript)
+
+새로운 `analyze_class` 도구로 OO 설계 품질 평가:
+
+```json
+{
+  "name": "DatabaseConnection",
+  "metrics": {
+    "wmc": 5,      // Weighted Methods per Class (클래스당 가중 메서드)
+    "lcom": 0.0,   // Lack of Cohesion of Methods (0=응집됨)
+    "cbo": 2,      // Coupling Between Objects (객체 간 결합도)
+    "rfc": 8,      // Response For a Class (클래스 응답 수)
+    "dit": 0       // Depth of Inheritance Tree (상속 깊이)
+  },
+  "reusability": {
+    "score": 99,
+    "grade": "A",
+    "zone": "reusable"
+  }
+}
+```
+
+**메트릭 설명:**
+
+| 메트릭 | 의미 | 임계값 |
+|--------|------|--------|
+| **WMC** | 메서드 복잡도 합계 | <20 (낮음), >50 (높음) |
+| **LCOM** | 메서드 응집도 (0=완벽, 1=없음) | <0.5 (낮음), >0.8 (높음) |
+| **CBO** | 외부 의존성 수 | <5 (낮음), >14 (높음) |
+| **RFC** | 메서드 + 호출 메서드 | <20 (낮음), >50 (높음) |
+| **DIT** | 상속 깊이 | <3 (권장) |
+
+**재활용율 점수:**
+- 0-100 점 (벌점 공식 기반)
+- 등급: A (≥80), B (≥60), C (≥40), D (≥20), F (<20)
+- 영역: reusable, moderate, problematic
+
+#### 모든 패키지 `--version` 지원
+
+| 패키지 | 명령어 | 출력 |
+|--------|--------|------|
+| npm CLI | `semantic-complexity --version` | `0.0.8` |
+| npm MCP | `semantic-complexity-ts-mcp --version` | `0.0.8` |
+| Python CLI | `semantic-complexity --version` | `0.0.8` |
+| Python MCP | `semantic-complexity-py-mcp --version` | `0.0.8` |
+| Go CLI | `go-complexity -version` | `0.0.8` |
+| Go MCP | `go-complexity-mcp -version` | `0.0.8` |
+
+#### 안정성 프레임워크 (이론)
+
+5D 복잡도 공간이 이제 **Lyapunov 안정성 해석**을 지원:
+
+```
+에너지 함수: E(v) = vᵀMv + ⟨v,w⟩
+안정점:      ∂E/∂v = 0 (canonical centroid)
+안정성:      M ≥ 0 (positive semidefinite)
+```
+
+이는 리팩토링할 때 코드가 자연스럽게 canonical profile로 "흐른다"는 것을 의미하며, 권장사항을 따르면 안정적이고 최소 복잡도의 코드로 수렴한다는 수학적 보장을 제공함
+
+---
+
+## [0.0.7] - 2025-12-24
 
 ### Native Tensor/Canonical 통합 (아키텍처 수정)
 
@@ -55,7 +136,7 @@ type FunctionResult struct {
 
 ---
 
-## [0.0.6] - 2024-12-23
+## [0.0.6] - 2025-12-23
 
 ### MCP 도구 통합 & LLM 최적화 설명
 
@@ -88,7 +169,7 @@ USE THIS FIRST when user mentions:
 
 ---
 
-## [0.0.5] - 2024-12-23
+## [0.0.5] - 2025-12-23
 
 ### 빌드 & 보안 수정
 
@@ -97,14 +178,14 @@ USE THIS FIRST when user mentions:
 - core 빌드 전 cli/mcp가 import 시도하던 CI 빌드 실패 수정
 
 #### 보안
-- Go 1.22 → 1.23 (CVE-2024-45336, CVE-2024-45341 수정)
+- Go 1.22 → 1.23 (CVE-2025-45336, CVE-2025-45341 수정)
 
 #### CI
 - Go 태그 버전 동적화 (하드코딩 `go/v0.0.1` 제거)
 
 ---
 
-## [0.0.4] - 2024-12-23
+## [0.0.4] - 2025-12-23
 
 ### Go 지원, 테스트 확장 & 새 MCP 도구
 
@@ -156,7 +237,7 @@ USE THIS FIRST when user mentions:
 
 ---
 
-## [0.0.3] - 2024-12-23
+## [0.0.3] - 2025-12-23
 
 ### 2차 Tensor Framework
 
@@ -229,7 +310,7 @@ py/semantic_complexity/core/
 
 ---
 
-## [0.0.2] - 2024-12-23
+## [0.0.2] - 2025-12-23
 
 ### Canonical Profiles & Meta-dimensions
 
@@ -274,7 +355,7 @@ packages/core/src/
 
 ---
 
-## [0.0.1] - 2024-12-23
+## [0.0.1] - 2025-12-23
 
 ### 초기 릴리스
 

@@ -1,5 +1,5 @@
 """
-semantic-complexity - Multi-dimensional code complexity analyzer (v0.0.3)
+semantic-complexity - Multi-dimensional code complexity analyzer (v0.0.8)
 
 Python implementation of the semantic complexity analysis engine.
 
@@ -10,14 +10,13 @@ Dimensions (5D Domain Space):
 - 4D Async: Async boundaries - π₁(async-flow) - weight 2.5
 - 5D Coupling: Hidden dependencies - deg(v) in G_dep - weight 3.0
 
-v0.0.3 Features:
-- Second-order tensor: score = v^T M v + ⟨v, w⟩
-- ε-regularization for convergence
-- Module-type canonical profiles
-- Hodge decomposition of complexity space
+v0.0.8 Features:
+- Native MCP server (semantic-complexity-py-mcp)
+- Full tensor/canonical analysis in CLI output
+- Class reusability analysis
 """
 
-__version__ = "0.0.3"
+__version__ = "0.0.8"
 
 from semantic_complexity.core import (
     CANONICAL_PROFILES,
