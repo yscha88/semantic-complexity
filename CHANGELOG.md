@@ -4,6 +4,15 @@
 
 ---
 
+## [0.0.5] - 2024-12-23
+
+### Build Order Fix
+
+- Sequential build: core → cli/mcp (parallel)
+- Fixes CI build failure where cli/mcp tried to import core before it was built
+
+---
+
 ## [0.0.4] - 2024-12-23
 
 ### Go Support, Comprehensive Testing & New MCP Tools
