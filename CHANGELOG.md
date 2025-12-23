@@ -6,10 +6,17 @@
 
 ## [0.0.5] - 2024-12-23
 
-### Build Order Fix
+### Build & Security Fixes
 
+#### Build
 - Sequential build: core → cli/mcp (parallel)
 - Fixes CI build failure where cli/mcp tried to import core before it was built
+
+#### Security
+- Go 1.22 → 1.23 (CVE-2024-45336, CVE-2024-45341 fixes)
+
+#### CI
+- Dynamic Go tag versioning (removes hardcoded `go/v0.0.1`)
 
 ---
 

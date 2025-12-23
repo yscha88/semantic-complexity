@@ -4,10 +4,12 @@
 
 **Multi-dimensional Code Complexity Analyzer** — Quantifies actual maintenance difficulty using algebraic topology and tensor analysis.
 
-## v0.0.5: Build Order Fix
+## v0.0.5: Build & Security Fixes
 
 ### What's New
 - **Build Order Fix**: Sequential build (core → cli/mcp) for CI compatibility
+- **Go 1.23**: Security update (CVE-2024-45336, CVE-2024-45341)
+- **Dynamic Go Tags**: CI reads version from package.json
 
 ---
 
