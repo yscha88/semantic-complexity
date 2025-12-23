@@ -6,6 +6,8 @@ Lyapunov 안정성 기반:
 - Gradient: 균형점으로 향하는 방향
 """
 
+__module_type__ = "lib/domain"
+
 import math
 from dataclasses import dataclass
 from typing import Literal

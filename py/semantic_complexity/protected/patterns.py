@@ -18,6 +18,8 @@ Source Repository Protected Zones:
 - */audit/*, */logging/audit*
 """
 
+__module_type__ = "lib/domain"
+
 import fnmatch
 import re
 from dataclasses import dataclass, field

@@ -1,14 +1,11 @@
 """
 Canonical Profile System
 
-모듈 타입별 기준 프로파일 및 자동 탐지
+모듈 타입별 기준 프로파일
 """
 
-from .detector import (
-    detect_module_type,
-    detect_module_type_from_content,
-    detect_with_fallback,
-)
+__module_type__ = "lib/domain"
+
 from ..types.profile import (
     CanonicalProfile,
     ChangeBudget,
@@ -18,11 +15,7 @@ from ..types.profile import (
 )
 
 __all__ = [
-    # Detection
-    "detect_module_type",
-    "detect_module_type_from_content",
-    "detect_with_fallback",
-    # Profiles (re-export)
+    # Profiles
     "CanonicalProfile",
     "ChangeBudget",
     "Threshold",

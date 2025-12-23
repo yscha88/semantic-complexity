@@ -7,6 +7,8 @@ Ham Sandwich Theorem 기반 복잡도 축:
 - 🥓 Ham (Behavioral): 행동 보존
 """
 
+__module_type__ = "types"
+
 from enum import Enum
 from typing import Literal
 

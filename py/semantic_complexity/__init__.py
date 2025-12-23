@@ -20,6 +20,7 @@ Usage:
     gate = check_gate(result, "mvp")
 """
 
+__module_type__ = "lib/common"
 __version__ = "0.0.8"
 
 # ============================================================
@@ -32,6 +33,7 @@ from .types import (
     # Module
     ModuleType,
     ModuleTypeLiteral,
+    DEFAULT_MODULE_TYPE,
     # Score
     SandwichScore,
     RawScores,
@@ -95,10 +97,7 @@ from .simplex import (
 # ============================================================
 # Canonical
 # ============================================================
-from .canonical import (
-    detect_module_type,
-    detect_with_fallback,
-)
+# 모듈 타입은 __module_type__으로 명시적 선언 (추정 없음)
 
 # ============================================================
 # Gate
@@ -130,7 +129,9 @@ from .budget import (
 from .recommend import (
     suggest_refactor,
     get_priority_action,
+    check_degradation,
     Recommendation,
+    DegradationResult,
 )
 
 # ============================================================
@@ -161,16 +162,16 @@ def analyze_sandwich(
         source: Python 소스 코드
         file_path: 파일 경로 (선택)
         test_sources: 테스트 파일들 {path: source} (선택)
-        module_type: 모듈 타입 (자동 탐지)
+        module_type: 모듈 타입 (__module_type__ 선언값 사용, 미제공시 기본값)
 
     Returns:
         ModuleAnalysis: 분석 결과
     """
     from dataclasses import dataclass
 
-    # 모듈 타입 탐지
+    # 모듈 타입: 명시적 제공 또는 기본값
     if module_type is None:
-        module_type = detect_with_fallback(file_path or "", source)
+        module_type = DEFAULT_MODULE_TYPE
 
     # 3축 분석
     bread_result = analyze_bread(source, file_path)
@@ -274,8 +275,7 @@ __all__ = [
     "GradientDirection",
     "EquilibriumStatus",
     # Canonical
-    "detect_module_type",
-    "detect_with_fallback",
+    "DEFAULT_MODULE_TYPE",
     # Gate
     "check_mvp_gate",
     "check_production_gate",
@@ -293,7 +293,9 @@ __all__ = [
     # Recommend
     "suggest_refactor",
     "get_priority_action",
+    "check_degradation",
     "Recommendation",
+    "DegradationResult",
     # Protected
     "is_protected",
     "check_protected",

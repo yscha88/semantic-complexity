@@ -17,6 +17,8 @@ Canonical Profile 정의 - 2계층 구조
 
 from __future__ import annotations
 
+__module_type__ = "types"
+
 from dataclasses import dataclass
 from typing import NamedTuple
 

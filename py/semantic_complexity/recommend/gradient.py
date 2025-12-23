@@ -4,6 +4,8 @@ Gradient-based Recommender
 균형점으로 향하는 리팩토링 권장사항 생성
 """
 
+__module_type__ = "lib/domain"
+
 from dataclasses import dataclass
 from typing import Literal
 
@@ -14,7 +16,7 @@ from ..simplex import (
     check_equilibrium,
     calculate_deviation,
 )
-from ..analyzers import CognitiveResult
+from ..analyzers import CognitiveAnalysis
 
 
 @dataclass
@@ -84,7 +86,7 @@ class GradientRecommender:
         self,
         current: SandwichScore,
         module_type: ModuleType,
-        cognitive_result: CognitiveResult | None = None,
+        cognitive_result: CognitiveAnalysis | None = None,
     ):
         self.current = current
         self.module_type = module_type
@@ -161,7 +163,7 @@ class GradientRecommender:
 def suggest_refactor(
     current: SandwichScore,
     module_type: ModuleType,
-    cognitive_result: CognitiveResult | None = None,
+    cognitive_result: CognitiveAnalysis | None = None,
     max_recommendations: int = 3,
 ) -> list[Recommendation]:
     """
@@ -170,7 +172,7 @@ def suggest_refactor(
     Args:
         current: 현재 SandwichScore
         module_type: 모듈 타입
-        cognitive_result: Cognitive 분석 결과 (선택)
+        cognitive_result: Cognitive 분석 결과 (인지 가능 여부)
         max_recommendations: 최대 권장사항 수
 
     Returns:
@@ -196,3 +198,98 @@ def get_priority_action(
     """
     recommendations = suggest_refactor(current, module_type, max_recommendations=1)
     return recommendations[0] if recommendations else None
+
+
+# ============================================================
+# 인지 저하 탐지
+# ============================================================
+
+@dataclass
+class DegradationResult:
+    """인지 저하 탐지 결과"""
+    degraded: bool
+    severity: Literal["none", "mild", "moderate", "severe"]
+    indicators: list[str]
+    before_accessible: bool
+    after_accessible: bool
+    delta_nesting: int
+    delta_hidden_deps: int
+    delta_violations: int
+
+
+def check_degradation(
+    before: CognitiveAnalysis,
+    after: CognitiveAnalysis,
+) -> DegradationResult:
+    """
+    인지 저하 탐지 - 코드 변경이 인지성을 악화시켰는지 확인
+
+    WHEN TO USE:
+    - PR 리뷰 시 인지성 악화 여부 확인
+    - 리팩토링 전후 비교
+    - 기술 부채 추적
+
+    저하 지표:
+    1. accessible True → False 전환
+    2. 중첩 깊이 증가
+    3. 숨겨진 의존성 증가
+    4. state×async×retry 위반 발생
+
+    Args:
+        before: 변경 전 CognitiveAnalysis
+        after: 변경 후 CognitiveAnalysis
+
+    Returns:
+        DegradationResult: 저하 여부 및 심각도
+    """
+    indicators: list[str] = []
+
+    # 1. 인지 가능 상태 전환
+    accessibility_lost = before.accessible and not after.accessible
+    if accessibility_lost:
+        indicators.append("인지 가능 상태 상실 (accessible: True → False)")
+
+    # 2. 중첩 깊이 증가
+    delta_nesting = after.max_nesting - before.max_nesting
+    if delta_nesting > 0:
+        indicators.append(f"중첩 깊이 증가: +{delta_nesting} ({before.max_nesting} → {after.max_nesting})")
+
+    # 3. 숨겨진 의존성 증가
+    delta_hidden = len(after.hidden_dependencies) - len(before.hidden_dependencies)
+    if delta_hidden > 0:
+        indicators.append(f"숨겨진 의존성 증가: +{delta_hidden}")
+
+    # 4. state×async×retry 위반 발생
+    sar_before = before.state_async_retry.violated
+    sar_after = after.state_async_retry.violated
+    if not sar_before and sar_after:
+        indicators.append(f"state×async×retry 위반 발생: {' × '.join(after.state_async_retry.axes)}")
+
+    # 5. 위반 사항 증가
+    delta_violations = len(after.violations) - len(before.violations)
+    if delta_violations > 0:
+        indicators.append(f"위반 사항 증가: +{delta_violations}")
+
+    # 심각도 판정
+    severity: Literal["none", "mild", "moderate", "severe"]
+    if not indicators:
+        severity = "none"
+    elif accessibility_lost:
+        severity = "severe"
+    elif len(indicators) >= 3:
+        severity = "severe"
+    elif len(indicators) >= 2:
+        severity = "moderate"
+    else:
+        severity = "mild"
+
+    return DegradationResult(
+        degraded=len(indicators) > 0,
+        severity=severity,
+        indicators=indicators,
+        before_accessible=before.accessible,
+        after_accessible=after.accessible,
+        delta_nesting=delta_nesting,
+        delta_hidden_deps=delta_hidden,
+        delta_violations=delta_violations,
+    )

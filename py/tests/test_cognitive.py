@@ -11,6 +11,8 @@
     4. state×async×retry 2개 이상 공존 금지
 """
 
+__module_type__ = "test"
+
 import pytest
 from semantic_complexity.analyzers.cheese import (
     is_cognitively_accessible,

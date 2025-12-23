@@ -5,6 +5,8 @@ SandwichScore: Simplex 상의 점 (bread + cheese + ham = 100)
 RawScores: 정규화 전 원시 점수
 """
 
+__module_type__ = "types"
+
 from dataclasses import dataclass
 from typing import Self
 

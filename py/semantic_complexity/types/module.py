@@ -11,6 +11,8 @@
 
 from __future__ import annotations
 
+__module_type__ = "types"
+
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -581,3 +583,11 @@ def reset_registry() -> None:
     """레지스트리 초기화 (테스트용)"""
     global _registry
     _registry = ModuleTypeRegistry()
+
+
+# ============================================================
+# 기본 모듈 타입
+# ============================================================
+
+# __module_type__ 미선언 시 기본값
+DEFAULT_MODULE_TYPE = ModuleType(structural="app")

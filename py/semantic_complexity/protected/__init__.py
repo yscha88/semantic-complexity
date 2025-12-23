@@ -4,6 +4,8 @@ Protected Zone System
 보호 구역 파일 탐지 및 ADR 요구사항
 """
 
+__module_type__ = "lib/domain"
+
 from .patterns import (
     is_protected,
     check_protected,

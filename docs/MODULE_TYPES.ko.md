@@ -183,6 +183,87 @@ module_types:
 
 ---
 
+## 분석 제외 대상
+
+### 제외 모듈 타입
+
+복잡도 분석에서 제외되는 모듈 타입:
+
+| 모듈 타입 | 정의 | 제외 사유 |
+|----------|------|----------|
+| `test` | 테스트 코드 | 🥓 Ham 계산에만 사용, 복잡도 측정 불필요 |
+| `config` | 설정 파일 | 선언적, 로직 없음 |
+| `types` | 타입 정의만 | 구조 정의, 실행 로직 없음 |
+| `generated` | 자동 생성 코드 | protobuf, openapi 등 수정 불가 |
+| `script` | 일회성 스크립트 | 유지보수 대상 아님 |
+| `vendor` | 외부 라이브러리 복사본 | 우리 코드 아님 |
+
+```python
+# tests/test_user.py
+__module_type__ = "test"
+
+# src/config/settings.py
+__module_type__ = "config"
+
+# src/types/user.py
+__module_type__ = "types"
+
+# src/generated/api_pb2.py
+__module_type__ = "generated"
+```
+
+### 숨겨진 의존성 허용 목록
+
+다음 패턴은 숨겨진 의존성 계산에서 **제외**:
+
+| 패턴 | 언어 | 제외 사유 |
+|------|------|----------|
+| `logging.*`, `logger.*` | Python | 관측성 필수 |
+| `print()` | Python | 디버깅 |
+| `console.log()`, `console.*` | JS/TS | 디버깅 |
+| `log.*`, `slog.*` | Go | 관측성 필수 |
+| `assert` | 공통 | 검증 로직 |
+| `raise`, `throw` | 공통 | 예외 처리 |
+| `@dataclass`, `TypedDict` | Python | 타입 선언 |
+| `interface`, `type` | TS | 타입 선언 |
+
+### 설정 파일
+
+```yaml
+# .semantic-complexity.yaml
+exclude:
+  # 분석 제외 모듈 타입
+  module_types:
+    - test
+    - config
+    - types
+    - generated
+    - script
+    - vendor
+
+  # 숨겨진 의존성 허용 목록
+  hidden_dependency_allowlist:
+    - logging
+    - logger
+    - print
+    - console.log
+    - console.error
+    - console.warn
+    - log.Info
+    - log.Error
+    - slog.*
+
+  # 파일 패턴 제외
+  file_patterns:
+    - "**/__generated__/**"
+    - "**/node_modules/**"
+    - "**/vendor/**"
+    - "**/*.pb.go"
+    - "**/*_pb2.py"
+```
+
+---
+
 ## 명시적 선언 규칙
 
 ### 원칙
@@ -272,3 +353,4 @@ undefined_module:
 |------|------|-----------|
 | 0.1 | 2025-12-24 | 초안 - 1차/2차 분류 체계 정의 |
 | 0.2 | 2025-12-24 | 명시적 선언 규칙 추가 - 경로/내용 기반 추정 폐기 |
+| 0.3 | 2025-12-24 | 분석 제외 대상 추가 - test/config/types/generated, 허용 목록 |

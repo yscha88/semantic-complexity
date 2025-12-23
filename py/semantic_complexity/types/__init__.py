@@ -8,8 +8,10 @@ semantic-complexity 타입 정의
 - CanonicalProfile: 모듈별 기준 프로파일
 """
 
+__module_type__ = "types"
+
 from .axis import Axis, AxisLiteral, AXIS_DESCRIPTIONS
-from .module import ModuleType, ModuleTypeLiteral, MODULE_PATTERNS, MODULE_DESCRIPTIONS
+from .module import ModuleType, ModuleTypeLiteral, MODULE_PATTERNS, MODULE_DESCRIPTIONS, DEFAULT_MODULE_TYPE
 from .score import (
     SandwichScore,
     RawScores,
@@ -35,6 +37,7 @@ __all__ = [
     "ModuleTypeLiteral",
     "MODULE_PATTERNS",
     "MODULE_DESCRIPTIONS",
+    "DEFAULT_MODULE_TYPE",
     # Score
     "SandwichScore",
     "RawScores",

@@ -4,6 +4,8 @@ Simplex 정규화
 Raw scores → SandwichScore (bread + cheese + ham = 100)
 """
 
+__module_type__ = "lib/domain"
+
 import math
 from dataclasses import dataclass
 
