@@ -4,6 +4,39 @@
 
 ---
 
+## [0.0.6] - 2024-12-23
+
+### MCP Tool Consolidation & LLM-Optimized Descriptions
+
+#### Tool Consolidation (9 → 6 tools)
+
+| Before | After | Change |
+|--------|-------|--------|
+| `compare_mccabe_dimensional` | → `analyze_function` | Merged (comparison field) |
+| `get_dimension_breakdown` | → `analyze_function` | Merged (dimensions field) |
+| `infer_module_type` | → `validate_complexity` | Merged |
+| `check_canonical` | → `validate_complexity` | Merged |
+
+**New consolidated tools:**
+1. `get_hotspots` - [ENTRY POINT] Find complexity hotspots
+2. `analyze_file` - File-level analysis
+3. `analyze_function` - Deep function analysis (includes breakdown + comparison)
+4. `suggest_refactor` - Refactoring suggestions
+5. `generate_graph` - Dependency/call graph visualization
+6. `validate_complexity` - Canonical bounds validation (includes module type inference)
+
+#### LLM-Optimized Tool Descriptions
+
+Added contextual usage hints for autonomous tool selection:
+```
+USE THIS FIRST when user mentions:
+- "refactoring", "리팩토링", "개선"
+- "code quality", "코드 품질"
+- "what should I improve?", "뭐 고쳐야 해?"
+```
+
+---
+
 ## [0.0.5] - 2024-12-23
 
 ### Build & Security Fixes
