@@ -1,0 +1,69 @@
+name: Publish Packages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version_suffix:
+        description: 'Version suffix (e.g., beta, rc1). Leave empty for SHA-based version'
+        required: false
+        default: ''
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Get short SHA
+        id: sha
+        run: echo "short=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
+
+      - name: Set version suffix
+        id: version
+        run: |
+          if [ -n "${{ inputs.version_suffix }}" ]; then
+            echo "suffix=${{ inputs.version_suffix }}" >> $GITHUB_OUTPUT
+          else
+            echo "suffix=${{ steps.sha.outputs.short }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update package versions
+        run: |
+          SUFFIX="${{ steps.version.outputs.suffix }}"
+          # Update all package.json files with version suffix
+          for pkg in packages/*/package.json; do
+            jq --arg suffix "$SUFFIX" '.version = .version + "-" + $suffix' "$pkg" > tmp.json && mv tmp.json "$pkg"
+          done
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm --filter semantic-complexity test
+
+      - name: Publish packages
+        run: |
+          pnpm --filter semantic-complexity publish --no-git-checks --access public
+          pnpm --filter semantic-complexity-cli publish --no-git-checks --access public
+          pnpm --filter semantic-complexity-mcp publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
