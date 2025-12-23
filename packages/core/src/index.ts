@@ -218,6 +218,40 @@ export {
   findBestModuleType as findBestTensorModuleType,
 } from './tensor/index.js';
 
+// ─── v0.0.8: Class Reusability Module ───────────────────────────
+
+export type {
+  ClassFieldInfo,
+  ClassMethodInfo,
+  ClassAnalysisResult,
+  ClassMetrics,
+  ReusabilityScore,
+  ReusabilityIssue,
+  FileClassAnalysisResult,
+} from './class/index.js';
+
+export {
+  analyzeClass,
+  analyzeClasses,
+  analyzeClassesInFile,
+} from './class/index.js';
+
+// ─── v0.0.8: Invariants Module ──────────────────────────────────
+
+export type {
+  CognitiveViolation,
+  SecretViolation,
+  LockedZoneWarning,
+  InvariantCheckResult,
+} from './invariants/index.js';
+
+export {
+  checkCognitiveInvariant,
+  detectSecrets,
+  checkLockedZone,
+  checkAllInvariants,
+} from './invariants/index.js';
+
 // ─── Convenience Functions ───────────────────────────────────────
 
 import * as fs from 'node:fs';

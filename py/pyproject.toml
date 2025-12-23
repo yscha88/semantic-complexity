@@ -1,6 +1,6 @@
 [project]
 name = "semantic-complexity"
-version = "0.0.7"
+version = "0.0.8"
 description = "Multi-dimensional code complexity analyzer"
 readme = "README.md"
 license = { text = "MIT" }
@@ -20,7 +20,9 @@ classifiers = [
 ]
 keywords = ["complexity", "code-analysis", "cyclomatic", "cognitive", "metrics"]
 
-dependencies = []
+dependencies = [
+    "mcp>=1.0.0",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -32,6 +34,7 @@ dev = [
 
 [project.scripts]
 semantic-complexity = "semantic_complexity.cli:main"
+semantic-complexity-py-mcp = "semantic_complexity.mcp:main"
 
 [project.urls]
 Homepage = "https://github.com/yscha88/semantic-complexity"

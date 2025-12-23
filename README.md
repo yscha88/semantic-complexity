@@ -4,26 +4,64 @@
 
 **Multi-dimensional Code Complexity Analyzer** — Quantifies actual maintenance difficulty using algebraic topology and tensor analysis.
 
-## v0.0.7: Native Tensor/Canonical Integration
+## v0.0.8: Language-Specific MCP Servers & Class Reusability
 
-### Architecture Fix
-Python and Go CLIs now return native tensor/canonical/hodge results instead of basic analysis only. MCP uses these native results directly.
+### Independent MCP Servers per Language
 
-| Component | Before | After |
-|-----------|--------|-------|
-| Python CLI | Basic analysis | Full: tensor, canonical, hodge, recommendations |
-| Go CLI | Basic analysis | Full: tensor, canonical, hodge, recommendations |
-| MCP | Recalculated with TS | Uses native results from each language |
+| Package | Installation | Command |
+|---------|-------------|---------|
+| **TypeScript/JS** | `npm i -g semantic-complexity-ts-mcp` | `semantic-complexity-ts-mcp` |
+| **Python** | `pip install semantic-complexity` | `semantic-complexity-py-mcp` |
+| **Go** | `go install .../mcp/main` | `go-complexity-mcp` |
 
-### MCP Tools (6 tools)
+### MCP Tools (7 tools for TS, 5 for Python/Go)
+
 | Tool | Description |
 |------|-------------|
 | `get_hotspots` | [ENTRY POINT] Find complexity hotspots |
 | `analyze_file` | File-level analysis |
-| `analyze_function` | Deep function analysis (includes breakdown + comparison) |
+| `analyze_function` | Deep function analysis |
+| `analyze_class` | **NEW** Class reusability metrics (TS only) |
 | `suggest_refactor` | Refactoring suggestions |
-| `generate_graph` | Dependency/call graph visualization |
-| `validate_complexity` | Canonical bounds validation (includes module type inference) |
+| `generate_graph` | Dependency/call graph (TS only) |
+| `validate_complexity` | Canonical bounds validation |
+
+### Class Reusability Analysis
+
+OO design quality metrics using standard indicators:
+
+| Metric | Meaning | Good Range |
+|--------|---------|------------|
+| **WMC** | Weighted Methods per Class | < 20 |
+| **LCOM** | Lack of Cohesion (0=cohesive) | < 0.5 |
+| **CBO** | Coupling Between Objects | < 5 |
+| **RFC** | Response For a Class | < 20 |
+
+```bash
+# Returns reusability score (0-100), grade (A-F), and recommendations
+```
+
+### Theoretical Foundations
+
+This system is built on a **stability verification framework**, not just metrics collection.
+
+See [THEORY.md](./THEORY.md) for:
+- **Stability Invariants (🍞🧀🥓)** — Security, Cognitive, Behavioral constraints
+- **LLM Refactoring Protocol** — Constrained transformer rules
+- **Release Evidence Theory** — Engineering proof framework
+- **Lyapunov Stability** — Mathematical convergence guarantee
+
+---
+
+## v0.0.7: Native Tensor/Canonical Integration
+
+Each language now returns **native** tensor/canonical/hodge results instead of relying on TypeScript core recalculation.
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Python CLI | Basic analysis only | Full: tensor, canonical, hodge, recommendations |
+| Go CLI | Basic analysis only | Full: tensor, canonical, hodge, recommendations |
+| MCP | Recalculated via TS | Uses native results from each language |
 
 ---
 

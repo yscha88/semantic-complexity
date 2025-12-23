@@ -53,6 +53,18 @@ from semantic_complexity.core.tensor import (
     extract_vector,
 )
 
+# v0.0.8 imports
+from semantic_complexity.core.invariants import (
+    CognitiveViolation,
+    InvariantCheckResult,
+    LockedZoneWarning,
+    SecretViolation,
+    check_all_invariants,
+    check_cognitive_invariant,
+    check_locked_zone,
+    detect_secrets,
+)
+
 
 class DimensionalWeights(NamedTuple):
     """Weight multipliers for each complexity dimension."""
@@ -95,6 +107,7 @@ class CouplingComplexity:
     side_effects: int = 0
     env_dependency: int = 0
     implicit_io: int = 0
+    console_io: int = 0  # v0.0.8: print/logging (낮은 가중치)
     closure_captures: int = 0
 
 
@@ -151,11 +164,13 @@ class DimensionalComplexity:
         )
 
     def _score_coupling(self) -> float:
+        """v0.0.8: console_io는 낮은 가중치 (디버깅/로깅 목적)."""
         return (
             self.coupling.global_access * 2
             + self.coupling.side_effects * 3
             + self.coupling.env_dependency * 2
             + self.coupling.implicit_io * 2
+            + self.coupling.console_io * 0.5  # print/logging은 낮은 가중치
             + self.coupling.closure_captures * 1
         )
 
@@ -176,10 +191,14 @@ class FunctionComplexity:
 # AST Visitor for Complexity Analysis
 # ─────────────────────────────────────────────────────────────────
 
-# Known global/builtin names that indicate side effects
+# v0.0.8: 콘솔 출력 함수 (낮은 가중치 - 디버깅/로깅 목적)
+CONSOLE_FUNCTIONS = frozenset({
+    "print", "logging", "logger",
+})
+
+# 실제 I/O 함수 (높은 가중치)
 IO_FUNCTIONS = frozenset({
-    "print", "input", "open", "read", "write", "close",
-    "logging", "logger",
+    "input", "open", "read", "write", "close",
 })
 
 GLOBAL_OBJECTS = frozenset({
@@ -331,7 +350,10 @@ class ComplexityVisitor(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call) -> None:
         func_name = self._get_call_name(node)
         if func_name:
-            if func_name in IO_FUNCTIONS:
+            # v0.0.8: console 출력과 실제 I/O 구분
+            if func_name in CONSOLE_FUNCTIONS:
+                self.coupling.console_io += 1
+            elif func_name in IO_FUNCTIONS:
                 self.coupling.implicit_io += 1
             if func_name in GLOBAL_OBJECTS:
                 self.coupling.global_access += 1

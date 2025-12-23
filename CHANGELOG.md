@@ -4,7 +4,88 @@
 
 ---
 
-## [0.0.7] - 2024-12-24
+## [0.0.8] - 2025-12-24
+
+### Language-Specific MCP Servers & Class Reusability Analysis
+
+#### Independent MCP Servers per Language
+
+Each language now has its own dedicated MCP server:
+
+| Package | Installation | Command |
+|---------|-------------|---------|
+| **TypeScript/JS** | `npm i -g semantic-complexity-ts-mcp` | `semantic-complexity-ts-mcp` |
+| **Python** | `pip install semantic-complexity` | `semantic-complexity-py-mcp` |
+| **Go** | `go install .../mcp/main` | `go-complexity-mcp` |
+
+**Benefits:**
+- No subprocess overhead (each MCP runs native code)
+- Better performance and reliability
+- Consistent 5-tool interface across all languages
+
+#### Class Reusability Analysis (TypeScript/JavaScript)
+
+New `analyze_class` tool for evaluating OO design quality:
+
+```json
+{
+  "name": "DatabaseConnection",
+  "metrics": {
+    "wmc": 5,      // Weighted Methods per Class
+    "lcom": 0.0,   // Lack of Cohesion of Methods (0=cohesive)
+    "cbo": 2,      // Coupling Between Objects
+    "rfc": 8,      // Response For a Class
+    "dit": 0       // Depth of Inheritance Tree
+  },
+  "reusability": {
+    "score": 99,
+    "grade": "A",
+    "zone": "reusable"
+  }
+}
+```
+
+**Metrics explained:**
+
+| Metric | Meaning | Threshold |
+|--------|---------|-----------|
+| **WMC** | Sum of method complexities | <20 (low), >50 (high) |
+| **LCOM** | Method cohesion (0=perfect, 1=none) | <0.5 (low), >0.8 (high) |
+| **CBO** | External dependencies count | <5 (low), >14 (high) |
+| **RFC** | Methods + called methods | <20 (low), >50 (high) |
+| **DIT** | Inheritance depth | <3 (recommended) |
+
+**Reusability scoring:**
+- Score 0-100 based on penalty formula
+- Grade: A (≥80), B (≥60), C (≥40), D (≥20), F (<20)
+- Zone: reusable, moderate, problematic
+
+#### All Packages Now Support `--version`
+
+| Package | Command | Output |
+|---------|---------|--------|
+| npm CLI | `semantic-complexity --version` | `0.0.8` |
+| npm MCP | `semantic-complexity-ts-mcp --version` | `0.0.8` |
+| Python CLI | `semantic-complexity --version` | `0.0.8` |
+| Python MCP | `semantic-complexity-py-mcp --version` | `0.0.8` |
+| Go CLI | `go-complexity -version` | `0.0.8` |
+| Go MCP | `go-complexity-mcp -version` | `0.0.8` |
+
+#### Stability Framework (Theoretical)
+
+The 5D complexity space now supports a **Lyapunov stability interpretation**:
+
+```
+Energy function: E(v) = vᵀMv + ⟨v,w⟩
+Stable point:    ∂E/∂v = 0 (canonical centroid)
+Stability:       M ≥ 0 (positive semidefinite)
+```
+
+This means code naturally "flows" toward the canonical profile when refactoring, providing a mathematical guarantee that following the recommendations leads to stable, minimal-complexity code
+
+---
+
+## [0.0.7] - 2025-12-24
 
 ### Native Tensor/Canonical Integration (Architecture Fix)
 
@@ -55,7 +136,7 @@ type FunctionResult struct {
 
 ---
 
-## [0.0.6] - 2024-12-23
+## [0.0.6] - 2025-12-23
 
 ### MCP Tool Consolidation & LLM-Optimized Descriptions
 
@@ -88,7 +169,7 @@ USE THIS FIRST when user mentions:
 
 ---
 
-## [0.0.5] - 2024-12-23
+## [0.0.5] - 2025-12-23
 
 ### Build & Security Fixes
 
@@ -104,7 +185,7 @@ USE THIS FIRST when user mentions:
 
 ---
 
-## [0.0.4] - 2024-12-23
+## [0.0.4] - 2025-12-23
 
 ### Go Support, Comprehensive Testing & New MCP Tools
 
@@ -156,7 +237,7 @@ Inspired by [Clinical Dementia Rating (CDR)](https://knightadrc.wustl.edu/profes
 
 ---
 
-## [0.0.3] - 2024-12-23
+## [0.0.3] - 2025-12-23
 
 ### 2nd-Order Tensor Framework
 
@@ -229,7 +310,7 @@ py/semantic_complexity/core/
 
 ---
 
-## [0.0.2] - 2024-12-23
+## [0.0.2] - 2025-12-23
 
 ### Canonical Profiles & Meta-dimensions
 
@@ -274,7 +355,7 @@ packages/core/src/
 
 ---
 
-## [0.0.1] - 2024-12-23
+## [0.0.1] - 2025-12-23
 
 ### Initial Release
 

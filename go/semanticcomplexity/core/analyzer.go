@@ -14,10 +14,15 @@ var statePatterns = []string{
 	"current", "previous", "next", "active", "enabled", "disabled",
 }
 
-// I/O packages that indicate coupling
+// v0.0.8: 콘솔 출력 패키지 (낮은 가중치 - 디버깅/로깅 목적)
+var consolePackages = map[string]bool{
+	"fmt": true, "log": true,
+}
+
+// I/O packages that indicate coupling (높은 가중치)
 var ioPackages = map[string]bool{
-	"fmt": true, "os": true, "io": true, "net": true, "http": true,
-	"log": true, "bufio": true, "ioutil": true,
+	"os": true, "io": true, "net": true, "http": true,
+	"bufio": true, "ioutil": true,
 }
 
 // ComplexityVisitor walks the AST and calculates complexity metrics.
@@ -147,7 +152,10 @@ func (v *ComplexityVisitor) Visit(node ast.Node) ast.Visitor {
 	case *ast.SelectorExpr:
 		if ident, ok := n.X.(*ast.Ident); ok {
 			pkgName := ident.Name
-			if ioPackages[pkgName] {
+			// v0.0.8: console 출력과 실제 I/O 구분
+			if consolePackages[pkgName] {
+				v.coupling.ConsoleIO++
+			} else if ioPackages[pkgName] {
 				v.coupling.SideEffects++
 			}
 		}
@@ -202,7 +210,10 @@ func (v *ComplexityVisitor) checkCouplingCall(call *ast.CallExpr) {
 		}
 	case *ast.SelectorExpr:
 		if ident, ok := fn.X.(*ast.Ident); ok {
-			if ioPackages[ident.Name] {
+			// v0.0.8: console 출력과 실제 I/O 구분
+			if consolePackages[ident.Name] {
+				v.coupling.ConsoleIO++
+			} else if ioPackages[ident.Name] {
 				v.coupling.SideEffects++
 			}
 		}
@@ -213,7 +224,10 @@ func (v *ComplexityVisitor) checkCouplingCall(call *ast.CallExpr) {
 func (v *ComplexityVisitor) GetResult(weights DimensionalWeights) DimensionalComplexity {
 	stateScore := float64(v.state.StateMutations) * 2
 	asyncScore := float64(v.async.AsyncBoundaries)
-	couplingScore := float64(v.coupling.GlobalAccess)*2 + float64(v.coupling.SideEffects)*3
+	// v0.0.8: ConsoleIO는 낮은 가중치 (디버깅/로깅 목적)
+	couplingScore := float64(v.coupling.GlobalAccess)*2 +
+		float64(v.coupling.SideEffects)*3 +
+		float64(v.coupling.ConsoleIO)*0.5
 
 	weighted := float64(v.control)*weights.Control +
 		float64(v.nesting)*weights.Nesting +

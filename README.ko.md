@@ -4,26 +4,64 @@
 
 **다차원 코드 복잡도 분석기** — 대수적 위상학과 텐서 분석을 기반으로 코드의 실제 유지보수 난이도를 정량화합니다.
 
+## v0.0.8: 언어별 독립 MCP 서버 & Class 재활용율
+
+### 언어별 독립 MCP 서버
+
+| 패키지 | 설치 | 명령어 |
+|--------|------|--------|
+| **TypeScript/JS** | `npm i -g semantic-complexity-ts-mcp` | `semantic-complexity-ts-mcp` |
+| **Python** | `pip install semantic-complexity` | `semantic-complexity-py-mcp` |
+| **Go** | `go install .../mcp/main` | `go-complexity-mcp` |
+
+### MCP 도구 (TS 7개, Python/Go 5개)
+
+| 도구 | 설명 |
+|------|------|
+| `get_hotspots` | [진입점] 복잡도 핫스팟 검색 |
+| `analyze_file` | 파일 수준 분석 |
+| `analyze_function` | 함수 심층 분석 |
+| `analyze_class` | **NEW** Class 재활용율 메트릭 (TS 전용) |
+| `suggest_refactor` | 리팩토링 제안 |
+| `generate_graph` | 의존성/호출 그래프 (TS 전용) |
+| `validate_complexity` | Canonical 경계 검증 |
+
+### Class 재활용율 분석
+
+표준 OO 지표 기반 설계 품질 분석:
+
+| 메트릭 | 의미 | 권장 범위 |
+|--------|------|-----------|
+| **WMC** | 클래스당 가중 메서드 | < 20 |
+| **LCOM** | 응집도 부족 (0=응집됨) | < 0.5 |
+| **CBO** | 객체 간 결합도 | < 5 |
+| **RFC** | 클래스 응답 수 | < 20 |
+
+```bash
+# 재활용율 점수 (0-100), 등급 (A-F), 권장사항 반환
+```
+
+### 이론적 기반
+
+본 시스템은 단순한 메트릭 수집이 아닌 **안정성 검증 프레임워크** 위에 구축되었습니다.
+
+[THEORY.ko.md](./THEORY.ko.md) 참조:
+- **안정성 불변조건 (🍞🧀🥓)** — Security, Cognitive, Behavioral 제약
+- **LLM 리팩토링 프로토콜** — 제약된 변환기 규칙
+- **릴리스 증거 이론** — 공학적 증명 프레임워크
+- **Lyapunov 안정성** — 수학적 수렴 보장
+
+---
+
 ## v0.0.7: Native Tensor/Canonical 통합
 
-### 아키텍처 수정
-Python/Go CLI가 기본 분석 결과만 반환하던 버그 수정. 이제 각 언어의 native tensor/canonical/hodge 결과를 반환하고 MCP가 직접 사용.
+각 언어가 TypeScript core 재계산 없이 **네이티브** tensor/canonical/hodge 결과를 반환.
 
 | 컴포넌트 | 이전 | 이후 |
 |----------|------|------|
 | Python CLI | 기본 분석만 | 전체: tensor, canonical, hodge, recommendations |
 | Go CLI | 기본 분석만 | 전체: tensor, canonical, hodge, recommendations |
-| MCP | TS로 재계산 | 각 언어의 native 결과 사용 |
-
-### MCP 도구 (6개)
-| 도구 | 설명 |
-|------|------|
-| `get_hotspots` | [진입점] 복잡도 핫스팟 검색 |
-| `analyze_file` | 파일 수준 분석 |
-| `analyze_function` | 함수 심층 분석 (breakdown + comparison 포함) |
-| `suggest_refactor` | 리팩토링 제안 |
-| `generate_graph` | 의존성/호출 그래프 시각화 |
-| `validate_complexity` | Canonical 경계 검증 (모듈 타입 추론 포함) |
+| MCP | TS로 재계산 | 각 언어 네이티브 결과 사용 |
 
 ---
 

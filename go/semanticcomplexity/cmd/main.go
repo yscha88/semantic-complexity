@@ -11,7 +11,7 @@ import (
 	"github.com/yscha88/semantic-complexity/go/semanticcomplexity/core"
 )
 
-const version = "0.0.7"
+const version = "0.0.8"
 
 func main() {
 	showVersion := flag.Bool("version", false, "Show version")
