@@ -279,7 +279,7 @@ func analyzeFile(fset *token.FileSet, file *ast.File) []FunctionResult {
 			startPos := fset.Position(fn.Pos())
 			endPos := fset.Position(fn.End())
 
-			// Calculate tensor score
+			// Calculate 5D vector
 			vector := Vector5D{
 				Control:  float64(result.Control),
 				Nesting:  float64(result.Nesting),
@@ -287,7 +287,31 @@ func analyzeFile(fset *token.FileSet, file *ast.File) []FunctionResult {
 				Async:    float64(result.Async.AsyncBoundaries),
 				Coupling: float64(result.Coupling.GlobalAccess + result.Coupling.SideEffects),
 			}
-			tensorScore := CalculateTensorScore(vector, ModuleUnknown, 2.0)
+
+			// Find best module type
+			bestType := FindBestModuleType(vector)
+			confidence := 1.0 / (1.0 + bestType.Distance)
+
+			// Calculate tensor score with inferred module type
+			tensorScore := CalculateTensorScore(vector, bestType.Type, 2.0)
+
+			// Analyze deviation from canonical
+			deviation := AnalyzeDeviation(vector, bestType.Type)
+
+			// Hodge decomposition
+			hodge := HodgeDecompose(vector)
+
+			// Refactoring recommendations
+			recommendations := RecommendRefactoring(vector)
+			var recOutputs []RecommendationOutput
+			for _, r := range recommendations {
+				recOutputs = append(recOutputs, RecommendationOutput{
+					Dimension:      r.Dimension,
+					Priority:       r.Priority,
+					Action:         r.Action,
+					ExpectedImpact: r.ExpectedImpact,
+				})
+			}
 
 			funcResult := FunctionResult{
 				Name:        fn.Name.Name,
@@ -297,12 +321,36 @@ func analyzeFile(fset *token.FileSet, file *ast.File) []FunctionResult {
 				Cognitive:   result.Control + result.Nesting,
 				Dimensional: result,
 				Tensor: TensorScoreOutput{
+					Linear:          tensorScore.Linear,
+					Quadratic:       tensorScore.Quadratic,
 					Regularized:     tensorScore.Regularized,
 					RawSum:          tensorScore.RawSum,
 					RawSumThreshold: tensorScore.RawSumThreshold,
 					RawSumRatio:     tensorScore.RawSumRatio,
 					Zone:            GetZone(tensorScore),
 				},
+				ModuleType: ModuleTypeOutput{
+					Inferred:   string(bestType.Type),
+					Distance:   bestType.Distance,
+					Confidence: round(confidence, 3),
+				},
+				Canonical: CanonicalOutput{
+					IsCanonical:         deviation.IsCanonical,
+					IsOrphan:            deviation.IsOrphan,
+					Status:              deviation.Status,
+					EuclideanDistance:   deviation.EuclideanDistance,
+					MahalanobisDistance: deviation.MahalanobisDistance,
+					Violations:          deviation.ViolationDimensions,
+				},
+				Hodge: HodgeOutput{
+					Algorithmic:   hodge.Algorithmic,
+					Architectural: hodge.Architectural,
+					Balanced:      hodge.Balanced,
+					Total:         hodge.Total,
+					BalanceRatio:  hodge.BalanceRatio,
+					IsHarmonic:    hodge.IsHarmonic,
+				},
+				Recommendations: recOutputs,
 			}
 
 			results = append(results, funcResult)

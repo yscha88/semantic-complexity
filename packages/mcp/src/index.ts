@@ -91,6 +91,43 @@ interface PythonFunctionResult {
     async_: { async_boundaries: number };
     coupling: { global_access: number; side_effects: number };
   };
+  // v0.0.7: Full tensor/canonical analysis from native CLI
+  tensor?: {
+    linear: number;
+    quadratic: number;
+    regularized: number;
+    rawSum: number;
+    rawSumThreshold: number;
+    rawSumRatio: number;
+    zone: 'safe' | 'review' | 'violation';
+  };
+  moduleType?: {
+    inferred: string;
+    distance: number;
+    confidence: number;
+  };
+  canonical?: {
+    isCanonical: boolean;
+    isOrphan: boolean;
+    status: string;
+    euclideanDistance: number;
+    mahalanobisDistance: number;
+    violations: string[];
+  };
+  hodge?: {
+    algorithmic: number;
+    architectural: number;
+    balanced: number;
+    total: number;
+    balanceRatio: number;
+    isHarmonic: boolean;
+  };
+  recommendations?: Array<{
+    dimension: string;
+    priority: number;
+    action: string;
+    expectedImpact: number;
+  }>;
 }
 
 function analyzePythonFile(filePath: string): PythonFunctionResult[] {
@@ -118,32 +155,16 @@ for p in ${JSON.stringify(possiblePyPaths)}:
         sys.path.insert(0, p)
 try:
     from semantic_complexity import analyze_functions
+    from semantic_complexity.cli import func_to_dict
     with open(r'${safeFilePath}', 'r', encoding='utf-8') as f:
         source = f.read()
     results = analyze_functions(source, '${path.basename(filePath)}')
-    output = []
-    for r in results:
-        output.append({
-            'name': r.name,
-            'lineno': r.lineno,
-            'end_lineno': r.end_lineno,
-            'cyclomatic': r.cyclomatic,
-            'cognitive': r.cognitive,
-            'dimensional': {
-                'weighted': r.dimensional.weighted,
-                'control': r.dimensional.control,
-                'nesting': r.dimensional.nesting,
-                'state': {'state_mutations': r.dimensional.state.state_mutations},
-                'async_': {'async_boundaries': r.dimensional.async_.async_boundaries},
-                'coupling': {
-                    'global_access': r.dimensional.coupling.global_access,
-                    'side_effects': r.dimensional.coupling.side_effects
-                }
-            }
-        })
+    # v0.0.7: Use CLI's func_to_dict for full tensor/canonical analysis
+    output = [func_to_dict(r) for r in results]
     print(json.dumps(output))
 except Exception as e:
-    print(json.dumps({'error': str(e)}))
+    import traceback
+    print(json.dumps({'error': str(e), 'traceback': traceback.format_exc()}))
 `;
 
     // 임시 파일에 Python 코드 작성
@@ -586,11 +607,12 @@ async function analyzeFile(filePath: string, threshold = 0): Promise<string> {
   }> = [];
 
   if (language === 'python') {
-    // Python 분석
+    // Python 분석 - v0.0.7: 네이티브 tensor/canonical 결과 직접 사용
     const pyResults = analyzePythonFile(absolutePath);
     for (const r of pyResults) {
       if (r.dimensional.weighted >= threshold) {
-        const tensor = calculateTensorFromPython(r.dimensional);
+        // v0.0.7: Python CLI에서 계산된 tensor 직접 사용, fallback으로 TS 계산
+        const tensor = r.tensor || calculateTensorFromPython(r.dimensional);
         results.push({
           name: r.name,
           line: r.lineno,
@@ -610,11 +632,12 @@ async function analyzeFile(filePath: string, threshold = 0): Promise<string> {
       }
     }
   } else if (language === 'go') {
-    // Go 분석
+    // Go 분석 - v0.0.7: 네이티브 tensor/canonical 결과 직접 사용
     const goResults = analyzeGoFile(absolutePath);
     for (const r of goResults) {
       if (r.dimensional.weighted >= threshold) {
-        const tensor = calculateTensorFromPython(r.dimensional); // Go와 Python 결과 형식 동일
+        // v0.0.7: Go CLI에서 계산된 tensor 직접 사용, fallback으로 TS 계산
+        const tensor = r.tensor || calculateTensorFromPython(r.dimensional);
         results.push({
           name: r.name,
           line: r.lineno,
@@ -1412,7 +1435,7 @@ function generateSuggestionsFromGo(r: GoFunctionResult): string[] {
 const server = new Server(
   {
     name: 'semantic-complexity-mcp',
-    version: '0.0.6',
+    version: '0.0.7',
   },
   {
     capabilities: {

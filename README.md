@@ -4,6 +4,36 @@
 
 **Multi-dimensional Code Complexity Analyzer** — Quantifies actual maintenance difficulty using algebraic topology and tensor analysis.
 
+## v0.0.7: Native Tensor/Canonical Integration
+
+### Architecture Fix
+Python and Go CLIs now return native tensor/canonical/hodge results instead of basic analysis only. MCP uses these native results directly.
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Python CLI | Basic analysis | Full: tensor, canonical, hodge, recommendations |
+| Go CLI | Basic analysis | Full: tensor, canonical, hodge, recommendations |
+| MCP | Recalculated with TS | Uses native results from each language |
+
+### MCP Tools (6 tools)
+| Tool | Description |
+|------|-------------|
+| `get_hotspots` | [ENTRY POINT] Find complexity hotspots |
+| `analyze_file` | File-level analysis |
+| `analyze_function` | Deep function analysis (includes breakdown + comparison) |
+| `suggest_refactor` | Refactoring suggestions |
+| `generate_graph` | Dependency/call graph visualization |
+| `validate_complexity` | Canonical bounds validation (includes module type inference) |
+
+---
+
+## v0.0.6: MCP Tool Consolidation
+
+- **Tool Consolidation (9 → 6)**: Merged redundant tools for cleaner API
+- **LLM-Optimized Descriptions**: Added contextual usage hints for autonomous tool selection
+
+---
+
 ## v0.0.5: Build & Security Fixes
 
 ### What's New

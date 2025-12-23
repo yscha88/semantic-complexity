@@ -22,6 +22,14 @@ from semantic_complexity.core import (
     DimensionalWeights,
     FunctionComplexity,
     analyze_functions,
+    # v0.0.7: tensor/canonical support
+    ModuleType,
+    calculate_tensor_score,
+    find_best_module_type,
+    analyze_deviation,
+    hodge_decomposition,
+    recommend_refactoring,
+    extract_vector,
 )
 
 
@@ -109,7 +117,27 @@ def analyze_path(
 
 
 def func_to_dict(f: FunctionComplexity) -> dict[str, Any]:
-    """Convert FunctionComplexity to dict."""
+    """Convert FunctionComplexity to dict with full tensor/canonical analysis."""
+    # Extract 5D vector from dimensional complexity
+    vector = extract_vector(f.dimensional)
+
+    # Infer best module type
+    inferred_type, type_distance = find_best_module_type(vector)
+
+    # Calculate tensor score
+    tensor = calculate_tensor_score(f.dimensional, inferred_type)
+
+    # Analyze deviation from canonical
+    deviation = analyze_deviation(vector, inferred_type)
+
+    # Hodge decomposition
+    hodge = hodge_decomposition(vector)
+
+    # Refactoring recommendations
+    from semantic_complexity.core.tensor import Vector5D as WeightsVector
+    weights = WeightsVector(1.0, 1.5, 2.0, 2.5, 3.0)
+    recommendations = recommend_refactoring(vector, weights)
+
     return {
         "name": f.name,
         "line": f.lineno,
@@ -124,7 +152,47 @@ def func_to_dict(f: FunctionComplexity) -> dict[str, Any]:
             "coupling": asdict(f.dimensional.coupling),
             "weighted": f.dimensional.weighted,
             "contributions": f.dimensional.contributions,
-        }
+        },
+        # v0.0.7: Full tensor/canonical analysis
+        "tensor": {
+            "linear": tensor.linear,
+            "quadratic": tensor.quadratic,
+            "regularized": tensor.regularized,
+            "rawSum": tensor.raw_sum,
+            "rawSumThreshold": tensor.raw_sum_threshold,
+            "rawSumRatio": tensor.raw_sum_ratio,
+            "zone": "safe" if tensor.raw_sum_ratio < 0.7 else "review" if tensor.raw_sum_ratio < 1.0 else "violation",
+        },
+        "moduleType": {
+            "inferred": inferred_type.value,
+            "distance": type_distance,
+            "confidence": round(1.0 / (1.0 + type_distance), 3),
+        },
+        "canonical": {
+            "isCanonical": deviation.is_canonical,
+            "isOrphan": deviation.is_orphan,
+            "status": deviation.status,
+            "euclideanDistance": deviation.euclidean_distance,
+            "mahalanobisDistance": deviation.mahalanobis_distance,
+            "violations": deviation.violation_dimensions,
+        },
+        "hodge": {
+            "algorithmic": hodge.algorithmic,
+            "architectural": hodge.architectural,
+            "balanced": hodge.balanced,
+            "total": hodge.total,
+            "balanceRatio": hodge.balance_ratio,
+            "isHarmonic": hodge.is_harmonic,
+        },
+        "recommendations": [
+            {
+                "dimension": r.dimension,
+                "priority": r.priority,
+                "action": r.action,
+                "expectedImpact": r.expected_impact,
+            }
+            for r in recommendations
+        ],
     }
 
 
