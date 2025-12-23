@@ -1,229 +1,605 @@
 # semantic-complexity
 
-**다차원 코드 복잡도 분석기** — McCabe 순환 복잡도를 넘어, 실제 유지보수 난이도를 정량화합니다.
+**다차원 코드 복잡도 분석기** — 대수적 위상학과 텐서 분석을 기반으로 코드의 실제 유지보수 난이도를 정량화합니다.
 
-## 핵심 아이디어
+## v0.0.3: Mathematical Framework
 
-### 문제: 단일 지표의 한계
+### 문제 정의
 
-```
-McCabe = 10 (단순해 보임)
-실제로는 async 3중 중첩 + 전역 상태 + 클로저 5개 = 유지보수 지옥
-```
-
-McCabe 복잡도는 분기점만 측정하여 **숨겨진 복잡도**를 반영하지 못합니다.
-
-### 해결: 다차원 복잡도
-
-| 차원 | 가중치 | 측정 항목 |
-|------|--------|----------|
-| 1D Control | ×1.0 | if, switch, loop, 논리연산자 |
-| 2D Nesting | ×1.5 | 중첩 깊이, 콜백, 재귀 |
-| 3D State | ×2.0 | 상태 변이, hooks, 상태 기계 |
-| 4D Async | ×2.5 | async/await, Promise, 동시성 |
-| 5D Coupling | ×3.0 | 전역 접근, I/O, 부수효과, 클로저 |
-
-## 설계 철학 (v0.0.2+)
-
-### 햄 샌드위치 정리에서 착안
-
-[위상수학의 햄 샌드위치 정리](https://en.wikipedia.org/wiki/Ham_sandwich_theorem):
-> n차원 유클리드 공간에서 n개의 측정 가능한 객체가 주어지면, 단일 (n-1)차원 초평면으로 모든 객체를 동시에 이등분할 수 있다.
-
-Borsuk-Ulam 정리로 증명되며, **균형점의 존재를 보장**합니다.
-
-코드 품질 공간을 3개의 직교 축으로 분해:
-
-| 축 | 이름 | 의미 |
-|----|------|------|
-| 🍞 | Security | 구조 안정성, 보안 경계 |
-| 🧀 | Context | 맥락 밀도, 인지 복잡도 |
-| 🥓 | Behavior | 행동 보존성, 유지보수성 |
-
-**슈페르너 정리**: 3색 라벨링된 삼각분할에서 균형점 존재 → 반복 필터링으로 이상적 형태에 수렴 가능
-
-### P-NP 문제의 모듈별 특수해
-
-코드 최적화는 NP-hard 문제입니다:
-
-| 문제 | 복잡도 |
-|------|--------|
-| 최적 모듈 분할 | NP-hard |
-| 순환 의존성 최소 제거 | NP-hard |
-| 전역 최적 리팩토링 | NP-hard |
-
-**해결 접근**: 모듈 타입을 제약 조건으로 추가
+#### v0.0.2까지의 한계
 
 ```
-일반 문제 (NP-hard) + 모듈 타입 제약 = 제약된 문제 (P)
+score = Σ(dᵢ × wᵢ) = d₁w₁ + d₂w₂ + ... + d₅w₅
 ```
 
-SAT 문제와 동일한 구조입니다:
-- 일반 SAT: NP-complete
-- 2-SAT, Horn-SAT: P (구조적 제약으로 인해)
+이는 **1D 벡터의 선형 합산**으로, 다음 문제가 있습니다:
 
-각 모듈 타입이 **독립된 문제 클래스**가 되어, 해당 클래스 내에서 일반해가 존재합니다.
+| 문제 | 설명 |
+|------|------|
+| 차원 간 상호작용 무시 | `nesting × async`의 시너지 효과 반영 불가 |
+| 단일 가중치 | 모든 모듈에 동일한 가중치 적용 |
+| Hard boundary | `score = 10.0` 경계에서 수렴 불안정 |
+| 위상 구조 부재 | 코드 공간의 기하학적 특성 무시 |
 
-### 모듈 타입과 정준형
+---
 
-```typescript
-type ModuleType = 'api' | 'app' | 'lib' | 'deploy';
+## Mathematical Foundations
+
+### 1. Domain Space 정의
+
+코드 복잡도는 5개의 **domain**으로 구성된 공간 `D`에서 정의됩니다:
+
+```
+D = D_control × D_nesting × D_state × D_async × D_coupling ⊂ ℝ⁵
 ```
 
-| 타입 | 역할 | 정준 특성 |
-|------|------|-----------|
-| `api` | 경계면 | 얇은 레이어, 무상태, 검증 집중 |
-| `app` | 응용 로직 | 상태/비동기 허용, 격리됨 |
-| `lib` | 라이브러리 | 순수 함수, 고응집, 저결합 |
-| `deploy` | 배포 구성 | 선언적, 로직 최소 |
+각 domain은 독립적인 측정 공간이 아닌, **상호작용하는 fiber bundle** 구조를 가집니다.
 
-### 메타 차원
+#### Domain 정의
 
-5개 차원을 3개 상위 축(🍞🧀🥓)으로 집계:
+| Domain | 기호 | 수학적 정의 | 측정 대상 |
+|--------|------|-------------|-----------|
+| **Control** | `C` | `dim H₁(G) + 1` (First Betti number) | 분기, 루프, 조건문 |
+| **Nesting** | `N` | `Σᵢ depth(nodeᵢ)` (Depth integral) | 중첩 깊이, 콜백 |
+| **State** | `S` | `|∂Γ/∂t|` (State transition rate) | 상태 변이, 전이 |
+| **Async** | `A` | `π₁(async-flow)` (Fundamental group) | 비동기 경계, await |
+| **Coupling** | `Λ` | `deg(v) in G_dep` (Dependency degree) | 전역 접근, I/O, 부수효과 |
 
-| 메타 차원 | 구성 | 의미 |
+---
+
+### 2. Tensor Structure
+
+#### 2.1 First-Order (현재 v0.0.2)
+
+```
+score⁽¹⁾ = ⟨v, w⟩ = Σᵢ vᵢwᵢ
+
+v = [C, N, S, A, Λ] ∈ ℝ⁵
+w = [1.0, 1.5, 2.0, 2.5, 3.0]
+```
+
+선형 모델. 차원 간 독립 가정.
+
+#### 2.2 Second-Order Tensor (v0.0.3)
+
+차원 간 **상호작용**을 포착하는 2차 텐서:
+
+```
+score⁽²⁾ = vᵀMv + ⟨v, w⟩
+
+M ∈ ℝ⁵ˣ⁵ (Interaction Matrix)
+```
+
+**상호작용 행렬 M:**
+
+```
+        C     N     S     A     Λ
+    ┌─────────────────────────────┐
+C   │ 1.0   0.3   0.2   0.2   0.3 │  Control
+N   │ 0.3   1.0   0.4   0.8   0.2 │  Nesting × Async ↑
+S   │ 0.2   0.4   1.0   0.5   0.9 │  State × Coupling ↑↑
+A   │ 0.2   0.8   0.5   1.0   0.4 │  Async × Nesting ↑
+Λ   │ 0.3   0.2   0.9   0.4   1.0 │  Coupling × State ↑↑
+    └─────────────────────────────┘
+```
+
+**해석:**
+- `M[N,A] = 0.8`: 깊은 중첩 안의 async → 높은 상호작용
+- `M[S,Λ] = 0.9`: 상태 변이 + 숨겨진 의존성 → 치명적
+
+#### 2.3 Third-Order Tensor (모듈 타입별)
+
+모듈 타입에 따라 **다른 상호작용 행렬**을 적용:
+
+```
+W ∈ ℝ⁴ˣ⁵ˣ⁵
+
+W[module_type, i, j] = 모듈별 상호작용 가중치
+```
+
+```python
+# API 모듈: Coupling 상호작용 강조
+M_api[S,Λ] = 1.5  # State × Coupling 매우 위험
+
+# Lib 모듈: Control/Nesting 상호작용 강조
+M_lib[C,N] = 1.2  # Control × Nesting 중요
+
+# App 모듈: State/Async 상호작용 강조
+M_app[S,A] = 1.3  # State × Async 중요
+```
+
+---
+
+### 3. ε-Regularization과 수렴
+
+#### 문제: Hard Boundary의 불안정성
+
+```
+threshold = 10.0
+
+iteration 1: score = 10.5 → fix
+iteration 2: score = 9.8  → ok
+iteration 3: score = 10.1 → fix
+iteration 4: score = 9.9  → ok
+...
+경계에서 진동, 수렴 안 함
+```
+
+#### 해결: ε-Lifted Space
+
+복잡도 공간을 threshold에서 **ε만큼 떠있는** 상태로 정의:
+
+```
+target = threshold - ε
+
+         ┌─────────────────────┐
+    ε    │   Safe Zone         │  ← 여기로 수렴
+         ├─────────────────────┤
+  ──────▶│   threshold = 10    │  ← 불안정 경계
+         ├─────────────────────┤
+   -ε    │   Violation Zone    │
+         └─────────────────────┘
+```
+
+#### Contraction Mapping Theorem
+
+수렴을 보장하려면:
+
+```
+‖f(x) - f(y)‖ ≤ k‖x - y‖,  where k < 1
+```
+
+ε-regularization이 이 조건을 만족시킵니다:
+
+```
+score_reg = score + ε‖v‖²
+
+∇score_reg = ∇score + 2εv
+```
+
+**결과:**
+- ε = 0: k → 1, 수렴 보장 없음
+- ε > 0: k < 1, Banach fixed-point theorem 적용 가능
+
+#### Convergence Score
+
+```python
+def convergence_score(current: float, threshold: float, epsilon: float) -> float:
+    """
+    Returns:
+        < 0: Safe zone (converged)
+        0-1: ε-neighborhood (review needed)
+        > 1: Violation zone
+    """
+    target = threshold - epsilon
+    return (current - target) / epsilon
+```
+
+---
+
+### 4. Topological Interpretation
+
+#### McCabe와 Algebraic Topology
+
+McCabe 복잡도는 **위상학적 불변량**입니다:
+
+```
+McCabe = E - N + 2P = dim H₁(G) + 1
+```
+
+- `H₁(G)`: Control Flow Graph의 First Homology Group
+- `dim H₁(G)`: First Betti Number (독립 사이클 수)
+
+#### 확장: 각 Domain의 위상 구조
+
+| Domain | 그래프 | 위상적 측정 |
+|--------|--------|-------------|
+| Control | Control Flow Graph | `β₁ = dim H₁(CFG)` |
+| Nesting | AST Depth Tree | `height(T)` |
+| State | State Transition Graph | `β₀, β₁` of STG |
+| Async | Async Flow Graph | `π₁(AFG)` |
+| Coupling | Dependency Graph | `deg(v), β₁(DG)` |
+
+#### Hodge Decomposition of Code Space
+
+코드 복잡도 공간에 **Hodge-like 분해**를 적용:
+
+```
+H^k(Code) = ⊕_{p+q=k} H^{p,q}(Code)
+```
+
+5D Domain 공간의 Hodge 구조:
+
+| Hodge Component | 지배 Domain | 특성 | 해석 |
+|-----------------|-------------|------|------|
+| `H^{2,0}` | Control, Nesting | Algorithmic | 순수 알고리즘 복잡도 |
+| `H^{0,2}` | Coupling, State | Architectural | 구조적/의존성 복잡도 |
+| `H^{1,1}` | Async (mixed) | Balanced | 혼합 복잡도 |
+
+**Hodge Decomposition의 의미:**
+
+```
+         H^{2,0} (Algorithmic)
+            ↗
+Code Space → H^{1,1} (Balanced/Async)
+            ↘
+         H^{0,2} (Architectural)
+```
+
+- **H^{2,0}** (holomorphic): Control + Nesting → 로컬 알고리즘 복잡도
+- **H^{0,2}** (anti-holomorphic): Coupling + State → 전역 구조 복잡도
+- **H^{1,1}** (harmonic): Async → 두 세계를 연결하는 경계
+
+**Harmonic Condition:**
+```
+Δω = 0  (Laplacian이 0인 형태)
+
+최적 코드 = H^{1,1}에서 harmonic form
+         = 알고리즘/구조 복잡도가 균형잡힌 상태
+```
+
+#### de Rham Cohomology 연결
+
+코드 변경을 **differential form**으로 해석:
+
+```
+d: Ω^k(Code) → Ω^{k+1}(Code)
+
+d² = 0  (경계의 경계는 없다)
+```
+
+- `Ω^0`: 함수 (스칼라 복잡도)
+- `Ω^1`: 함수 간 관계 (의존성)
+- `Ω^2`: 모듈 간 관계 (아키텍처)
+
+**Closed vs Exact:**
+```
+Closed: dω = 0 (변경해도 복잡도 불변)
+Exact:  ω = dη (리팩토링으로 제거 가능)
+
+H^k = Closed / Exact = 본질적 복잡도
+```
+
+---
+
+### 5. Module Type Canonical Forms
+
+#### Canonical Profile per Module Type
+
+각 모듈 타입은 **이상적인 복잡도 프로필**을 가집니다:
+
+```
+Φ: ModuleType → CanonicalProfile
+
+Φ(api)    = (C: low,  N: low,  S: low,  A: low,  Λ: low)
+Φ(lib)    = (C: med,  N: med,  S: low,  A: low,  Λ: low)
+Φ(app)    = (C: med,  N: med,  S: med,  A: med,  Λ: low)
+Φ(deploy) = (C: low,  N: low,  S: low,  A: low,  Λ: low)
+```
+
+#### Deviation Metric
+
+현재 상태와 canonical form 사이의 거리:
+
+```
+δ(v, Φ(type)) = ‖v - Φ(type)‖_M
+
+where ‖·‖_M is the M-weighted norm (Mahalanobis-like)
+```
+
+---
+
+### 6. Ham Sandwich Decomposition
+
+#### Meta-Dimensions (3-axis)
+
+5D 공간을 3개의 **직교 축**으로 투영:
+
+```
+π: ℝ⁵ → ℝ³
+
+v = [C, N, S, A, Λ] ↦ [Security, Context, Behavior]
+```
+
+| Meta-Axis | 구성 | 의미 |
 |-----------|------|------|
-| 🍞 **Security** | coupling + global + env | 구조 안정성 |
-| 🧀 **Context** | cognitive + nesting + callback | 맥락 밀도 |
-| 🥓 **Behavior** | state + async + sideEffects | 행동 보존성 |
+| 🍞 **Security** | `f(Λ, S)` | 구조 안정성, 보안 경계 |
+| 🧀 **Context** | `g(C, N)` | 맥락 밀도, 인지 부하 |
+| 🥓 **Behavior** | `h(S, A)` | 행동 보존성, 예측 가능성 |
 
-### 수렴 분석
+#### Ham Sandwich Theorem 적용
 
-```typescript
-const result = analyzeConvergence({
-  filePath: './src/api/users.ts',
-  moduleType: 'api',
-});
+> "3차원 공간의 3개 객체는 단일 평면으로 동시 이등분 가능"
 
-// 결과
-{
-  deviation: { security: 0.2, context: 1.5, behavior: 0.8 },
-  isStable: false,
-  suggestion: "Context 복잡도가 API 경계면 기준 초과"
-}
+**Implication:** 최적의 리팩토링 전략이 존재함을 보장
+
+---
+
+### 7. Canonical Existence Theorem과 반례
+
+#### 정리 (Naive Version)
+
+> "모든 모듈 타입 τ에 대해 최적의 canonical profile Φ*(τ)가 존재한다"
+
+**증명 스케치:**
+1. Weierstrass 정리: compact set에서 연속함수는 최솟값을 가짐
+2. 2차 형식 `vᵀMv`는 M이 positive semi-definite일 때 볼록
+3. ε-regularization이 strict convexity 보장
+4. Hodge decomposition이 유일성 제공
+
+그러나 이 정리는 **여러 조건에서 실패**합니다.
+
+---
+
+#### 반례 1: Non-Compact Domain (비유계 제약)
+
+Weierstrass 정리는 **compact set**에서만 적용됩니다.
+
+```python
+# 플러그인 시스템 - Coupling이 무한히 증가 가능
+class PluginManager:
+    def load_plugin(self, plugin):
+        self.plugins.append(plugin)
+        for p in self.plugins:
+            p.notify_all(self.plugins)  # O(n²) coupling
 ```
 
-## 패키지 구조
+```
+Λ(Coupling) → ∞  as  |plugins| → ∞
+
+Domain: D_coupling = [0, ∞)  ← NOT bounded!
+∴ Φ(plugin_manager) is NOT compact
+∴ Minimum may not exist (infimum only)
+```
+
+---
+
+#### 반례 2: Non-Convex Objective (비볼록 목적함수)
+
+M이 **positive semi-definite가 아닌** 경우:
 
 ```
-packages/
-├── core/     # semantic-complexity (분석 엔진)
-├── cli/      # semantic-complexity-cli (CLI)
-└── mcp/      # semantic-complexity-mcp (Claude Code 연동)
+M_adversarial =
+    ┌─────────────────────────────────┐
+    │ 1.0  -0.5   0.2   0.2   0.3    │
+    │-0.5   1.0   0.4  -0.3   0.2    │  ← 음수 상호작용
+    │ 0.2   0.4   1.0   0.5  -0.6    │
+    │ 0.2  -0.3   0.5   1.0   0.4    │
+    │ 0.3   0.2  -0.6   0.4   1.0    │
+    └─────────────────────────────────┘
+
+eigenvalues(M) = [1.8, 1.2, 0.9, 0.4, -0.3]
+                                      ↑
+                              Negative eigenvalue!
 ```
 
-## 설치
+**결과:** Control과 Nesting이 서로 상쇄하는 코드 패턴에서 **multiple local minima** 발생.
+
+---
+
+#### 반례 3: ε = 0 진동 (Regularization 없음)
+
+```
+ε = 0일 때:
+  Lipschitz constant k ≈ 1
+  ‖f(x) - f(y)‖ ≤ k‖x - y‖ where k = 1
+
+Banach fixed-point theorem FAILS when k = 1
+```
+
+**실제 현상:**
+```
+iteration 1: score = 10.5 → extract_method() → Coupling ↑
+iteration 2: score = 9.8  → inline_method()  → Control ↑
+iteration 3: score = 10.2 → extract_method() → Coupling ↑
+... 무한 진동
+```
+
+---
+
+#### 반례 4: Module Type Ambiguity (타입 모호성)
+
+```python
+class UserService:
+    """API + Lib + App 특성을 모두 가진 hybrid 모듈"""
+
+    def __init__(self, db, cache, queue):
+        self.db = db          # Coupling (api-like)
+        self.cache = cache    # State (app-like)
+        self.queue = queue    # Async (lib-like)
+```
+
+```
+P(api) = 0.4,  P(lib) = 0.3,  P(app) = 0.3
+
+Φ_mixture = 0.4×Φ(api) + 0.3×Φ(lib) + 0.3×Φ(app)
+          ≠ Φ(τ) for any τ
+
+Convex combination of canonical profiles ≠ canonical
+```
+
+---
+
+#### 반례 5: Hodge Uniqueness 실패
+
+위상적으로 동등하지만 복잡도가 다른 함수:
+
+```
+f₁(x) = Σᵢ₌₁ⁿ if(cond_i) { action_i }   # Control = n, Nesting = 1
+f₂(x) = switch(classify(x)) { ... }      # Control = k, Nesting = log(n)
+
+β₁(CFG_f₁) = β₁(CFG_f₂)  ← Same Betti number
+But score(f₁) ≠ score(f₂)
+```
+
+Hodge structure가 metric 정보 없이는 유일성을 보장하지 않음.
+
+---
+
+#### 반례 6: Legacy Code (실세계 위반)
+
+```python
+class LegacyPaymentProcessor:
+    """10년간 진화한 코드 - 모든 타입의 특성을 가짐"""
+    global_config = {}  # deploy
+    _cache = {}         # app
+
+    # Control = 47, Nesting = 12, State = 23, Async = 8, Coupling = 31
+```
+
+```
+v_actual = [47, 12, 23, 8, 31]
+
+For ANY module type τ:
+  δ(v_actual, Φ(τ)) > ε_max
+
+∄ τ : v_actual ∈ Φ(τ)
+
+"Orphan" state - 어떤 canonical form에도 속하지 않음
+```
+
+---
+
+#### 반례 요약
+
+| 반례 | 위반 조건 | 결과 |
+|------|-----------|------|
+| 1. Plugin Manager | Compact domain | Infimum only, no minimum |
+| 2. Adversarial M | Positive definite | Multiple local minima |
+| 3. ε = 0 | Contraction mapping | Non-convergence |
+| 4. Hybrid module | Clear type | Undefined Φ(τ) |
+| 5. Topological equiv | Metric uniqueness | Non-unique decomposition |
+| 6. Legacy code | Clean design | Outside all canonical regions |
+
+---
+
+#### 수정된 정리 (Conditional Canonical Existence)
+
+```
+Theorem: Let τ ∈ ModuleTypes, and suppose:
+  (i)   Φ(τ) ⊂ ℝ⁵ is compact (bounded constraints)
+  (ii)  M is positive semi-definite (convex objective)
+  (iii) ε > 0 (regularization active)
+  (iv)  τ is uniquely determined (no type ambiguity)
+  (v)   Code is "newly designed" (not legacy accumulation)
+
+Then ∃! v* ∈ Φ(τ) such that:
+  v* = argmin_{v ∈ Φ(τ)} [vᵀMv + ⟨v,w⟩ + ε‖v‖²]
+
+Moreover, iterative refinement converges:
+  v_{n+1} = f(v_n) → v* as n → ∞
+```
+
+**Implications:**
+- 새 코드 설계 시: 정리가 적용되어 최적 구조 존재
+- 레거시 리팩토링 시: 먼저 타입을 명확히 하고, 경계 조건 확인 필요
+- ε > 0 유지가 수렴의 핵심
+
+---
+
+## Implementation
+
+### Score Calculation (v0.0.3)
+
+```python
+def calculate_score(
+    v: Vector5D,
+    module_type: ModuleType,
+    epsilon: float = 2.0
+) -> ComplexityScore:
+    # 1차 항
+    linear = dot(v, get_weights(module_type))
+
+    # 2차 항 (상호작용)
+    M = get_interaction_matrix(module_type)
+    quadratic = v.T @ M @ v
+
+    # ε-정규화
+    regularization = epsilon * norm(v) ** 2
+
+    return ComplexityScore(
+        raw=linear + quadratic,
+        regularized=linear + quadratic + regularization,
+        epsilon=epsilon
+    )
+```
+
+### Convergence Analysis
+
+```python
+def analyze_convergence(
+    current: Vector5D,
+    module_type: ModuleType,
+    threshold: float = 10.0,
+    epsilon: float = 2.0
+) -> ConvergenceResult:
+    canonical = get_canonical_profile(module_type)
+    deviation = mahalanobis_distance(current, canonical)
+
+    conv_score = (deviation - (threshold - epsilon)) / epsilon
+
+    return ConvergenceResult(
+        deviation=deviation,
+        convergence_score=conv_score,
+        status="safe" if conv_score < 0 else
+               "review" if conv_score < 1 else "violation"
+    )
+```
+
+---
+
+## Package Structure
+
+```
+semantic-complexity/
+├── packages/           # TypeScript (JS/TS 분석)
+│   ├── core/          # 분석 엔진
+│   ├── cli/           # CLI 도구
+│   └── mcp/           # Claude Code 연동
+├── py/                # Python (Python 분석)
+│   └── semantic_complexity/
+└── go/                # Go (예정)
+```
+
+## Installation
 
 ```bash
+# TypeScript/JavaScript
 npm install semantic-complexity
-npm install -g semantic-complexity-cli
+
+# Python
+pip install semantic-complexity
 ```
 
-## CLI 사용
+## Roadmap
 
-```bash
-# 프로젝트 요약
-semantic-complexity summary ./src
+| Version | Features |
+|---------|----------|
+| v0.0.1 | 5D 복잡도 분석, 선형 가중합 |
+| v0.0.2 | Canonical profiles, Meta-dimensions, Delta gates |
+| **v0.0.3** | **2차 Tensor, ε-regularization, 수렴 분석** |
+| v0.0.4 | 3차 Tensor (모듈별 상호작용), 위상학적 확장 |
 
-# HTML 리포트
-semantic-complexity analyze ./src -o report -f html
+## References
 
-# JSON 리포트
-semantic-complexity analyze ./src --json
-```
+### Complexity Theory
+1. McCabe, T.J. (1976). "A Complexity Measure" - IEEE TSE
+2. Halstead, M.H. (1977). "Elements of Software Science"
 
-### 출력 예시
+### Algebraic Topology
+3. Borsuk-Ulam Theorem - Topological Fixed Point
+4. Sperner's Lemma - Combinatorial Topology
+5. Betti Numbers & Homology Groups - `H_n(X)` invariants
 
-```
-═══════════════════════════════════════════════════════════════
- Summary
-═══════════════════════════════════════════════════════════════
+### Hodge Theory
+6. Hodge, W.V.D. (1941). "The Theory and Applications of Harmonic Integrals"
+7. Hodge Decomposition: `H^k(M) = ⊕_{p+q=k} H^{p,q}(M)`
+8. de Rham Cohomology - Differential forms on manifolds
 
-  Files:        30
-  Functions:    268
-  Avg McCabe:   2.6
-  Avg Dimensional: 21
-  Avg Ratio:    8.18x
-  High-Risk:    56 functions
+### Convergence & Fixed Points
+9. Banach Fixed-Point Theorem - Contraction Mapping
+10. Lyapunov Stability - ε-neighborhood convergence
 
-───────────────────────────────────────────────────────────────
- Dimension Breakdown
-───────────────────────────────────────────────────────────────
-
-  1D Control   ████████████████████████████░░    687 (avg: 2.6)
-  2D Nesting   ███████████████████████████░░░    667 (avg: 2.5)
-  3D State     ██████████████████████████████  741.5 (avg: 2.8)
-  4D Async     ██████████░░░░░░░░░░░░░░░░░░░░    248 (avg: 0.9)
-  5D Coupling  ███████████████████████░░░░░░░    570 (avg: 2.1)
-
-───────────────────────────────────────────────────────────────
- Hotspots (Top 5)
-───────────────────────────────────────────────────────────────
-
-  Function          McCabe  Dimensional  Ratio  Primary
-  ──────────────────────────────────────────────────────
-  Signup                81          802   9.9x  2D-nesting
-  PatientOverview       47        415.5  8.84x  3D-state
-  Sidebar                7          209 29.86x  5D-coupling
-```
-
-### Ratio 해석
-
-```
-Ratio = Dimensional / McCabe
-
-< 3x    단순한 제어 흐름
-3-5x    일반적인 복잡도
-5-10x   숨겨진 복잡도, 주의 필요
-> 10x   리팩토링 권장
-```
-
-## 프로그래매틱 사용
-
-```typescript
-import { analyzeFilePath, analyzeFunctionExtended } from 'semantic-complexity';
-
-const result = analyzeFilePath('./src/components/Login.tsx');
-
-for (const func of result.functions) {
-  console.log(func.function.name, func.dimensional);
-}
-```
-
-## MCP 연동
-
-프로젝트에 `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "complexity": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["semantic-complexity-mcp"]
-    }
-  }
-}
-```
-
-Claude Code에서:
-
-```
-"Login.tsx 복잡도 분석해줘"
-"가장 복잡한 함수 10개 찾아줘"
-"Signup 리팩토링 제안해줘"
-```
-
-## 로드맵
-
-- **v0.0.1**: 5차원 복잡도 분석 (현재)
-- **v0.0.2**: 모듈 타입 기반 정준성 프레임워크
-  - 메타 차원 (Security/Context/Behavior)
-  - 수렴 분석
-  - Delta 기반 품질 게이트
-
-자세한 변경 사항은 [CHANGELOG.md](./CHANGELOG.md)를 참조하세요.
-
-## 라이선스
+## License
 
 MIT
