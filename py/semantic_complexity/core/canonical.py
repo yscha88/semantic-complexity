@@ -117,6 +117,20 @@ CANONICAL_PROFILES: dict[ModuleType, CanonicalProfile] = {
         async_=(0, 5),       # medium: data fetching
         coupling=(0, 3),     # low: component isolation
     ),
+    ModuleType.DATA: CanonicalProfile(
+        control=(0, 3),      # low: simple getters/setters
+        nesting=(0, 2),      # low: flat structure
+        state=(0, 10),       # high: entity field definitions
+        async_=(0, 2),       # low: typically sync
+        coupling=(0, 5),     # medium: ORM relationships
+    ),
+    ModuleType.INFRA: CanonicalProfile(
+        control=(0, 5),      # low: simple CRUD
+        nesting=(0, 3),      # low: flat queries
+        state=(0, 2),        # low: stateless data access
+        async_=(0, 8),       # high: DB I/O
+        coupling=(0, 8),     # high: external dependencies
+    ),
     ModuleType.DEPLOY: CanonicalProfile(
         control=(0, 3),      # low: simple scripts
         nesting=(0, 2),      # low: flat

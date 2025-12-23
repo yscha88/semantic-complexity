@@ -56,6 +56,22 @@ export const MODULE_MATRICES: Record<ModuleType, Matrix5x5> = {
     [0.4,  0.6,  0.3,  1.0,  0.3],
     [0.2,  0.2,  0.5,  0.3,  1.0],
   ],
+  data: [
+    // DATA: State is most important (entity definitions)
+    [1.0,  0.2,  0.3,  0.1,  0.4],
+    [0.2,  1.0,  0.2,  0.1,  0.2],
+    [0.3,  0.2,  1.5,  0.2,  0.8],  // State self-weight ↑, State × Coupling ↑
+    [0.1,  0.1,  0.2,  1.0,  0.2],
+    [0.4,  0.2,  0.8,  0.2,  1.0],  // Coupling × State ↑
+  ],
+  infra: [
+    // INFRA: Async and Coupling are critical (DB/IO)
+    [1.0,  0.2,  0.2,  0.3,  0.4],
+    [0.2,  1.0,  0.2,  0.3,  0.2],
+    [0.2,  0.2,  1.0,  0.4,  0.6],
+    [0.3,  0.3,  0.4,  1.5,  0.8],  // Async self-weight ↑, Async × Coupling ↑
+    [0.4,  0.2,  0.6,  0.8,  1.5],  // Coupling self-weight ↑, Coupling × Async ↑
+  ],
   deploy: [
     // DEPLOY: All interactions should be minimal
     [1.0,  0.1,  0.1,  0.1,  0.2],

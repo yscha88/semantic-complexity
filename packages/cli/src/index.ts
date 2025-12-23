@@ -12,6 +12,13 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { scanProject, type ProjectReport } from './scanner.js';
 import { generateReportFile, type ReportFormat } from './reporter.js';
+import {
+  DependencyGraph,
+  CallGraph,
+  exportToDot,
+  exportToMermaid,
+  parseSourceFile,
+} from 'semantic-complexity';
 
 const program = new Command();
 
@@ -116,6 +123,81 @@ program
   });
 
 // ─────────────────────────────────────────────────────────────────
+// graph 명령어
+// ─────────────────────────────────────────────────────────────────
+
+program
+  .command('graph')
+  .description('Generate dependency or call graph')
+  .argument('<path>', 'Project path or file to analyze')
+  .option('-t, --type <type>', 'Graph type (dependency, call)', 'dependency')
+  .option('-f, --format <format>', 'Output format (dot, mermaid)', 'mermaid')
+  .option('-o, --output <path>', 'Output file path')
+  .action(async (projectPath: string, options) => {
+    const absolutePath = path.resolve(projectPath);
+
+    if (!fs.existsSync(absolutePath)) {
+      console.error(chalk.red(`Error: Path not found: ${absolutePath}`));
+      process.exit(1);
+    }
+
+    const spinner = ora('Building graph...').start();
+
+    try {
+      const stat = fs.statSync(absolutePath);
+      let graphOutput: string;
+
+      if (options.type === 'call') {
+        // Call graph - requires a single file
+        if (stat.isDirectory()) {
+          spinner.fail('Call graph requires a single file, not a directory');
+          process.exit(1);
+        }
+
+        const content = fs.readFileSync(absolutePath, 'utf-8');
+        const sourceFile = parseSourceFile(absolutePath, content);
+        const callGraph = new CallGraph();
+
+        // Analyze the source file for call relationships
+        callGraph.analyzeSourceFile(sourceFile);
+
+        graphOutput = exportToMermaid(callGraph);
+
+      } else {
+        // Dependency graph
+        const projectRoot = stat.isDirectory() ? absolutePath : path.dirname(absolutePath);
+        const depGraph = new DependencyGraph(projectRoot);
+
+        if (stat.isDirectory()) {
+          // Analyze all files in directory
+          depGraph.analyzeDirectory(absolutePath);
+        } else {
+          const content = fs.readFileSync(absolutePath, 'utf-8');
+          depGraph.analyzeFile(absolutePath, content);
+        }
+
+        graphOutput = exportToDot(depGraph);
+      }
+
+      spinner.succeed('Graph generated');
+
+      if (options.output) {
+        const ext = options.format === 'dot' ? '.dot' : '.md';
+        const outputPath = options.output.endsWith(ext) ? options.output : options.output + ext;
+        fs.writeFileSync(outputPath, graphOutput, 'utf-8');
+        console.log(chalk.green(`Graph saved: ${outputPath}`));
+      } else {
+        console.log('\n' + graphOutput);
+      }
+
+    } catch (error) {
+      spinner.fail('Graph generation failed');
+      console.error(chalk.red(`Error: ${(error as Error).message}`));
+      process.exit(1);
+    }
+  });
+
+// ─────────────────────────────────────────────────────────────────
 // 요약 출력
 // ─────────────────────────────────────────────────────────────────
 
@@ -132,6 +214,18 @@ function printSummary(report: ProjectReport, topN = 10): void {
   console.log(`  ${chalk.gray('Avg Dimensional:')} ${s.averageDimensional}`);
   console.log(`  ${chalk.gray('Avg Ratio:')}    ${chalk.yellow(s.averageRatio + 'x')}`);
   console.log(`  ${chalk.gray('High-Risk:')}    ${chalk.red(s.functionsAboveThreshold.toString())} functions`);
+
+  // Tensor Summary (v0.0.3)
+  if (s.tensor) {
+    console.log(chalk.cyan('\n───────────────────────────────────────────────────────────────'));
+    console.log(chalk.cyan(' Tensor Analysis (v0.0.3)'));
+    console.log(chalk.cyan('───────────────────────────────────────────────────────────────\n'));
+
+    console.log(`  ${chalk.gray('Safe:')}       ${chalk.green(s.tensor.safeCount.toString())} functions`);
+    console.log(`  ${chalk.gray('Review:')}     ${chalk.yellow(s.tensor.reviewCount.toString())} functions`);
+    console.log(`  ${chalk.gray('Violation:')}  ${chalk.red(s.tensor.violationCount.toString())} functions`);
+    console.log(`  ${chalk.gray('Avg Ratio:')}  ${s.tensor.averageRawSumRatio.toFixed(3)} (threshold: 1.0)`);
+  }
 
   // 차원별 분석
   console.log(chalk.cyan('\n───────────────────────────────────────────────────────────────'));
@@ -161,15 +255,18 @@ function printSummary(report: ProjectReport, topN = 10): void {
     console.log(chalk.cyan('───────────────────────────────────────────────────────────────\n'));
 
     console.log(
-      chalk.gray('  Function'.padEnd(30) + 'McCabe'.padStart(8) + 'Dimensional'.padStart(12) + 'Ratio'.padStart(8) + '  Primary')
+      chalk.gray('  Function'.padEnd(28) + 'McCabe'.padStart(7) + 'Dim'.padStart(6) + 'Ratio'.padStart(7) + 'Zone'.padStart(10) + '  Primary')
     );
     console.log(chalk.gray('  ' + '-'.repeat(75)));
 
     for (const h of report.hotspots.slice(0, topN)) {
-      const name = h.function.slice(0, 28).padEnd(30);
+      const name = h.function.slice(0, 26).padEnd(28);
       const ratioColor = h.ratio > 10 ? chalk.red : h.ratio > 5 ? chalk.yellow : chalk.white;
+      const zoneColor = h.tensor?.zone === 'violation' ? chalk.red :
+                        h.tensor?.zone === 'review' ? chalk.yellow : chalk.green;
+      const zone = h.tensor?.zone || 'n/a';
       console.log(
-        `  ${name}${h.mccabe.toString().padStart(8)}${h.dimensional.toString().padStart(12)}${ratioColor((h.ratio + 'x').padStart(8))}  ${h.primaryDimension}`
+        `  ${name}${h.mccabe.toString().padStart(7)}${h.dimensional.toString().padStart(6)}${ratioColor((h.ratio + 'x').padStart(7))}${zoneColor(zone.padStart(10))}  ${h.primaryDimension}`
       );
     }
   }

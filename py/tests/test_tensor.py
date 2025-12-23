@@ -207,7 +207,8 @@ def test():
             linear=3.0, quadratic=1.0, raw=4.0,
             regularization=0.5, regularized=4.5,
             epsilon=2.0, module_type=ModuleType.LIB,
-            vector=Vector5D.zero()
+            vector=Vector5D.zero(),
+            raw_sum=0.0, raw_sum_threshold=21.0, raw_sum_ratio=0.0,
         )
         assert score.is_safe
         assert not score.needs_review
@@ -218,7 +219,8 @@ def test():
             linear=6.0, quadratic=2.0, raw=8.0,
             regularization=0.5, regularized=8.5,
             epsilon=2.0, module_type=ModuleType.LIB,
-            vector=Vector5D.zero()
+            vector=Vector5D.zero(),
+            raw_sum=0.0, raw_sum_threshold=21.0, raw_sum_ratio=0.0,
         )
         assert not score.is_safe
         assert score.needs_review
@@ -229,7 +231,8 @@ def test():
             linear=8.0, quadratic=3.0, raw=11.0,
             regularization=0.5, regularized=11.5,
             epsilon=2.0, module_type=ModuleType.LIB,
-            vector=Vector5D.zero()
+            vector=Vector5D.zero(),
+            raw_sum=0.0, raw_sum_threshold=21.0, raw_sum_ratio=0.0,
         )
         assert not score.is_safe
         assert not score.needs_review

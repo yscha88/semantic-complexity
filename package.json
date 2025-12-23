@@ -1,8 +1,8 @@
 {
-  "name": "semantic-complexity-monorepo",
-  "version": "0.1.0",
+  "name": "semantic-complexity",
+  "version": "0.0.4",
   "private": true,
-  "description": "Multi-dimensional code complexity analysis tool",
+  "description": "Multi-dimensional code complexity analyzer",
   "type": "module",
   "scripts": {
     "build": "pnpm -r build",
@@ -30,8 +30,5 @@
     "tsx": "^4.21.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.50.0"
-  },
-  "dependencies": {
-    "semantic-complexity": "^0.0.1-cedf2072"
   }
 }

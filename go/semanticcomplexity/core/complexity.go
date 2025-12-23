@@ -1,20 +1,20 @@
 // Package core provides multi-dimensional code complexity analysis.
 //
-// Dimensions:
-//   - 1D Control: Cyclomatic complexity (branches, loops)
-//   - 2D Nesting: Depth penalty
-//   - 3D State: State mutations and transitions
-//   - 4D Async: Goroutines, channels
-//   - 5D Coupling: Hidden dependencies, side effects
+// Complexity Domains:
+//   - Control (C): Cyclomatic complexity (branches, loops)
+//   - Nesting (N): Depth penalty
+//   - State (S): State mutations and transitions
+//   - Async (A): Goroutines, channels
+//   - Coupling (Λ): Hidden dependencies, side effects
 package core
 
-// DimensionalWeights holds weight multipliers for each complexity dimension.
+// DimensionalWeights holds weight multipliers for each complexity domain.
 type DimensionalWeights struct {
-	Control  float64 // 1D: branch points
-	Nesting  float64 // 2D: depth penalty
-	State    float64 // 3D: state complexity
-	Async    float64 // 4D: async complexity
-	Coupling float64 // 5D: hidden coupling
+	Control  float64 // C: branch points
+	Nesting  float64 // N: depth penalty
+	State    float64 // S: state complexity
+	Async    float64 // A: async complexity
+	Coupling float64 // Λ: hidden coupling
 }
 
 // DefaultWeights returns the default weight configuration.
@@ -28,48 +28,48 @@ func DefaultWeights() DimensionalWeights {
 	}
 }
 
-// StateComplexity holds 3D state complexity metrics.
+// StateComplexity holds state complexity metrics.
 type StateComplexity struct {
-	StateMutations int
-	StateReads     int
-	StateBranches  int
+	StateMutations int `json:"state_mutations"`
 }
 
-// AsyncComplexity holds 4D async complexity metrics.
+// AsyncComplexity holds async complexity metrics.
 type AsyncComplexity struct {
-	GoroutineSpawns int
-	ChannelOps      int
-	SelectCases     int
+	AsyncBoundaries int `json:"async_boundaries"`
 }
 
-// CouplingComplexity holds 5D hidden coupling metrics.
+// CouplingComplexity holds hidden coupling metrics.
 type CouplingComplexity struct {
-	GlobalAccess  int
-	SideEffects   int
-	EnvDependency int
+	GlobalAccess int `json:"global_access"`
+	SideEffects  int `json:"side_effects"`
 }
 
 // DimensionalComplexity holds the complete complexity analysis result.
 type DimensionalComplexity struct {
-	Control  int
-	Nesting  int
-	State    StateComplexity
-	Async    AsyncComplexity
-	Coupling CouplingComplexity
-	Weighted float64
-	Weights  DimensionalWeights
+	Weighted float64            `json:"weighted"`
+	Control  int                `json:"control"`
+	Nesting  int                `json:"nesting"`
+	State    StateComplexity    `json:"state"`
+	Async    AsyncComplexity    `json:"async_"`
+	Coupling CouplingComplexity `json:"coupling"`
 }
 
-// AnalyzeSource analyzes the complexity of Go source code.
-func AnalyzeSource(source string, filename string) (*DimensionalComplexity, error) {
-	// TODO: Implement Go AST analysis
-	return &DimensionalComplexity{
-		Weights: DefaultWeights(),
-	}, nil
+// TensorScoreOutput holds the tensor score output for JSON.
+type TensorScoreOutput struct {
+	Regularized     float64 `json:"regularized"`
+	RawSum          float64 `json:"raw_sum"`
+	RawSumThreshold float64 `json:"raw_sum_threshold"`
+	RawSumRatio     float64 `json:"raw_sum_ratio"`
+	Zone            string  `json:"zone"`
 }
 
-// AnalyzeFile analyzes the complexity of a Go file.
-func AnalyzeFile(filepath string) (*DimensionalComplexity, error) {
-	// TODO: Read file and call AnalyzeSource
-	return AnalyzeSource("", filepath)
+// FunctionResult holds the analysis result for a single function.
+type FunctionResult struct {
+	Name        string                `json:"name"`
+	Lineno      int                   `json:"lineno"`
+	EndLineno   int                   `json:"end_lineno"`
+	Cyclomatic  int                   `json:"cyclomatic"`
+	Cognitive   int                   `json:"cognitive"`
+	Dimensional DimensionalComplexity `json:"dimensional"`
+	Tensor      TensorScoreOutput     `json:"tensor"`
 }

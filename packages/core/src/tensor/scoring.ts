@@ -23,6 +23,8 @@ import {
   vectorToArray,
 } from './matrix.js';
 
+import { getCanonicalProfile } from './canonical.js';
+
 /**
  * Default linear weights
  */
@@ -33,6 +35,28 @@ export const DEFAULT_WEIGHTS: Vector5D = {
   async: 2.5,
   coupling: 3.0,
 };
+
+/**
+ * Calculate raw sum of dimensions (CDR-SOB style)
+ * Simple sum: C + N + S + A + Λ
+ */
+export function calculateRawSum(vector: Vector5D): number {
+  return vector.control + vector.nesting + vector.state + vector.async + vector.coupling;
+}
+
+/**
+ * Calculate rawSum threshold from canonical profile upper bounds
+ */
+export function calculateRawSumThreshold(moduleType: ModuleType): number {
+  const profile = getCanonicalProfile(moduleType);
+  return (
+    profile.control[1] +
+    profile.nesting[1] +
+    profile.state[1] +
+    profile.async[1] +
+    profile.coupling[1]
+  );
+}
 
 /**
  * Calculate tensor-based complexity score
@@ -61,6 +85,11 @@ export function calculateTensorScore(
   const regularization = epsilon * normSquared * 0.01; // Scale factor
   const regularized = raw + regularization;
 
+  // CDR-SOB style: simple sum and threshold
+  const rawSum = calculateRawSum(vector);
+  const rawSumThreshold = calculateRawSumThreshold(moduleType);
+  const rawSumRatio = rawSumThreshold > 0 ? rawSum / rawSumThreshold : 0;
+
   return {
     linear: Math.round(linear * 100) / 100,
     quadratic: Math.round(quadratic * 100) / 100,
@@ -70,6 +99,10 @@ export function calculateTensorScore(
     epsilon,
     moduleType,
     vector,
+    // CDR-SOB style
+    rawSum: Math.round(rawSum * 100) / 100,
+    rawSumThreshold,
+    rawSumRatio: Math.round(rawSumRatio * 1000) / 1000,
   };
 }
 

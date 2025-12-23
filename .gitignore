@@ -51,3 +51,7 @@ py/uv.lock
 
 # dev.env
 .env
+
+# Go binaries
+*.exe
+go-complexity

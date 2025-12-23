@@ -41,8 +41,8 @@ def complex_function(x):
 """)
 
 print(f"Weighted complexity: {result.weighted}")
-print(f"Control (1D): {result.control}")
-print(f"Nesting (2D): {result.nesting}")
+print(f"Control: {result.control}")
+print(f"Nesting: {result.nesting}")
 print(f"Contributions: {result.contributions}")
 
 # Analyze functions individually
@@ -51,15 +51,15 @@ for fn in functions:
     print(f"{fn.name}: McCabe={fn.cyclomatic}, Dimensional={fn.dimensional.weighted}")
 ```
 
-## Dimensions
+## Domains
 
-| Dimension | Weight | Description |
-|-----------|--------|-------------|
-| 1D Control | 1.0 | Cyclomatic complexity (branches, loops) |
-| 2D Nesting | 1.5 | Depth penalty |
-| 3D State | 2.0 | State mutations and transitions |
-| 4D Async | 2.5 | Async/await, coroutines |
-| 5D Coupling | 3.0 | Hidden dependencies, side effects |
+| Domain | Weight | Description |
+|--------|--------|-------------|
+| Control (C) | 1.0 | Cyclomatic complexity (branches, loops) |
+| Nesting (N) | 1.5 | Depth penalty |
+| State (S) | 2.0 | State mutations and transitions |
+| Async (A) | 2.5 | Async/await, coroutines |
+| Coupling (Λ) | 3.0 | Hidden dependencies, side effects |
 
 ## License
 

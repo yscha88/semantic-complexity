@@ -28,6 +28,8 @@ class ModuleType(Enum):
     LIB = "lib"          # Reusable library code, pure functions
     APP = "app"          # Application logic, stateful services
     WEB = "web"          # Static frontend, UI components
+    DATA = "data"        # Models, entities, schemas
+    INFRA = "infra"      # Repositories, DB access, external I/O
     DEPLOY = "deploy"    # Infrastructure, configuration
     UNKNOWN = "unknown"  # Unclassified
 
@@ -131,6 +133,22 @@ class InteractionMatrix:
             [0.4,  0.6,  0.3,  1.0,  0.3],
             [0.2,  0.2,  0.5,  0.3,  1.0],
         ],
+        ModuleType.DATA: [
+            # DATA: State is most important (entity definitions)
+            [1.0,  0.2,  0.3,  0.1,  0.4],
+            [0.2,  1.0,  0.2,  0.1,  0.2],
+            [0.3,  0.2,  1.5,  0.2,  0.8],  # State self-weight ↑, State × Coupling ↑
+            [0.1,  0.1,  0.2,  1.0,  0.2],
+            [0.4,  0.2,  0.8,  0.2,  1.0],  # Coupling × State ↑
+        ],
+        ModuleType.INFRA: [
+            # INFRA: Async and Coupling are critical (DB/IO)
+            [1.0,  0.2,  0.2,  0.3,  0.4],
+            [0.2,  1.0,  0.2,  0.3,  0.2],
+            [0.2,  0.2,  1.0,  0.4,  0.6],
+            [0.3,  0.3,  0.4,  1.5,  0.8],  # Async self-weight ↑, Async × Coupling ↑
+            [0.4,  0.2,  0.6,  0.8,  1.5],  # Coupling self-weight ↑, Coupling × Async ↑
+        ],
         ModuleType.DEPLOY: [
             # DEPLOY: All interactions should be minimal
             [1.0,  0.1,  0.1,  0.1,  0.2],
@@ -214,7 +232,13 @@ class InteractionMatrix:
 
 @dataclass
 class TensorScore:
-    """Result of tensor-based complexity calculation."""
+    """
+    Result of tensor-based complexity calculation.
+
+    Dual-metric approach inspired by CDR (Clinical Dementia Rating):
+    - tensorScore (CDR Global style): Algorithm-based, captures interactions
+    - rawSum (CDR-SOB style): Simple sum, better for tracking changes
+    """
 
     # Raw scores
     linear: float           # ⟨v, w⟩
@@ -230,6 +254,11 @@ class TensorScore:
     module_type: ModuleType
     vector: Vector5D
 
+    # CDR-SOB style metrics
+    raw_sum: float          # C + N + S + A + Λ (simple sum)
+    raw_sum_threshold: float  # Threshold based on canonical upper bounds
+    raw_sum_ratio: float    # raw_sum / raw_sum_threshold (0-1 = safe, >1 = violation)
+
     @property
     def is_safe(self) -> bool:
         """Check if score is in safe zone (below threshold - ε)."""
@@ -244,6 +273,36 @@ class TensorScore:
     def is_violation(self) -> bool:
         """Check if score exceeds threshold."""
         return self.regularized >= 10.0
+
+
+def calculate_raw_sum(v: Vector5D) -> float:
+    """
+    Calculate raw sum of dimensions (CDR-SOB style).
+
+    Simple sum: C + N + S + A + Λ
+    """
+    return v.control + v.nesting + v.state + v.async_ + v.coupling
+
+
+def calculate_raw_sum_threshold(module_type: ModuleType) -> float:
+    """
+    Calculate rawSum threshold from canonical profile upper bounds.
+
+    Import here to avoid circular dependency.
+    """
+    from semantic_complexity.core.canonical import CANONICAL_PROFILES
+
+    profile = CANONICAL_PROFILES.get(module_type)
+    if profile is None:
+        profile = CANONICAL_PROFILES[ModuleType.UNKNOWN]
+
+    return (
+        profile.control[1]
+        + profile.nesting[1]
+        + profile.state[1]
+        + profile.async_[1]
+        + profile.coupling[1]
+    )
 
 
 def extract_vector(complexity: DimensionalComplexity) -> Vector5D:
@@ -295,6 +354,11 @@ def calculate_tensor_score(
     regularization = epsilon * (v.norm() ** 2) * 0.01  # Scale factor
     regularized = raw + regularization
 
+    # CDR-SOB style: simple sum and threshold
+    raw_sum = calculate_raw_sum(v)
+    raw_sum_threshold = calculate_raw_sum_threshold(module_type)
+    raw_sum_ratio = raw_sum / raw_sum_threshold if raw_sum_threshold > 0 else 0.0
+
     return TensorScore(
         linear=round(linear, 2),
         quadratic=round(quadratic, 2),
@@ -304,6 +368,10 @@ def calculate_tensor_score(
         epsilon=epsilon,
         module_type=module_type,
         vector=v,
+        # CDR-SOB style
+        raw_sum=round(raw_sum, 2),
+        raw_sum_threshold=raw_sum_threshold,
+        raw_sum_ratio=round(raw_sum_ratio, 3),
     )
 
 
@@ -314,6 +382,8 @@ __all__ = [
     "TensorScore",
     "extract_vector",
     "calculate_tensor_score",
+    "calculate_raw_sum",
+    "calculate_raw_sum_threshold",
     "IDX_CONTROL",
     "IDX_NESTING",
     "IDX_STATE",

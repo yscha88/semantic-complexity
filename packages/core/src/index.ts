@@ -194,6 +194,8 @@ export {
 // Tensor scoring
 export {
   calculateTensorScore,
+  calculateRawSum,
+  calculateRawSumThreshold,
   convergenceScore,
   estimateLipschitz,
   analyzeConvergence as analyzeTensorConvergence,

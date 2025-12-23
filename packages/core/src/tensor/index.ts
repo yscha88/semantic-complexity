@@ -56,6 +56,8 @@ export {
 export {
   DEFAULT_WEIGHTS,
   calculateTensorScore,
+  calculateRawSum,
+  calculateRawSumThreshold,
   convergenceScore,
   estimateLipschitz,
   analyzeConvergence,
