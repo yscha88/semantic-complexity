@@ -4,6 +4,13 @@
 
 **Multi-dimensional Code Complexity Analyzer** — Quantifies actual maintenance difficulty using algebraic topology and tensor analysis.
 
+## v0.0.5: Build Order Fix
+
+### What's New
+- **Build Order Fix**: Sequential build (core → cli/mcp) for CI compatibility
+
+---
+
 ## v0.0.4: Go Support & Comprehensive Testing
 
 ### What's New

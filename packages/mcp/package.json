@@ -1,6 +1,6 @@
 {
   "name": "semantic-complexity-mcp",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "MCP server for semantic complexity analysis - integrate with Claude and other LLMs",
   "type": "module",
   "main": "./dist/index.js",

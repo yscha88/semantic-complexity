@@ -1,6 +1,6 @@
 {
   "name": "semantic-complexity",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Multi-dimensional code complexity analyzer",
   "type": "module",
   "main": "./dist/index.js",

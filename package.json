@@ -1,11 +1,11 @@
 {
   "name": "semantic-complexity",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "description": "Multi-dimensional code complexity analyzer",
   "type": "module",
   "scripts": {
-    "build": "pnpm -r build",
+    "build": "pnpm --filter semantic-complexity build && pnpm --filter semantic-complexity-cli --filter semantic-complexity-mcp build",
     "test": "pnpm -r test",
     "lint": "eslint .",
     "clean": "pnpm -r clean"
