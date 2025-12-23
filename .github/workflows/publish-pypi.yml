@@ -1,0 +1,68 @@
+name: Publish Python Package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'py/**'
+  workflow_dispatch:
+    inputs:
+      version_suffix:
+        description: 'Version suffix (e.g., beta, rc1). Leave empty for SHA-based version'
+        required: false
+        default: ''
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Get short SHA
+        id: sha
+        run: echo "short=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
+
+      - name: Set version suffix
+        id: version
+        run: |
+          if [ -n "${{ inputs.version_suffix }}" ]; then
+            echo "suffix=${{ inputs.version_suffix }}" >> $GITHUB_OUTPUT
+          else
+            echo "suffix=${{ steps.sha.outputs.short }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update version
+        working-directory: py
+        run: |
+          SUFFIX="${{ steps.version.outputs.suffix }}"
+          sed -i "s/version = \".*\"/version = \"0.0.1-$SUFFIX\"/" pyproject.toml
+          sed -i "s/__version__ = \".*\"/__version__ = \"0.0.1-$SUFFIX\"/" semantic_complexity/__init__.py
+
+      - name: Install dependencies
+        working-directory: py
+        run: uv sync --dev
+
+      - name: Test
+        working-directory: py
+        run: uv run pytest
+
+      - name: Build
+        working-directory: py
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: py/dist/

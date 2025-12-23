@@ -1,8 +1,10 @@
-name: Publish Packages
+name: Publish npm Packages
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'packages/**'
   workflow_dispatch:
     inputs:
       version_suffix:
@@ -46,7 +48,6 @@ jobs:
       - name: Update package versions
         run: |
           SUFFIX="${{ steps.version.outputs.suffix }}"
-          # Update all package.json files with version suffix
           for pkg in packages/*/package.json; do
             jq --arg suffix "$SUFFIX" '.version = .version + "-" + $suffix' "$pkg" > tmp.json && mv tmp.json "$pkg"
           done

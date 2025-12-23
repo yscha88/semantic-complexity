@@ -14,6 +14,11 @@ import {
   type DimensionalWeights,
 } from 'semantic-complexity';
 
+/** ExtendedComplexityResult with relativePath for CLI */
+interface ExtendedResultWithPath extends ExtendedComplexityResult {
+  relativePath: string;
+}
+
 // ─────────────────────────────────────────────────────────────────
 // 타입 정의
 // ─────────────────────────────────────────────────────────────────
@@ -151,7 +156,7 @@ export async function scanProject(
       if (result.functions.length > 0) {
         fileResults.push(result);
       }
-    } catch (error) {
+    } catch {
       // 파싱 실패 시 스킵
       console.error(`Failed to analyze: ${filePath}`);
     }
@@ -250,7 +255,7 @@ function generateReport(
     .slice(0, 20)
     .map((f) => ({
       function: f.function.name,
-      file: (f as any).relativePath,
+      file: (f as ExtendedResultWithPath).relativePath,
       line: f.function.location.startLine,
       mccabe: f.cyclomatic,
       dimensional: Math.round(f.dimensional.weighted * 10) / 10,
@@ -372,7 +377,7 @@ function generateRefactorPriority(
     if (ratio > 10 || d.weighted > 100) {
       items.push({
         priority: 'critical',
-        file: (f as any).relativePath || f.function.location.filePath,
+        file: (f as ExtendedResultWithPath).relativePath || f.function.location.filePath,
         function: f.function.name,
         line: f.function.location.startLine,
         reason: `Ratio ${ratio.toFixed(1)}x, Dimensional ${d.weighted.toFixed(1)}`,
@@ -384,7 +389,7 @@ function generateRefactorPriority(
     else if (ratio > 5 || d.weighted > 50) {
       items.push({
         priority: 'high',
-        file: (f as any).relativePath || f.function.location.filePath,
+        file: (f as ExtendedResultWithPath).relativePath || f.function.location.filePath,
         function: f.function.name,
         line: f.function.location.startLine,
         reason: `Ratio ${ratio.toFixed(1)}x, Dimensional ${d.weighted.toFixed(1)}`,
@@ -396,7 +401,7 @@ function generateRefactorPriority(
     else if (ratio > 3 || d.weighted > 30) {
       items.push({
         priority: 'medium',
-        file: (f as any).relativePath || f.function.location.filePath,
+        file: (f as ExtendedResultWithPath).relativePath || f.function.location.filePath,
         function: f.function.name,
         line: f.function.location.startLine,
         reason: `Ratio ${ratio.toFixed(1)}x, Dimensional ${d.weighted.toFixed(1)}`,
