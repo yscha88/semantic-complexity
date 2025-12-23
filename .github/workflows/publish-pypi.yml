@@ -6,11 +6,6 @@ on:
     paths:
       - 'py/**'
   workflow_dispatch:
-    inputs:
-      version_suffix:
-        description: 'Version suffix (e.g., beta, rc1). Leave empty for SHA-based version'
-        required: false
-        default: ''
 
 jobs:
   publish:
@@ -29,26 +24,6 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
-
-      - name: Get short SHA
-        id: sha
-        run: echo "short=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
-
-      - name: Set version suffix
-        id: version
-        run: |
-          if [ -n "${{ inputs.version_suffix }}" ]; then
-            echo "suffix=${{ inputs.version_suffix }}" >> $GITHUB_OUTPUT
-          else
-            echo "suffix=${{ steps.sha.outputs.short }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Update version
-        working-directory: py
-        run: |
-          SUFFIX="${{ steps.version.outputs.suffix }}"
-          sed -i "s/version = \".*\"/version = \"0.0.2.dev$SUFFIX\"/" pyproject.toml
-          sed -i "s/__version__ = \".*\"/__version__ = \"0.0.2.dev$SUFFIX\"/" semantic_complexity/__init__.py
 
       - name: Install dependencies
         working-directory: py
