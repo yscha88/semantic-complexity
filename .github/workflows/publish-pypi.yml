@@ -47,8 +47,8 @@ jobs:
         working-directory: py
         run: |
           SUFFIX="${{ steps.version.outputs.suffix }}"
-          sed -i "s/version = \".*\"/version = \"0.0.2-$SUFFIX\"/" pyproject.toml
-          sed -i "s/__version__ = \".*\"/__version__ = \"0.0.2-$SUFFIX\"/" semantic_complexity/__init__.py
+          sed -i "s/version = \".*\"/version = \"0.0.2.dev$SUFFIX\"/" pyproject.toml
+          sed -i "s/__version__ = \".*\"/__version__ = \"0.0.2.dev$SUFFIX\"/" semantic_complexity/__init__.py
 
       - name: Install dependencies
         working-directory: py
