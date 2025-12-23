@@ -1,0 +1,37 @@
+{
+  "name": "semantic-complexity-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multi-dimensional code complexity analysis tool",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "eslint .",
+    "clean": "pnpm -r clean"
+  },
+  "keywords": [
+    "complexity",
+    "cognitive-complexity",
+    "cyclomatic-complexity",
+    "static-analysis",
+    "mcp"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@9.15.1",
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.50.0"
+  },
+  "dependencies": {
+    "semantic-complexity": "^0.0.1-cedf2072"
+  }
+}
