@@ -19,7 +19,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.23'
 
       - name: Test
         working-directory: go/semanticcomplexity
@@ -35,5 +35,7 @@ jobs:
       # Users install with: go get github.com/yscha88/semantic-complexity/go/semanticcomplexity
       - name: Tag info
         run: |
+          VERSION=$(cat package.json | grep '"version"' | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
           echo "Go packages are published via git tags."
-          echo "To release: git tag go/v0.0.1 && git push origin go/v0.0.1"
+          echo "Current version: $VERSION"
+          echo "To release: git tag go/v$VERSION && git push origin go/v$VERSION"
