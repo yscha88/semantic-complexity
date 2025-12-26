@@ -37,6 +37,7 @@ venv/
 ENV/
 py/.venv/
 py/uv.lock
+py/.python-version
 
 # Test reports (generated)
 *-report.md
