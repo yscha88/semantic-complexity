@@ -26,6 +26,7 @@ from .cheese import (
     check_state_async_retry,
 )
 from .ham import analyze_ham, HamResult, GoldenTest, CriticalPath
+from .test_discovery import discover_tests, find_related_tests, find_test_dir
 
 __all__ = [
     # Bread
@@ -50,4 +51,8 @@ __all__ = [
     "HamResult",
     "GoldenTest",
     "CriticalPath",
+    # Test Discovery
+    "discover_tests",
+    "find_related_tests",
+    "find_test_dir",
 ]
