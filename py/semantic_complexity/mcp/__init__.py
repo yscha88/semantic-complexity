@@ -115,6 +115,7 @@ def check_gate(
     source: str,
     file_path: str | None = None,
     gate_type: str = "mvp",
+    test_dir: str | None = None,
 ) -> dict:
     """
     릴리스 Gate 검사 - MVP 또는 Production 출시 가능 여부 판정
@@ -139,17 +140,22 @@ def check_gate(
 
     Args:
         source: Python 소스 코드 문자열
-        file_path: 파일 경로 (선택)
+        file_path: 파일 경로 (선택, 테스트 파일 자동 탐색에 사용)
         gate_type: "mvp" 또는 "production"
+        test_dir: 테스트 디렉토리 경로 (선택, 없으면 자동 탐색)
     """
     from semantic_complexity import (
         analyze_bread, analyze_cognitive, analyze_ham,
         check_mvp_gate, check_production_gate,
     )
+    from semantic_complexity.analyzers.test_discovery import discover_tests
+
+    # 테스트 파일 자동 탐색
+    test_sources = discover_tests(file_path)
 
     bread = analyze_bread(source, file_path)
     cheese = analyze_cognitive(source)
-    ham = analyze_ham(source, file_path)
+    ham = analyze_ham(source, file_path, test_sources)
 
     if gate_type == "production":
         result = check_production_gate(bread, cheese, ham)
@@ -178,6 +184,7 @@ def check_gate(
             "golden_test_coverage": result.ham.golden_test_coverage,
             "unprotected_paths": result.ham.unprotected_paths,
         },
+        "test_files_found": list(test_sources.keys()),
     }
 
 
