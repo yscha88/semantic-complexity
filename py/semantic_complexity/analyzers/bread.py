@@ -99,7 +99,7 @@ AUTH_EXPLICIT_PATTERNS = [
 # ============================================================
 
 SECRET_PATTERNS = [
-    # High severity
+    # High severity - 하드코딩된 비밀
     (r'["\']?password["\']?\s*[:=]\s*["\'][^"\']+["\']', "password", "high"),
     (r'["\']?api_key["\']?\s*[:=]\s*["\'][^"\']+["\']', "api_key", "high"),
     (r'["\']?secret["\']?\s*[:=]\s*["\'][^"\']+["\']', "secret", "high"),
@@ -114,6 +114,37 @@ SECRET_PATTERNS = [
     # Low severity (환경변수 참조는 OK)
     (r'os\.environ\.get\(["\'].*KEY', "env_key_access", "low"),
     (r'os\.getenv\(["\'].*SECRET', "env_secret_access", "low"),
+]
+
+# ============================================================
+# 민감 정보 출력 패턴 (Console 출력 보안)
+# ============================================================
+#
+# | 모듈 타입    | print()     | logger              |
+# |--------------|-------------|---------------------|
+# | api/external | ❌ 금지     | ✅ 허용 (sanitized) |
+# | lib/domain   | ❌ 금지     | ✅ 허용             |
+# | app (내부)   | ⚠️ 개발용만 | ✅ 허용             |
+#
+SECRET_LEAK_PATTERNS = [
+    # 민감 변수명이 출력문에 포함된 경우
+    # High severity - 인증/비밀 정보
+    (r'print\s*\(.*\b(password|passwd|pwd)\b', "password_leak", "high"),
+    (r'print\s*\(.*\b(api_key|apikey|api_secret)\b', "api_key_leak", "high"),
+    (r'print\s*\(.*\b(secret|private_key)\b', "secret_leak", "high"),
+    (r'print\s*\(.*\b(token|access_token|refresh_token)\b', "token_leak", "high"),
+    (r'print\s*\(.*\b(credential|auth_token)\b', "credential_leak", "high"),
+
+    # High severity - 개인정보 (HIPAA/GDPR)
+    (r'print\s*\(.*\b(patient_id|ssn|social_security)\b', "pii_leak", "high"),
+    (r'print\s*\(.*\b(credit_card|card_number)\b', "pii_leak", "high"),
+
+    # Medium severity - 민감 데이터 덤프
+    (r'print\s*\(.*\b(state_dict|weights|checkpoint)\b', "model_leak", "medium"),
+    (r'print\s*\(.*\b(file_content|raw_data)\b', "data_leak", "medium"),
+
+    # Logger도 동일 적용 (debug 레벨은 제외)
+    (r'logger\.(info|warning|error)\s*\(.*\b(password|secret|token|api_key)\b', "log_secret", "medium"),
 ]
 
 
@@ -174,21 +205,31 @@ class BreadAnalyzer:
         return (explicitness, patterns_found)
 
     def _detect_secrets(self) -> list[SecretPattern]:
-        """Secret 패턴 탐지"""
+        """Secret 패턴 탐지 (하드코딩 + 민감정보 출력)"""
         secrets: list[SecretPattern] = []
 
         for line_num, line in enumerate(self.lines, 1):
+            # 1. 하드코딩된 비밀 탐지
             for pattern, pattern_type, severity in SECRET_PATTERNS:
                 match = re.search(pattern, line, re.IGNORECASE)
                 if match:
-                    # 환경변수 참조는 낮은 심각도로 처리
                     if severity == "low":
                         continue  # 환경변수 사용은 OK
-
                     secrets.append(SecretPattern(
                         line=line_num,
                         pattern_type=pattern_type,
                         snippet=self._mask_secret(match.group()),
+                        severity=severity,
+                    ))
+
+            # 2. 민감 정보 출력 탐지 (print/logger)
+            for pattern, pattern_type, severity in SECRET_LEAK_PATTERNS:
+                match = re.search(pattern, line, re.IGNORECASE)
+                if match:
+                    secrets.append(SecretPattern(
+                        line=line_num,
+                        pattern_type=pattern_type,
+                        snippet=line.strip()[:50],  # 출력문 일부만
                         severity=severity,
                     ))
 
