@@ -1,10 +1,10 @@
-name: Publish npm Packages
+name: Publish npm Package
 
 on:
   push:
     branches: [main]
     paths:
-      - 'packages/**'
+      - 'src/ts/**'
   workflow_dispatch:
     inputs:
       version_suffix:
@@ -45,26 +45,26 @@ jobs:
             echo "suffix=${{ steps.sha.outputs.short }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update package versions
+      - name: Update package version
+        working-directory: src/ts
         run: |
           SUFFIX="${{ steps.version.outputs.suffix }}"
-          for pkg in packages/*/package.json; do
-            jq --arg suffix "$SUFFIX" '.version = .version + "-" + $suffix' "$pkg" > tmp.json && mv tmp.json "$pkg"
-          done
+          jq --arg suffix "$SUFFIX" '.version = .version + "-" + $suffix' package.json > tmp.json && mv tmp.json package.json
 
       - name: Install dependencies
+        working-directory: src/ts
         run: pnpm install
 
       - name: Build
+        working-directory: src/ts
         run: pnpm build
 
       - name: Test
-        run: pnpm --filter semantic-complexity test
+        working-directory: src/ts
+        run: pnpm test
 
-      - name: Publish packages
-        run: |
-          pnpm --filter semantic-complexity publish --no-git-checks --access public
-          pnpm --filter semantic-complexity-cli publish --no-git-checks --access public
-          pnpm --filter semantic-complexity-mcp publish --no-git-checks --access public
+      - name: Publish
+        working-directory: src/ts
+        run: pnpm publish --no-git-checks --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

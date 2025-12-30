@@ -35,9 +35,9 @@ __pycache__/
 .venv/
 venv/
 ENV/
-py/.venv/
-py/uv.lock
-py/.python-version
+src/py/.venv/
+src/py/uv.lock
+src/py/.python-version
 
 # Test reports (generated)
 *-report.md
