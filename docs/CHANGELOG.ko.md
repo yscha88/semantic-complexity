@@ -2,6 +2,134 @@
 
 ---
 
+## [0.0.13] - 2025-12-30
+
+### Essential Complexity Waiver + 3단계 Gate 시스템
+
+본질적 복잡도 면제 시스템과 PoC/MVP/Production 3단계 Gate를 도입합니다.
+
+#### 🚪 3단계 Gate 시스템
+
+| 단계 | 엄격도 | Waiver | 용도 |
+|------|--------|--------|------|
+| **PoC** | 느슨 | ❌ | 빠른 검증, 일단 돌아가면 OK |
+| **MVP** | 바싹 | ❌ | 첫 릴리스, 제대로 설계 강제 |
+| **Production** | 엄격 | ✅ | 운영 중 입증된 기술부채 허용 |
+
+**임계값 비교:**
+```
+           nesting  concepts  test_coverage
+PoC:          6        12         50%
+MVP:          4         9         80%
+Production:   3         7         95%
+```
+
+#### 📐 기준점 기반 임계값
+
+하드코딩 대신 `BASE_THRESHOLDS` + `STAGE_ADJUSTMENTS`로 계산:
+
+```python
+BASE_THRESHOLDS = {
+    "nesting_max": 4,           # MVP 기준
+    "concepts_per_function": 9,
+    "golden_test_min": 0.8,
+}
+
+# PoC: +2, +3, -0.3
+# MVP: 기준 (조정 없음)
+# Production: -1, -2, +0.15
+```
+
+#### 🎫 Essential Complexity Waiver
+
+**사용법:**
+```python
+__module_type__ = "lib/domain"
+__essential_complexity__ = {
+    "adr": "docs/adr/003-inference.md",
+}
+```
+
+**동작:**
+- Production Gate에서만 waiver 적용
+- ADR 파일 존재 시 복잡도 검사 유예
+- PoC/MVP에서는 waiver 불가 (처음부터 제대로)
+
+#### 🔍 복잡도 신호 탐지
+
+본질적 복잡도 판단을 위한 토대 정보 제공:
+
+| 카테고리 | 신호 예시 |
+|----------|-----------|
+| math | `np.linalg`, `torch.matmul`, `fft` |
+| algorithm | `memo[`, `visited`, `heapq` |
+| domain | `voxel`, `segmentation`, `cipher` |
+
+```python
+context = build_complexity_context(source)
+# context.signals: 탐지된 신호
+# context.questions: 검토 질문 (자동 생성)
+```
+
+#### 🚫 LLM Waiver 편법 방지
+
+`LLM_REFACTORING_PROTOCOL.md` 업데이트:
+- `__essential_complexity__` 수정 금지
+- ADR 파일 생성/수정 금지
+- 리팩토링 대신 면제로 도망 금지
+
+---
+
+## [0.0.12] - 2025-12-30
+
+### Anti-pattern Penalty 시스템 도입
+
+LLM이 개념 수 줄이기 위해 `*args`, `**kwargs` 등 편법을 사용하는 것을 방지합니다.
+
+#### 🧀 Cheese Anti-pattern Penalty
+
+**탐지 대상:**
+
+| Anti-pattern | Penalty | 이유 |
+|--------------|---------|------|
+| `*args` 사용 | +3 | 실제 파라미터 수를 숨김 |
+| `**kwargs` 사용 | +3 | 실제 파라미터 수를 숨김 |
+
+**FunctionInfo 확장:**
+- `raw_concept_count`: penalty 적용 전 원본 개념 수
+- `concept_count`: penalty 포함 최종 개념 수
+- `anti_patterns`: 탐지된 anti-pattern 목록
+
+**예시:**
+```python
+# 편법: *args, **kwargs로 파라미터 숨기기
+def process(*args, **kwargs):  # raw: 1, penalty: +6, total: 7
+    return args[0]
+
+# 올바른 방법: 명시적 파라미터
+def process(input_data, config, options):  # concepts: 4
+    return transform(input_data)
+```
+
+#### 📄 LLM_REFACTORING_PROTOCOL.md 업데이트
+
+새로운 섹션 5 "Anti-Patterns (Prohibited Refactoring Tricks)" 추가:
+
+| 금지 패턴 | 설명 |
+|-----------|------|
+| `*args`/`**kwargs` wrapping | 파라미터 수 숨기기 |
+| Config object bundling | 관련 없는 파라미터 묶기 |
+| Tuple/Dict packing | 의미 숨기기 |
+| Inline everything | 가독성 저하 |
+
+> "Metric evasion is not refactoring—it is obfuscation."
+
+#### 🎯 gradient.py 업데이트
+
+`CHEESE_ANTI_PATTERNS` 추가로 권장사항에 금지 사항 명시
+
+---
+
 ## [0.0.11] - 2025-12-30
 
 ### Bread Trust Boundary 패턴 확장 + Cheese 개념 수 계산 개선
