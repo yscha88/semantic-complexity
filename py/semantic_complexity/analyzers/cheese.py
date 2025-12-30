@@ -182,7 +182,34 @@ class ConceptVisitor(ast.NodeVisitor):
     - 함수 호출: 이해해야 할 동작
     - 조건문/분기: 고려해야 할 경로
     - 반환값: 결과 추적
+
+    제외 항목 (인지 부하 거의 없음):
+    - self/cls 파라미터: 클래스 메서드의 첫 번째 인자
+    - Built-in 함수: str, int, len, tuple, list, dict 등
     """
+
+    # Built-in 및 일반적 표준 라이브러리 함수 (인지 부하 거의 없음)
+    BUILTIN_FUNCTIONS = frozenset({
+        # Python built-in
+        "str", "int", "float", "bool", "bytes", "bytearray",
+        "len", "range", "enumerate", "zip", "map", "filter",
+        "list", "dict", "set", "tuple", "frozenset",
+        "type", "isinstance", "issubclass", "hasattr", "getattr", "setattr",
+        "print", "repr", "hash", "id", "hex", "bin", "oct",
+        "min", "max", "sum", "abs", "round", "pow", "divmod",
+        "sorted", "reversed", "any", "all",
+        "open", "iter", "next",
+        "vars", "dir", "globals", "locals",
+        # numpy 기본 변환 함수
+        "array", "asarray", "asanyarray", "ascontiguousarray",
+        "zeros", "ones", "empty", "full",
+        "arange", "linspace", "logspace",
+        "reshape", "ravel", "flatten", "squeeze", "expand_dims",
+        "concatenate", "stack", "vstack", "hstack",
+        "copy", "deepcopy",
+        # pathlib 기본
+        "Path",
+    })
 
     def __init__(self):
         self.functions: list[FunctionInfo] = []
@@ -205,9 +232,10 @@ class ConceptVisitor(ast.NodeVisitor):
         self._current_lineno = node.lineno
         self._current_concepts = []
 
-        # 1. 파라미터 (각각 개념)
+        # 1. 파라미터 (각각 개념) - self/cls 제외
         for arg in node.args.args:
-            self._current_concepts.append(f"param:{arg.arg}")
+            if arg.arg not in ("self", "cls"):
+                self._current_concepts.append(f"param:{arg.arg}")
 
         # 2. 지역 변수
         for stmt in ast.walk(node):
@@ -218,14 +246,16 @@ class ConceptVisitor(ast.NodeVisitor):
                         if concept not in self._current_concepts:
                             self._current_concepts.append(concept)
 
-        # 3. 함수 호출 (고유한 것만)
+        # 3. 함수 호출 (고유한 것만) - built-in 제외
         calls = set()
         for stmt in ast.walk(node):
             if isinstance(stmt, ast.Call):
                 call_name = self._get_call_name(stmt)
                 if call_name and call_name not in calls:
-                    calls.add(call_name)
-                    self._current_concepts.append(f"call:{call_name}")
+                    # Built-in 함수는 인지 부하가 거의 없으므로 제외
+                    if call_name not in self.BUILTIN_FUNCTIONS:
+                        calls.add(call_name)
+                        self._current_concepts.append(f"call:{call_name}")
 
         # 4. 제어 흐름 (분기점)
         for stmt in ast.walk(node):

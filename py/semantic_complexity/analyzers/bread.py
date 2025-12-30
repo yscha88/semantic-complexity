@@ -50,6 +50,13 @@ class SecretPattern:
 # ============================================================
 
 TRUST_BOUNDARY_PATTERNS = {
+    # 명시적 마커 (docstring, 변수, 주석)
+    "marker": [
+        (r'TRUST_BOUNDARY\s*[:=]', "Trust boundary marker"),
+        (r'""".*TRUST_BOUNDARY', "Trust boundary docstring"),
+        (r'Trust\s*Boundary\s*:', "Trust boundary label"),
+        (r'# TRUST.?BOUNDARY', "Trust boundary comment"),
+    ],
     "api": [
         (r'@(app|router)\.(get|post|put|delete|patch)', "API endpoint"),
         (r'@api_view\(', "Django REST API"),
@@ -82,6 +89,10 @@ TRUST_BOUNDARY_PATTERNS = {
 # ============================================================
 
 AUTH_EXPLICIT_PATTERNS = [
+    # 명시적 Auth Flow 선언 (docstring/주석)
+    (r'AUTH_FLOW\s*:', 10, "explicit AUTH_FLOW declaration"),
+    (r'AUTH_FLOW\s*=', 10, "explicit AUTH_FLOW variable"),
+    # 함수/클래스 기반
     (r'def\s+authenticate\(', 10, "explicit authenticate function"),
     (r'def\s+authorize\(', 10, "explicit authorize function"),
     (r'class.*Auth.*:', 8, "Auth class"),
@@ -263,8 +274,12 @@ class BreadAnalyzer:
         if not boundaries:
             violations.append("No trust boundary defined")
 
-        # Auth 명시성 낮음
-        if auth_result[0] < 0.3:
+        # Auth 명시성 체크
+        # AUTH_FLOW 패턴이 명시되어 있으면 (NONE 포함) "명시적"으로 간주
+        auth_flow_declared = any(
+            "AUTH_FLOW" in p for p in auth_result[1]
+        )
+        if not auth_flow_declared and auth_result[0] < 0.3:
             violations.append(f"Low auth explicitness: {auth_result[0]:.2f}")
 
         # High severity secrets
