@@ -136,10 +136,15 @@ packages/core/src/
 │ 조건              │ 기준              │ 근거                │
 ├───────────────────┼───────────────────┼────────────────────┤
 │ 1. 중첩 깊이       │ ≤ N (설정 가능)   │ 한눈에 구조 파악    │
-│ 2. 개념 수         │ ≤ 5개/함수        │ 작업 기억 한계      │
+│ 2. 개념 수         │ ≤ 9개/함수        │ Miller's Law (7±2) │
 │ 3. 숨겨진 의존성    │ 최소화            │ 컨텍스트 완결성     │
 │ 4. state×async×retry │ 2개 이상 공존 금지 │ 동시 추론 불가    │
 └─────────────────────────────────────────────────────────────┘
+
+개념 수 계산 시 제외 항목:
+- self/cls 파라미터: 클래스 메서드 규약으로 인지 부하 없음
+- Built-in 함수: str, int, len, list, dict 등
+- numpy 기본 함수: array, asanyarray, zeros 등
 ```
 
 #### 3.1.2 의사코드: 인지 가능 여부 판정
@@ -166,11 +171,11 @@ FUNCTION is_cognitively_accessible(code, config) -> (Boolean, String):
         RETURN (False, "중첩 깊이 초과: " + max_nesting)
 
     # ─────────────────────────────────────────────────────────
-    # 조건 2: 함수당 개념 수 검사
+    # 조건 2: 함수당 개념 수 검사 (Miller's Law: 7±2)
     # ─────────────────────────────────────────────────────────
     FOR each function IN extract_functions(code):
-        concept_count = count_concepts(function)
-        IF concept_count > 5:
+        concept_count = count_concepts(function)  # self/cls, built-in 제외
+        IF concept_count > 9:
             RETURN (False, "개념 수 초과: " + function.name + " = " + concept_count)
 
     # ─────────────────────────────────────────────────────────
