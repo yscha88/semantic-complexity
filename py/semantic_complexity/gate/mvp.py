@@ -8,15 +8,21 @@ PoC → MVP 진입 조건 검사
 🧀 Core modules below cognitive threshold
 🧀 No state×async×retry violations
 🥓 Golden tests exist for critical flows
+
+Essential Complexity Waiver:
+- MVP Gate: waiver 불가 (처음부터 제대로 설계)
+- Production Gate: waiver 가능 (ADR 필수)
 """
 
 __module_type__ = "lib/domain"
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Literal
 
 from ..types import Axis, ModuleType, SandwichScore, get_canonical_profile, DEFAULT_MODULE_TYPE
 from ..analyzers import BreadResult, CognitiveAnalysis, HamResult
+from .waiver import check_waiver, WaiverResult, EssentialComplexityConfig
 
 
 @dataclass
@@ -37,6 +43,9 @@ class CheeseGateResult:
     nesting_threshold: int
     state_async_retry_violations: list[str] = field(default_factory=list)
     concept_violations: list[str] = field(default_factory=list)
+    # Waiver 정보 (Production Gate에서만 적용)
+    waiver: WaiverResult | None = None
+    waived: bool = False
 
 
 @dataclass
@@ -51,7 +60,7 @@ class HamGateResult:
 @dataclass
 class GateResult:
     """전체 Gate 결과"""
-    gate: Literal["mvp", "production"]
+    gate: Literal["poc", "mvp", "production"]
     passed: bool
     sandwich_formed: bool
 
@@ -77,31 +86,87 @@ class GateResult:
 
 
 # ============================================================
-# Gate 임계값
+# Gate 임계값 (기준점 기반)
 # ============================================================
 
-MVP_THRESHOLDS = {
-    "nesting_max": 4,              # 최대 중첩 깊이
-    "concepts_per_function": 5,    # 함수당 최대 개념 수
-    "hidden_dep_max": 2,           # 최대 숨겨진 의존성
-    "golden_test_min": 0.8,        # Golden test 최소 커버리지
-    "trust_boundary_required": True,
-    "auth_flow_required": True,
+# 기준점 (MVP 기준)
+BASE_THRESHOLDS = {
+    "nesting_max": 4,              # 기준: 중첩 4
+    "concepts_per_function": 9,    # 기준: Miller's Law (7±2)
+    "hidden_dep_max": 2,           # 기준: 숨겨진 의존성 2개
+    "golden_test_min": 0.8,        # 기준: 80% 커버리지
 }
 
-PRODUCTION_THRESHOLDS = {
-    "nesting_max": 3,
-    "concepts_per_function": 4,
-    "hidden_dep_max": 1,
-    "golden_test_min": 0.95,
-    "contract_test_required": True,
-    "trust_boundary_required": True,
-    "auth_flow_required": True,
+# 단계별 조정 계수
+STAGE_ADJUSTMENTS = {
+    # PoC: 느슨 (+50% / -30%)
+    "poc": {
+        "nesting_max": +2,         # 4 → 6
+        "concepts_per_function": +3,  # 9 → 12
+        "hidden_dep_max": +2,      # 2 → 4
+        "golden_test_min": -0.3,   # 0.8 → 0.5
+    },
+    # MVP: 기준 (조정 없음)
+    "mvp": {
+        "nesting_max": 0,
+        "concepts_per_function": 0,
+        "hidden_dep_max": 0,
+        "golden_test_min": 0,
+    },
+    # Production: 더 엄격 (-25% / +15%)
+    "production": {
+        "nesting_max": -1,         # 4 → 3
+        "concepts_per_function": -2,  # 9 → 7
+        "hidden_dep_max": -1,      # 2 → 1
+        "golden_test_min": +0.15,  # 0.8 → 0.95
+    },
 }
+
+# 단계별 정책
+STAGE_POLICIES = {
+    "poc": {
+        "trust_boundary_required": False,  # 권장만
+        "auth_flow_required": False,       # 권장만
+        "contract_test_required": False,
+        "waiver_allowed": False,           # PoC에서는 waiver 불가
+    },
+    "mvp": {
+        "trust_boundary_required": True,
+        "auth_flow_required": True,
+        "contract_test_required": False,
+        "waiver_allowed": False,           # MVP에서는 waiver 불가
+    },
+    "production": {
+        "trust_boundary_required": True,
+        "auth_flow_required": True,
+        "contract_test_required": True,
+        "waiver_allowed": True,            # 기술부채 허용
+    },
+}
+
+
+def get_thresholds(gate_type: Literal["poc", "mvp", "production"]) -> dict:
+    """단계별 임계값 계산"""
+    adjustments = STAGE_ADJUSTMENTS.get(gate_type, STAGE_ADJUSTMENTS["mvp"])
+    policies = STAGE_POLICIES.get(gate_type, STAGE_POLICIES["mvp"])
+
+    thresholds = {}
+    for key, base_value in BASE_THRESHOLDS.items():
+        adjustment = adjustments.get(key, 0)
+        thresholds[key] = base_value + adjustment
+
+    thresholds.update(policies)
+    return thresholds
+
+
+# 미리 계산된 임계값 (호환성)
+POC_THRESHOLDS = get_thresholds("poc")
+MVP_THRESHOLDS = get_thresholds("mvp")
+PRODUCTION_THRESHOLDS = get_thresholds("production")
 
 
 class MVPGate:
-    """MVP Gate 검사기"""
+    """PoC/MVP/Production Gate 검사기"""
 
     def __init__(
         self,
@@ -109,18 +174,22 @@ class MVPGate:
         cheese_result: CognitiveAnalysis,
         ham_result: HamResult,
         module_type: ModuleType | None = None,
-        gate_type: Literal["mvp", "production"] = "mvp",
+        gate_type: Literal["poc", "mvp", "production"] = "mvp",
+        source: str | None = None,
+        file_path: str | Path | None = None,
+        project_root: str | Path | None = None,
     ):
         self.bread_result = bread_result
         self.cheese_result = cheese_result
         self.ham_result = ham_result
         self.module_type = module_type or DEFAULT_MODULE_TYPE
         self.gate_type = gate_type
+        self.source = source
+        self.file_path = file_path
+        self.project_root = project_root
 
-        self.thresholds = (
-            PRODUCTION_THRESHOLDS if gate_type == "production"
-            else MVP_THRESHOLDS
-        )
+        # 단계별 임계값 가져오기
+        self.thresholds = get_thresholds(gate_type)
 
     def check(self) -> GateResult:
         """Gate 검사 실행"""
@@ -181,9 +250,13 @@ class MVPGate:
 
         인지 가능 조건 (4가지 모두 충족):
         1. 중첩 깊이 ≤ N
-        2. 개념 수 ≤ 5개/함수
+        2. 개념 수 ≤ 9개/함수
         3. 숨겨진 의존성 최소화
         4. state×async×retry 2개 이상 공존 금지
+
+        Essential Complexity Waiver:
+        - MVP Gate: waiver 불가 (처음부터 제대로 설계)
+        - Production Gate: waiver 가능 (ADR 필수)
         """
         sar_violations: list[str] = []
         concept_violations: list[str] = []
@@ -199,8 +272,24 @@ class MVPGate:
             else:
                 concept_violations.append(violation)
 
-        # Gate 통과 조건: 인지 가능 = True
+        # 기본 통과 조건: 인지 가능 = True
         passed = self.cheese_result.accessible
+
+        # Waiver 체크 (waiver_allowed인 단계에서만)
+        waiver_result: WaiverResult | None = None
+        waived = False
+
+        waiver_allowed = self.thresholds.get("waiver_allowed", False)
+        if waiver_allowed and not passed and self.source:
+            # 실패 시 waiver 체크
+            waiver_result = check_waiver(
+                self.source,
+                self.file_path,
+                self.project_root,
+            )
+            if waiver_result.waived:
+                waived = True
+                passed = True  # ADR 있으면 유예
 
         return CheeseGateResult(
             passed=passed,
@@ -209,6 +298,8 @@ class MVPGate:
             nesting_threshold=nesting_threshold,
             state_async_retry_violations=sar_violations,
             concept_violations=concept_violations,
+            waiver=waiver_result,
+            waived=waived,
         )
 
     def _check_ham(self) -> HamGateResult:
@@ -233,6 +324,31 @@ class MVPGate:
 # 공개 API
 # ============================================================
 
+def check_poc_gate(
+    bread_result: BreadResult,
+    cheese_result: CognitiveAnalysis,
+    ham_result: HamResult,
+    module_type: ModuleType | None = None,
+) -> GateResult:
+    """
+    PoC Gate 검사 (느슨)
+
+    PoC 단계: 빠른 검증, 일단 돌아가면 OK.
+    Trust boundary, auth flow 권장만 (필수 아님).
+
+    Args:
+        bread_result: 🍞 Security 분석 결과
+        cheese_result: 🧀 Cognitive 분석 결과 (인지 가능 여부)
+        ham_result: 🥓 Behavioral 분석 결과
+        module_type: 모듈 타입
+
+    Returns:
+        GateResult: Gate 검사 결과
+    """
+    gate = MVPGate(bread_result, cheese_result, ham_result, module_type, "poc")
+    return gate.check()
+
+
 def check_mvp_gate(
     bread_result: BreadResult,
     cheese_result: CognitiveAnalysis,
@@ -240,7 +356,10 @@ def check_mvp_gate(
     module_type: ModuleType | None = None,
 ) -> GateResult:
     """
-    MVP Gate 검사
+    MVP Gate 검사 (바싹)
+
+    MVP 단계: 첫 릴리스, 제대로 설계 강제.
+    Waiver 불가 - 처음부터 제대로.
 
     Args:
         bread_result: 🍞 Security 분석 결과
@@ -260,18 +379,36 @@ def check_production_gate(
     cheese_result: CognitiveAnalysis,
     ham_result: HamResult,
     module_type: ModuleType | None = None,
+    source: str | None = None,
+    file_path: str | Path | None = None,
+    project_root: str | Path | None = None,
 ) -> GateResult:
     """
     Production Gate 검사 (더 엄격)
+
+    Production Gate에서는 Essential Complexity Waiver 가능.
+    __essential_complexity__에 ADR 경로가 있고 파일이 존재하면 유예.
 
     Args:
         bread_result: 🍞 Security 분석 결과
         cheese_result: 🧀 Cognitive 분석 결과 (인지 가능 여부)
         ham_result: 🥓 Behavioral 분석 결과
         module_type: 모듈 타입
+        source: 소스 코드 (waiver 체크용)
+        file_path: 파일 경로 (ADR 상대 경로 해석용)
+        project_root: 프로젝트 루트 (ADR 경로 해석용)
 
     Returns:
         GateResult: Gate 검사 결과
     """
-    gate = MVPGate(bread_result, cheese_result, ham_result, module_type, "production")
+    gate = MVPGate(
+        bread_result,
+        cheese_result,
+        ham_result,
+        module_type,
+        "production",
+        source,
+        file_path,
+        project_root,
+    )
     return gate.check()

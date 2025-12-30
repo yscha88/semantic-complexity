@@ -86,12 +86,22 @@ class StateAsyncRetry:
 
 
 @dataclass
+class AntiPatternPenalty:
+    """Anti-pattern penalty 정보"""
+    pattern: str          # "varargs", "kwargs", "config_bundling"
+    penalty: int          # 추가되는 개념 수
+    reason: str           # 설명
+
+
+@dataclass
 class FunctionInfo:
     """함수 정보"""
     name: str
     lineno: int
-    concept_count: int
+    concept_count: int          # penalty 포함 최종 개념 수
     concepts: list[str]
+    raw_concept_count: int = 0  # penalty 미포함 원본 개념 수
+    anti_patterns: list[AntiPatternPenalty] = field(default_factory=list)
 
 
 @dataclass
@@ -186,6 +196,11 @@ class ConceptVisitor(ast.NodeVisitor):
     제외 항목 (인지 부하 거의 없음):
     - self/cls 파라미터: 클래스 메서드의 첫 번째 인자
     - Built-in 함수: str, int, len, tuple, list, dict 등
+
+    Anti-pattern Penalty:
+    - *args: +3 penalty (숨겨진 파라미터)
+    - **kwargs: +3 penalty (숨겨진 파라미터)
+    - Config 객체 bundling: +field_count penalty
     """
 
     # Built-in 및 일반적 표준 라이브러리 함수 (인지 부하 거의 없음)
@@ -211,11 +226,23 @@ class ConceptVisitor(ast.NodeVisitor):
         "Path",
     })
 
+    # Config bundling 패턴 탐지용 이름들
+    CONFIG_PARAM_NAMES = frozenset({
+        "config", "cfg", "conf", "configuration",
+        "options", "opts", "settings", "params", "parameters",
+        "args", "kwargs",  # 딕셔너리로 전달되는 경우
+    })
+
+    # Anti-pattern penalty 값
+    VARARGS_PENALTY = 3   # *args penalty
+    KWARGS_PENALTY = 3    # **kwargs penalty
+
     def __init__(self):
         self.functions: list[FunctionInfo] = []
         self._current_concepts: list[str] = []
         self._current_name: str = ""
         self._current_lineno: int = 0
+        self._current_anti_patterns: list[AntiPatternPenalty] = []
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         self._analyze_function(node)
@@ -231,6 +258,22 @@ class ConceptVisitor(ast.NodeVisitor):
         self._current_name = node.name
         self._current_lineno = node.lineno
         self._current_concepts = []
+        self._current_anti_patterns = []
+
+        # 0. Anti-pattern 탐지: *args, **kwargs
+        if node.args.vararg:  # *args
+            self._current_anti_patterns.append(AntiPatternPenalty(
+                pattern="varargs",
+                penalty=self.VARARGS_PENALTY,
+                reason=f"*{node.args.vararg.arg} hides actual parameter count",
+            ))
+
+        if node.args.kwarg:  # **kwargs
+            self._current_anti_patterns.append(AntiPatternPenalty(
+                pattern="kwargs",
+                penalty=self.KWARGS_PENALTY,
+                reason=f"**{node.args.kwarg.arg} hides actual parameter count",
+            ))
 
         # 1. 파라미터 (각각 개념) - self/cls 제외
         for arg in node.args.args:
@@ -269,11 +312,18 @@ class ConceptVisitor(ast.NodeVisitor):
                 self._current_concepts.append("return:value")
                 break
 
+        # 개념 수 계산: 원본 + anti-pattern penalty
+        raw_count = len(self._current_concepts)
+        penalty_total = sum(ap.penalty for ap in self._current_anti_patterns)
+        final_count = raw_count + penalty_total
+
         self.functions.append(FunctionInfo(
             name=self._current_name,
             lineno=self._current_lineno,
-            concept_count=len(self._current_concepts),
+            concept_count=final_count,
             concepts=self._current_concepts.copy(),
+            raw_concept_count=raw_count,
+            anti_patterns=self._current_anti_patterns.copy(),
         ))
 
         # 중첩 함수 처리
