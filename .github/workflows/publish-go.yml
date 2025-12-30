@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'go/**'
+      - 'src/go/**'
   workflow_dispatch:
 
 jobs:
@@ -22,20 +22,20 @@ jobs:
           go-version: '1.23'
 
       - name: Test
-        working-directory: go/semanticcomplexity
+        working-directory: src/go/semanticcomplexity
         run: go test ./...
 
       - name: Verify module
-        working-directory: go/semanticcomplexity
+        working-directory: src/go/semanticcomplexity
         run: |
           go mod tidy
           go mod verify
 
       # Go packages are published via git tags
-      # Users install with: go get github.com/yscha88/semantic-complexity/go/semanticcomplexity
+      # Users install with: go get github.com/yscha88/semantic-complexity/src/go/semanticcomplexity
       - name: Tag info
         run: |
-          VERSION=$(cat package.json | grep '"version"' | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+          VERSION=$(cat src/py/pyproject.toml | grep '^version' | head -1 | sed 's/.*"\(.*\)".*/\1/')
           echo "Go packages are published via git tags."
           echo "Current version: $VERSION"
           echo "To release: git tag go/v$VERSION && git push origin go/v$VERSION"

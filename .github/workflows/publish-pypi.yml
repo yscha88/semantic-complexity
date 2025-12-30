@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'py/**'
+      - 'src/py/**'
   workflow_dispatch:
 
 jobs:
@@ -26,18 +26,18 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Install dependencies
-        working-directory: py
+        working-directory: src/py
         run: uv sync --extra dev
 
       - name: Test
-        working-directory: py
+        working-directory: src/py
         run: uv run pytest
 
       - name: Build
-        working-directory: py
+        working-directory: src/py
         run: uv build
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: py/dist/
+          packages-dir: src/py/dist/
