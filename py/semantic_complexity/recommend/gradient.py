@@ -53,12 +53,20 @@ CHEESE_ACTIONS = {
     ],
     "decrease": [
         ("중첩 평탄화 (early return)", "깊은 중첩을 early return으로 평탄화"),
-        ("함수 추출 (Extract Function)", "복잡한 블록을 별도 함수로 추출"),
+        ("함수 추출 (Extract Function)", "복잡한 블록을 별도 함수로 추출 (파라미터 묶기 금지)"),
         ("조건 단순화", "복잡한 조건을 명명된 변수로 분리"),
         ("상태 분리", "state×async×retry 분리"),
         ("Switch → 다형성", "switch/match를 Strategy 패턴으로"),
     ],
 }
+
+# 🚫 Anti-pattern 경고 (LLM이 사용하면 안 되는 편법)
+CHEESE_ANTI_PATTERNS = [
+    ("*args/**kwargs 사용 금지", "*args, **kwargs로 파라미터 숨기기는 복잡도 회피 편법"),
+    ("Config 객체 bundling 금지", "관련 없는 파라미터를 config 객체로 묶지 말 것"),
+    ("Tuple/Dict 파라미터 금지", "params: tuple, options: dict 형태로 의미 숨기기 금지"),
+    ("인라인 치환 금지", "명명된 변수를 인라인 표현식으로 대체하지 말 것"),
+]
 
 HAM_ACTIONS = {
     "increase": [
