@@ -37,7 +37,7 @@ from typing import NamedTuple
 class CognitiveConfig:
     """인지 가능 판정 설정"""
     nesting_threshold: int = 4          # 중첩 깊이 임계값
-    concepts_per_function: int = 5      # 함수당 개념 수 한계
+    concepts_per_function: int = 9      # 함수당 개념 수 한계 (Miller's Law: 7±2)
     hidden_dep_threshold: int = 2       # 숨겨진 의존성 허용 수
 
 
@@ -365,43 +365,50 @@ def _get_offset(source: str, lineno: int, col_offset: int) -> int | None:
 # 조건 3: 숨겨진 의존성 탐지
 # ============================================================
 
-# 숨겨진 의존성 패턴
+# 숨겨진 의존성 패턴 (쓰기/상태변경만 카운트)
+#
+# | 유형            | 예시                                      | 처리      |
+# |-----------------|-------------------------------------------|-----------|
+# | 읽기 (배제)     | config 로딩, 데이터 읽기, 체크포인트 로딩 | ✅ 허용   |
+# | 쓰기 (카운트)   | 파일 저장, DB 수정, 외부 API 호출         | ⚠️ 카운트 |
+# | 환경변수 (배제) | os.environ.get()                          | ✅ 허용   |
+#
 HIDDEN_DEPENDENCY_PATTERNS: list[tuple[str, str]] = [
-    # Global state
-    (r"\bglobal\s+\w+", "global variable"),
+    # === 상태 수정 (위험) ===
+    (r"\bglobal\s+\w+", "global variable mutation"),
 
-    # Environment
-    (r"\bos\.environ", "os.environ access"),
-    (r"\bgetenv\s*\(", "getenv() call"),
-    (r"\bos\.getenv\s*\(", "os.getenv() call"),
+    # === 파일 쓰기 ===
+    (r"\.write\s*\(", "file write"),
+    (r"\.writelines\s*\(", "file write"),
+    (r"\.save\s*\(", "file save"),
+    (r"\.dump\s*\(", "data dump"),
+    (r"\.to_csv\s*\(", "csv write"),
+    (r"\.to_json\s*\(", "json write"),
+    (r"\.to_pickle\s*\(", "pickle write"),
 
-    # Implicit I/O
-    (r"\bopen\s*\(", "file I/O"),
-    (r"\bprint\s*\(", "stdout write"),
-    (r"\binput\s*\(", "stdin read"),
+    # === DB 수정 ===
+    (r"\.commit\s*\(", "db commit"),
+    (r"\.execute\s*\([^)]*\b(INSERT|UPDATE|DELETE)\b", "db mutation"),
+    (r"\.insert", "db insert"),
+    (r"\.update\s*\(", "db update"),
+    (r"\.delete\s*\(", "db delete"),
 
-    # Implicit network
-    (r"\brequests\.", "HTTP client"),
-    (r"\burllib", "HTTP client"),
-    (r"\bsocket\.", "socket I/O"),
-    (r"\bhttpx\.", "HTTP client"),
-    (r"\baiohttp\.", "async HTTP"),
+    # === 외부 API 쓰기 ===
+    (r"requests\.post\s*\(", "HTTP POST"),
+    (r"requests\.put\s*\(", "HTTP PUT"),
+    (r"requests\.delete\s*\(", "HTTP DELETE"),
+    (r"requests\.patch\s*\(", "HTTP PATCH"),
+    (r"httpx\.post\s*\(", "HTTP POST"),
+    (r"httpx\.put\s*\(", "HTTP PUT"),
 
-    # Database
-    (r"\bsqlalchemy\.", "database"),
-    (r"\bpymongo\.", "database"),
-    (r"\bpsycopg", "database"),
-    (r"\bmysql\.", "database"),
-
-    # Time/randomness (non-deterministic)
-    (r"\bdatetime\.now\s*\(", "current time"),
-    (r"\btime\.time\s*\(", "current time"),
-    (r"\brandom\.", "randomness"),
-
-    # Subprocess
-    (r"\bsubprocess\.", "subprocess"),
+    # === 외부 프로세스 실행 ===
+    (r"\bsubprocess\.run\s*\(", "subprocess"),
+    (r"\bsubprocess\.call\s*\(", "subprocess"),
+    (r"\bsubprocess\.Popen\s*\(", "subprocess"),
     (r"\bos\.system\s*\(", "system call"),
-    (r"\bos\.popen\s*\(", "system call"),
+
+    # === 비결정적 (테스트 어려움) ===
+    (r"\brandom\.(?!seed)", "randomness"),
 ]
 
 

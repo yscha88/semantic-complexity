@@ -194,8 +194,8 @@ def increment():
         deps = detect_hidden_dependencies(source)
         assert any("global" in d.reason for d in deps)
 
-    def test_detect_environment(self):
-        """환경 변수 탐지"""
+    def test_environment_read_allowed(self):
+        """환경 변수 읽기는 허용 (설정의 일종)"""
         source = """
 import os
 
@@ -203,20 +203,43 @@ def get_config():
     return os.environ.get("API_KEY")
 """
         deps = detect_hidden_dependencies(source)
-        assert any("environ" in d.reason for d in deps)
+        # 읽기는 허용되므로 탐지 안됨
+        assert not any("environ" in d.reason for d in deps)
 
-    def test_detect_file_io(self):
-        """파일 I/O 탐지"""
+    def test_file_write_detected(self):
+        """파일 쓰기만 탐지 (읽기는 허용)"""
+        source = """
+def save_file(path, data):
+    with open(path, 'w') as f:
+        f.write(data)
+"""
+        deps = detect_hidden_dependencies(source)
+        assert any("write" in d.reason.lower() for d in deps)
+
+    def test_file_read_allowed(self):
+        """파일 읽기는 허용"""
         source = """
 def read_file(path):
     with open(path) as f:
         return f.read()
 """
         deps = detect_hidden_dependencies(source)
-        assert any("file" in d.reason.lower() for d in deps)
+        # 읽기는 허용되므로 탐지 안됨
+        assert len(deps) == 0
 
-    def test_detect_network(self):
-        """네트워크 요청 탐지"""
+    def test_http_post_detected(self):
+        """HTTP 쓰기 요청만 탐지 (GET은 허용)"""
+        source = """
+import requests
+
+def send_data(url, data):
+    return requests.post(url, json=data)
+"""
+        deps = detect_hidden_dependencies(source)
+        assert any("POST" in d.reason for d in deps)
+
+    def test_http_get_allowed(self):
+        """HTTP GET은 허용 (읽기)"""
         source = """
 import requests
 
@@ -224,19 +247,18 @@ def fetch_data(url):
     return requests.get(url).json()
 """
         deps = detect_hidden_dependencies(source)
-        assert any("HTTP" in d.reason for d in deps)
+        assert len(deps) == 0
 
     def test_exceeds_hidden_dep_threshold(self):
-        """숨겨진 의존성 초과 = 인지 불가"""
+        """숨겨진 의존성 초과 = 인지 불가 (쓰기 패턴)"""
         source = """
-import os
 import requests
 import random
 
-def dangerous():
-    key = os.environ.get("KEY")
-    data = requests.get("http://api").json()
-    return random.choice(data)
+def dangerous(url, data):
+    requests.post(url, json=data)
+    requests.put(url, json=data)
+    return random.choice([1, 2, 3])
 """
         result = is_cognitively_accessible(source)
         assert result.accessible is False
