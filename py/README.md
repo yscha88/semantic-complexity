@@ -34,7 +34,7 @@ claude mcp add sc-py "uvx --from semantic-complexity semantic-complexity-py-mcp"
 claude mcp remove sc-py
 
 # 2. 캐시 정리 (최신 버전 반영)
-uv cache clean semantic-complexity
+uv cache clean semantic-complexity --force
 
 # 3. 재설치
 claude mcp add sc-py "uvx --from semantic-complexity semantic-complexity-py-mcp"
