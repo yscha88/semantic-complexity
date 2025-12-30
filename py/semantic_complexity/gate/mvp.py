@@ -153,8 +153,12 @@ class MVPGate:
         if self.thresholds.get("trust_boundary_required") and not trust_boundary_defined:
             violations.append("Trust boundary not defined")
 
-        # Auth flow 명시성 확인 (0.3 이상)
-        auth_flow_fixed = self.bread_result.auth_explicitness >= 0.3
+        # Auth flow 명시성 확인
+        # AUTH_FLOW 패턴이 명시되어 있으면 (NONE 포함) "명시적"으로 간주
+        auth_flow_declared = any(
+            "AUTH_FLOW" in p for p in self.bread_result.auth_patterns
+        )
+        auth_flow_fixed = auth_flow_declared or self.bread_result.auth_explicitness >= 0.3
         if self.thresholds.get("auth_flow_required") and not auth_flow_fixed:
             violations.append(f"Auth flow not explicit enough: {self.bread_result.auth_explicitness:.2f}")
 
