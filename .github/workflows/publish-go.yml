@@ -32,7 +32,7 @@ jobs:
           go mod verify
 
       # Go packages are published via git tags
-      # Users install with: go get github.com/yscha88/semantic-complexity/src/go/semanticcomplexity
+      # Users install with: go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
       - name: Tag info
         run: |
           VERSION=$(cat src/py/pyproject.toml | grep '^version' | head -1 | sed 's/.*"\(.*\)".*/\1/')
