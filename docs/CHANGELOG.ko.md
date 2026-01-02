@@ -2,9 +2,31 @@
 
 ---
 
+## [0.0.21] - 2026-01-03
+
+### CLI 버전 플래그 추가
+
+모든 MCP 서버에 `--version` 플래그 추가:
+
+```bash
+# Python
+semantic-complexity-py-mcp --version
+# semantic-complexity-py-mcp 0.0.21
+
+# TypeScript
+npx -y semantic-complexity-mcp --version
+# semantic-complexity-mcp 0.0.21
+
+# Go
+sc-go-mcp --version
+# sc-go-mcp 0.0.21
+```
+
+---
+
 ## [0.0.20] - 2026-01-03
 
-### 다국어 기능 동기화 + MCP 사용 가이드 리소스
+### 다국어 기능 동기화 + MCP 문서 리소스
 
 Python, TypeScript, Go 세 언어의 MCP 도구와 기능을 동기화합니다.
 

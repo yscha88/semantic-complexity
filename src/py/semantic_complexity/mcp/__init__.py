@@ -658,6 +658,10 @@ def check_degradation(
 
 def main():
     """Run MCP server"""
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] in ("--version", "-v"):
+        print("semantic-complexity-py-mcp 0.0.21")
+        sys.exit(0)
     mcp.run()
 
 

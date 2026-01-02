@@ -1,6 +1,6 @@
 {
   "name": "semantic-complexity",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Multi-dimensional code complexity analyzer (Bread-Cheese-Ham sandwich model)",
   "type": "module",
   "main": "./dist/index.js",
