@@ -14,17 +14,17 @@ claude mcp add sc-py -- uvx semantic-complexity-py-mcp
 claude mcp remove sc-py
 
 # 캐시 삭제
-uvx cache clean semantic-complexity-py-mcp
+uv cache clean
 
 # 재설치
-uvx cache clean semantic-complexity-py-mcp && claude mcp remove sc-py && claude mcp add sc-py -- uvx semantic-complexity-py-mcp
+uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- uvx semantic-complexity-py-mcp
 ```
 
 ### TypeScript
 
 ```bash
 # 설치
-claude mcp add sc-ts -- npx -y semantic-complexity-mcp
+claude mcp add sc-ts -- "npx -y semantic-complexity-mcp"
 
 # 삭제
 claude mcp remove sc-ts
@@ -35,7 +35,7 @@ npm cache clean --force
 rm -rf ~/.npm/_npx
 
 # 재설치
-npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- npx -y semantic-complexity-mcp
+npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- "npx -y semantic-complexity-mcp"
 ```
 
 ### Go
