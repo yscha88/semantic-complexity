@@ -2,6 +2,34 @@
 
 ---
 
+## [0.0.23] - 2026-01-03
+
+### TypeScript shebang + Go CI/CD Improvement
+
+#### TypeScript MCP shebang
+
+Added shebang to `src/ts/src/mcp/index.ts`:
+```
+#!/usr/bin/env node
+```
+
+Fixes Windows `npx` execution opening file instead of running.
+
+#### Go GitHub Actions Workflow
+
+| Item | Before | After |
+|------|--------|-------|
+| Trigger | Tag push | main branch push |
+| Version | From tag | From `main.go` |
+| Tag creation | Manual | Auto (`src/go/vX.Y.Z`) |
+
+All languages (Python/TypeScript/Go) now use the same CI/CD pattern:
+- Triggered on main branch push
+- Only when relevant paths change
+- Version extracted from source code
+
+---
+
 ## [0.0.22] - 2026-01-03
 
 ### TypeScript MCP bin Rename
