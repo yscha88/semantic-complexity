@@ -22,11 +22,11 @@ jobs:
           go-version: '1.23'
 
       - name: Test
-        working-directory: src/go/semanticcomplexity
+        working-directory: src/go
         run: go test ./...
 
       - name: Verify module
-        working-directory: src/go/semanticcomplexity
+        working-directory: src/go
         run: |
           go mod tidy
           go mod verify
