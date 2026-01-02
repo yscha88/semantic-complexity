@@ -2,7 +2,7 @@
 
 ---
 
-## [0.0.15] - 2026-01-02
+## [0.0.20] - 2026-01-03
 
 ### 다국어 기능 동기화 + MCP 사용 가이드 리소스
 
@@ -145,26 +145,34 @@ src/go/pkg/gate/
 | get_label | ✅ | ✅ | ✅ |
 | check_degradation | ✅ | ✅ | ✅ |
 | 외부 .waiver.json | ✅ | ✅ | ✅ |
-| **사용 가이드 리소스** | ✅ | ✅ | ✅ |
+| **MCP 문서 리소스** | ✅ | ✅ | ✅ |
 
-#### 📚 MCP 사용 가이드 리소스 추가
+#### 📚 MCP 문서 리소스 추가
 
-LLM이 MCP 서버를 설치한 후 사용 방법을 알 수 있도록 리소스 추가:
+LLM이 MCP 서버를 설치한 후 사용 방법과 이론적 배경을 스스로 찾아볼 수 있도록 리소스 추가:
 
-**리소스 URI:** `docs://usage-guide`
-
-**내용:**
-- 3축 모델 설명 (Bread/Cheese/Ham)
-- 도구별 사용 시나리오
-- Gate 단계 설명
-- 인지 복잡도 정의
+| 리소스 URI | 내용 |
+|-----------|------|
+| `docs://usage-guide` | 사용 가이드 (3축 모델, 도구별 시나리오, Gate 설명) |
+| `docs://theory` | 이론적 토대 (Ham Sandwich Theorem, Lyapunov 안정성) |
+| `docs://srs` | 소프트웨어 요구사항 명세 (모듈 타입, Gate 시스템) |
+| `docs://sds` | 소프트웨어 설계 명세 (ML 파이프라인 구조, 알고리즘) |
 
 **구현:**
 | 언어 | 방식 |
 |------|------|
-| Python | `@mcp.resource("docs://usage-guide")` |
+| Python | `@mcp.resource("docs://...")` 데코레이터 |
 | TypeScript | `ListResourcesRequestSchema` + `ReadResourceRequestSchema` |
-| Go | `s.AddResource()` |
+| Go | `mcp.NewResource()` + `s.AddResource()` |
+
+#### 📄 영문 문서 추가
+
+| 파일 | 설명 |
+|------|------|
+| `docs/THEORY.md` | 이론적 토대 (영문) |
+| `docs/SRS.md` | 소프트웨어 요구사항 명세 (영문) |
+| `docs/SDS.md` | 소프트웨어 설계 명세 (영문) |
+| `docs/CHANGELOG.md` | 변경 이력 (영문) |
 
 #### 🔄 GitHub Actions Go Workflow 개선
 
@@ -201,6 +209,148 @@ claude mcp add sc-ts -- "npx -y semantic-complexity-mcp"
 go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 claude mcp add sc-go -- sc-go-mcp
 ```
+
+---
+
+## [0.0.19] - 2026-01-02
+
+### Go 모듈 경로 수정
+
+#### 🔧 go.mod & import packages 수정
+- Go 모듈 경로를 `github.com/yscha88/semantic-complexity/src/go`로 변경
+- 모든 내부 import 경로 업데이트
+- `go install ...@latest` 지원을 위한 서브모듈 구조 적용
+
+---
+
+## [0.0.18] - 2026-01-02
+
+### 파일 구조 정리
+
+#### 📁 프로젝트 파일 정리
+- Go 바이너리 이름 변경: `cmd/mcp` → `cmd/sc-go-mcp`
+- README.md 추가 (MCP 설치 가이드)
+
+---
+
+## [0.0.17] - 2026-01-02
+
+### GitHub Actions 워크플로우 개선
+
+#### 🔄 Go Workflow 자동 서브모듈 태그 생성
+
+```yaml
+on:
+  push:
+    tags:
+      - '[0-9]*'  # X.Y.Z 형식
+
+- name: Create Go submodule tag
+  run: |
+    VERSION=${GITHUB_REF#refs/tags/}
+    GO_TAG="src/go/v$VERSION"
+    git tag "$GO_TAG" && git push origin "$GO_TAG"
+```
+
+- 트리거: `X.Y.Z` 형식 태그 푸시
+- 동작: `src/go/vX.Y.Z` 서브모듈 태그 자동 생성
+- 효과: `go install ...@latest` 지원
+
+---
+
+## [0.0.16] - 2026-01-02
+
+### workspace 설정 및 waiver 확장
+
+#### 🔧 TypeScript 외부 .waiver.json 지원
+- `parseWaiverFile()` - JSON 파싱
+- `findWaiverFile()` - 상위 디렉토리 탐색
+- `matchFilePattern()` - 글롭 패턴 매칭
+- `isWaiverExpired()` - 만료 체크
+- `checkExternalWaiver()` - 외부 waiver 체크
+- `checkWaiver()` - 통합 API (외부 우선, 인라인 폴백)
+
+---
+
+## [0.0.15] - 2026-01-02
+
+### TypeScript/Go MCP 동기화 + JSON 형식 통일
+
+Python, TypeScript, Go 세 언어의 MCP 도구와 기능을 동기화합니다.
+
+#### 🆕 Go 구현 신규 추가
+
+Go 언어로 semantic-complexity를 새로 구현:
+
+**패키지 구조:**
+```
+src/go/
+├── cmd/sc-go-mcp/   # MCP 서버 진입점
+├── pkg/analyzer/    # Bread, Cheese, Ham 분석기
+├── pkg/gate/        # Gate 및 Waiver 시스템
+├── pkg/simplex/     # 정규화 및 균형 계산
+└── pkg/types/       # 공통 타입 정의
+```
+
+**MCP 도구 (Python/TypeScript와 동일):**
+- `analyze_sandwich` - 3축 복잡도 분석
+- `check_gate` - Gate 검사 (waiver 포함)
+- `analyze_cheese` - 인지 가능성 분석
+- `suggest_refactor` - 리팩토링 권장사항
+- `check_budget` - PR 변경 예산 검사
+- `get_label` - 지배 축 라벨
+- `check_degradation` - 인지 저하 탐지
+
+#### 🔧 TypeScript MCP 도구 추가 (Python과 동기화)
+- `suggest_refactor` - 리팩토링 권장사항
+- `check_budget` - PR 변경 예산 검사
+- `get_label` - 지배 축 라벨
+- `check_degradation` - 인지 저하 탐지
+
+#### 🔄 MCP 도구 출력 형식 동기화
+
+모든 언어에서 동일한 출력 형식을 보장:
+
+**`analyze_sandwich` 출력 확장:**
+```json
+{
+  "bread": { ... },
+  "cheese": { ... },
+  "ham": { ... },
+  "simplex": { "bread": 0.33, "cheese": 0.34, "ham": 0.33 },
+  "equilibrium": { "inEquilibrium": true, "energy": 0.01 },
+  "label": "balanced",
+  "confidence": 0.95,
+  "canonical": { "bread": 0.33, "cheese": 0.34, "ham": 0.33 },
+  "deviation": { "bread": 0.0, "cheese": 0.0, "ham": 0.0 },
+  "recommendations": []
+}
+```
+
+#### 🔤 JSON 필드명 케이스 통일 (camelCase)
+
+Go의 모든 JSON 태그를 TypeScript와 일치하도록 camelCase로 통일:
+
+| 타입 | 변경 전 (snake_case) | 변경 후 (camelCase) |
+|------|---------------------|---------------------|
+| CheeseResult | `max_nesting` | `maxNesting` |
+| | `hidden_dependencies` | `hiddenDependencies` |
+| | `state_async_retry` | `stateAsyncRetry` |
+| GateResult | `gate_type` | `gateType` |
+| | `waiver_applied` | `waiverApplied` |
+
+#### 📊 언어별 기능 매트릭스
+
+| 기능 | Python | TypeScript | Go |
+|------|--------|------------|-----|
+| analyze_sandwich | ✅ | ✅ | ✅ |
+| analyze_cheese | ✅ | ✅ | ✅ |
+| check_gate | ✅ | ✅ | ✅ |
+| suggest_refactor | ✅ | ✅ | ✅ |
+| check_budget | ✅ | ✅ | ✅ |
+| get_label | ✅ | ✅ | ✅ |
+| check_degradation | ✅ | ✅ | ✅ |
+| 외부 .waiver.json | ✅ | ✅ | ✅ |
 
 ---
 

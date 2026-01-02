@@ -18,7 +18,7 @@ import (
 	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
-const version = "0.0.15"
+const version = "0.0.20"
 
 // Canonical profiles (ideal simplex coordinates by module type)
 var canonicalProfiles = map[string]types.SimplexCoordinates{
@@ -107,6 +107,96 @@ Ham Sandwich Theorem 기반 코드 복잡도 분석기입니다.
 - 중첩이 깊으면 컨텍스트 스택이 커짐
 - 상태+비동기+재시도가 동시에 있으면 경우의 수 폭발
 - 숨겨진 의존성은 예측 불가능한 부작용 유발
+
+## 추가 문서
+- docs://theory - 이론적 토대
+- docs://srs - 소프트웨어 요구사항 명세
+- docs://sds - 소프트웨어 설계 명세
+`
+
+const theorySummary = `# Theoretical Foundation (Summary)
+
+## Core Theorem: Ham Sandwich
+
+Maintainability (Ham) only has meaning between Security (Bread) and Cognitive (Cheese).
+Maximizing any single axis degrades the system.
+
+## Stability Invariants
+
+| Axis | Metaphor | Meaning |
+|------|----------|---------|
+| Bread | Structural stability | Trust boundaries, auth, crypto |
+| Cheese | Context density | Human/LLM comprehensible range |
+| Ham | Behavior preservation | Golden test, contract test |
+
+## Accessibility Conditions (ALL must be met)
+
+1. Nesting depth <= N (configurable)
+2. Concept count <= 9 per function (Miller's Law: 7±2)
+3. Hidden dependencies minimized
+4. state*async*retry: No 2+ coexistence
+
+## Mathematical Framework: Lyapunov Stability
+
+Energy function:  E(v) = ||v - c||²
+Stable point:     c = canonical centroid
+
+For full documentation: https://github.com/yscha88/semantic-complexity/blob/main/docs/THEORY.md
+`
+
+const srsSummary = `# Software Requirements Specification (Summary)
+
+## System Overview
+
+semantic-complexity is a multi-dimensional code complexity analyzer based on:
+- Ham Sandwich Theorem
+- Sperner's Lemma (equilibrium existence)
+- Lyapunov stability (convergence path)
+
+## Module Types
+
+| Type | Bread | Cheese | Ham |
+|------|-------|--------|-----|
+| deploy | 70 | 10 | 20 |
+| api-external | 50 | 20 | 30 |
+| api-internal | 30 | 30 | 40 |
+| app | 20 | 50 | 30 |
+| lib-domain | 10 | 30 | 60 |
+| lib-infra | 20 | 30 | 50 |
+
+## Gate System (3-Stage)
+
+| Stage | Strictness | Waiver |
+|-------|------------|--------|
+| PoC | Loose | No |
+| MVP | Tight | No |
+| Production | Strict | Yes |
+
+For full documentation: https://github.com/yscha88/semantic-complexity/blob/main/docs/SRS.md
+`
+
+const sdsSummary = `# Software Design Specification (Summary)
+
+## Architecture: ML Pipeline Structure
+
+INPUT (5D Vector) -> PROCESSING (Normalization) -> OUTPUT (3-axis)
+
+- INPUT: Context-free measurement (deterministic)
+- PROCESSING: Context injection, weights, filters
+- OUTPUT: Context-aware inference
+
+## Algorithms
+
+### Simplex Normalization
+
+bread + cheese + ham = 100
+
+### Gradient Direction (Lyapunov)
+
+E(v) = ||v - c||²  (energy function)
+recommendation = -∇E  (gradient descent)
+
+For full documentation: https://github.com/yscha88/semantic-complexity/blob/main/docs/SDS.md
 `
 
 func main() {
@@ -130,6 +220,63 @@ func main() {
 					MIMEType: "text/markdown",
 				},
 				Text: usageGuide,
+			},
+		}, nil
+	})
+
+	// Register theory resource
+	theoryResource := mcp.NewResource(
+		"docs://theory",
+		"Theoretical Foundation",
+		mcp.WithResourceDescription("Ham Sandwich Theorem based theory"),
+		mcp.WithMIMEType("text/markdown"),
+	)
+	s.AddResource(theoryResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]interface{}, error) {
+		return []interface{}{
+			mcp.TextResourceContents{
+				ResourceContents: mcp.ResourceContents{
+					URI:      "docs://theory",
+					MIMEType: "text/markdown",
+				},
+				Text: theorySummary,
+			},
+		}, nil
+	})
+
+	// Register SRS resource
+	srsResource := mcp.NewResource(
+		"docs://srs",
+		"Requirements Specification",
+		mcp.WithResourceDescription("Software requirements specification"),
+		mcp.WithMIMEType("text/markdown"),
+	)
+	s.AddResource(srsResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]interface{}, error) {
+		return []interface{}{
+			mcp.TextResourceContents{
+				ResourceContents: mcp.ResourceContents{
+					URI:      "docs://srs",
+					MIMEType: "text/markdown",
+				},
+				Text: srsSummary,
+			},
+		}, nil
+	})
+
+	// Register SDS resource
+	sdsResource := mcp.NewResource(
+		"docs://sds",
+		"Design Specification",
+		mcp.WithResourceDescription("Software design specification"),
+		mcp.WithMIMEType("text/markdown"),
+	)
+	s.AddResource(sdsResource, func(ctx context.Context, request mcp.ReadResourceRequest) ([]interface{}, error) {
+		return []interface{}{
+			mcp.TextResourceContents{
+				ResourceContents: mcp.ResourceContents{
+					URI:      "docs://sds",
+					MIMEType: "text/markdown",
+				},
+				Text: sdsSummary,
 			},
 		}, nil
 	})
