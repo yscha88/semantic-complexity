@@ -10,12 +10,12 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
-	"github.com/yscha88/semantic-complexity/pkg/analyzer"
-	"github.com/yscha88/semantic-complexity/pkg/budget"
-	"github.com/yscha88/semantic-complexity/pkg/gate"
-	"github.com/yscha88/semantic-complexity/pkg/recommend"
-	"github.com/yscha88/semantic-complexity/pkg/simplex"
-	"github.com/yscha88/semantic-complexity/pkg/types"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/analyzer"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/budget"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/gate"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/recommend"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/simplex"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
 const version = "0.0.15"
