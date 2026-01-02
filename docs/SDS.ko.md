@@ -1490,35 +1490,69 @@ const MCP_TOOLS = [
   {
     name: 'analyze_sandwich',
     description: '🍞🧀🥓 3축 복잡도 분석',
-    parameters: { path: string, moduleType?: ModuleType },
+    parameters: { source: string, file_path?: string },
+  },
+  {
+    name: 'analyze_cheese',
+    description: '🧀 인지 가능성 분석',
+    parameters: { source: string },
   },
   {
     name: 'check_gate',
     description: 'MVP/Production gate 조건 검사',
-    parameters: { path: string, gate: 'mvp' | 'production' },
+    parameters: { source: string, gate_type?: string, file_path?: string, project_root?: string },
   },
   {
     name: 'check_budget',
     description: 'PR 변경 예산 검사',
-    parameters: { baseBranch: string, headBranch: string },
+    parameters: { before_source: string, after_source: string, module_type?: string },
   },
   {
     name: 'get_label',
     description: '모듈의 지배 축 라벨 반환',
-    parameters: { path: string },
+    parameters: { source: string },
   },
   {
     name: 'suggest_refactor',
     description: '균형 방향 리팩토링 제안',
-    parameters: { path: string },
+    parameters: { source: string, module_type?: string },
   },
   {
     name: 'check_degradation',
     description: '인지 저하 징후 탐지',
-    parameters: { path: string },
+    parameters: { before_source: string, after_source: string },
   },
 ];
 ```
+
+### 5.3 MCP Resources
+
+LLM이 MCP 서버 설치 후 사용 방법을 이해할 수 있도록 리소스 제공:
+
+```typescript
+const MCP_RESOURCES = [
+  {
+    uri: 'docs://usage-guide',
+    name: '사용 가이드',
+    description: 'semantic-complexity MCP 서버 사용 가이드',
+    mimeType: 'text/markdown',
+  },
+];
+```
+
+**리소스 내용:**
+- 3축 모델 설명 (Bread/Cheese/Ham)
+- 도구별 사용 시나리오
+- Gate 단계 설명 (PoC/MVP/Production)
+- 인지 복잡도 정의
+
+**언어별 구현:**
+
+| 언어 | 구현 방식 |
+|------|-----------|
+| Python | `@mcp.resource("docs://usage-guide")` 데코레이터 |
+| TypeScript | `ListResourcesRequestSchema` + `ReadResourceRequestSchema` 핸들러 |
+| Go | `mcp.NewResource()` + `s.AddResource()` |
 
 ---
 
@@ -1538,3 +1572,4 @@ const MCP_TOOLS = [
 | 1.0 | 2025-12-24 | 초기 설계 명세 작성 |
 | 1.1 | 2026-01-01 | 2.1 ML 파이프라인 구조 추가, 3.3 Bread / 3.4 Ham 알고리즘 추가, 3.8 Gate / 3.9 Waiver 추가 |
 | 1.2 | 2026-01-02 | 3.9.3 Waiver 스키마 개선 (pattern, adr, justification, approved_at, expires_at, approver) |
+| 1.3 | 2026-01-03 | 5.2 MCP Tools 파라미터 업데이트, 5.3 MCP Resources 추가 (docs://usage-guide) |

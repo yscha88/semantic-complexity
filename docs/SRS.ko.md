@@ -919,13 +919,27 @@ semantic-complexity label ./src/auth
 
 ```typescript
 // 도구들
-- analyze_sandwich(path, moduleType)
-- check_gate(path, gateType)
-- check_budget(baseBranch, headBranch)
-- get_label(path)
-- suggest_refactor(path)
-- check_degradation(path)
+- analyze_sandwich(source, file_path?)
+- analyze_cheese(source)
+- check_gate(source, gate_type?, file_path?, project_root?)
+- check_budget(before_source, after_source, module_type?)
+- get_label(source)
+- suggest_refactor(source, module_type?)
+- check_degradation(before_source, after_source)
+
+// 리소스
+- docs://usage-guide  // 사용 가이드 (3축 모델, 도구 시나리오, 인지 복잡도 정의)
 ```
+
+#### 5.2.1 MCP 리소스 요구사항
+
+**REQ-MCP-RES-001**: LLM이 MCP 서버 설치 후 사용 방법을 이해할 수 있어야 한다.
+
+| 리소스 | 내용 | 필수 |
+|--------|------|------|
+| `docs://usage-guide` | 3축 모델, 도구 시나리오, 인지 복잡도 정의 | ✅ |
+
+**REQ-MCP-RES-002**: 모든 언어 구현체가 동일한 리소스를 제공해야 한다.
 
 ### 5.3 출력 형식
 

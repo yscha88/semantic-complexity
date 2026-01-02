@@ -72,6 +72,12 @@ go clean -cache && go install github.com/yscha88/semantic-complexity/src/go/cmd/
 | `get_label` | 모듈 지배 축 라벨 |
 | `check_degradation` | 인지 저하 탐지 |
 
+## MCP 리소스
+
+| URI | 설명 |
+|-----|------|
+| `docs://usage-guide` | 사용 가이드 (3축 모델, 도구 시나리오, 인지 복잡도 정의) |
+
 ## 문서
 
 - [이론](docs/THEORY.ko.md) - Ham Sandwich Theorem 기반 이론
