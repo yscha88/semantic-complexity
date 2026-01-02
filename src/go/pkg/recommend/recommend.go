@@ -4,7 +4,7 @@ package recommend
 import (
 	"math"
 
-	"github.com/yscha88/semantic-complexity/pkg/types"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
 // Action represents a refactoring action

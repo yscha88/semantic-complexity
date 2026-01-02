@@ -1,4 +1,4 @@
-module github.com/yscha88/semantic-complexity
+module github.com/yscha88/semantic-complexity/src/go
 
 go 1.23.2
 

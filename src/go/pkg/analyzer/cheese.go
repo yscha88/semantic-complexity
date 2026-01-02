@@ -7,7 +7,7 @@ import (
 	"go/token"
 	"strings"
 
-	"github.com/yscha88/semantic-complexity/pkg/types"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
 // AnalyzeCheese analyzes cognitive accessibility of Go source code
