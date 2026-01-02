@@ -593,7 +593,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 // Start server
 export async function main(): Promise<void> {
   if (process.argv.includes('--version') || process.argv.includes('-v')) {
-    console.log(`semantic-complexity-mcp ${packageJson.version}`);
+    console.log(`semantic-complexity-ts-mcp ${packageJson.version}`);
     process.exit(0);
   }
   const transport = new StdioServerTransport();

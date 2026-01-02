@@ -2,24 +2,35 @@
 
 ---
 
+## [0.0.22] - 2026-01-03
+
+### TypeScript MCP bin 이름 변경
+
+#### 🏷️ bin 이름 일관성 개선
+
+| 언어 | 이전 | 변경 후 |
+|------|------|---------|
+| Python | `semantic-complexity-py-mcp` | (유지) |
+| TypeScript | `semantic-complexity-mcp` | `semantic-complexity-ts-mcp` |
+| Go | `sc-go-mcp` | (유지) |
+
+---
+
 ## [0.0.21] - 2026-01-03
 
 ### CLI 버전 플래그 추가
 
-모든 MCP 서버에 `--version` 플래그 추가:
+모든 MCP 서버에 `--version` / `-v` 플래그 추가:
 
 ```bash
 # Python
 semantic-complexity-py-mcp --version
-# semantic-complexity-py-mcp 0.0.21
 
 # TypeScript
-npx -y semantic-complexity-mcp --version
-# semantic-complexity-mcp 0.0.21
+semantic-complexity-ts-mcp --version
 
 # Go
 sc-go-mcp --version
-# sc-go-mcp 0.0.21
 ```
 
 ---
@@ -225,7 +236,7 @@ MCP 서버 설치/업데이트/삭제/재설치 가이드:
 claude mcp add sc-py -- uvx semantic-complexity-py-mcp
 
 # TypeScript
-claude mcp add sc-ts -- "npx -y semantic-complexity-mcp"
+claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
 
 # Go
 go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
