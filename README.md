@@ -10,16 +10,16 @@ Code complexity analyzer based on Ham Sandwich Theorem
 
 ```bash
 # Install
-claude mcp add sc-py -- uvx semantic-complexity-py-mcp
+claude mcp add sc-py -- "uvx --from semantic-complexity semantic-complexity-py-mcp"
 
 # Update
-uv cache clean && uvx semantic-complexity-py-mcp --version
+uv cache clean && uvx --from semantic-complexity semantic-complexity-py-mcp --version
 
 # Remove
 claude mcp remove sc-py
 
 # Reinstall
-uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- uvx semantic-complexity-py-mcp
+uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- "uvx --from semantic-complexity semantic-complexity-py-mcp"
 ```
 
 ### TypeScript
@@ -82,6 +82,19 @@ go clean -cache && go install github.com/yscha88/semantic-complexity/src/go/cmd/
 | `docs://theory` | Theoretical foundation (Ham Sandwich Theorem, Lyapunov stability) |
 | `docs://srs` | Software Requirements Specification |
 | `docs://sds` | Software Design Specification |
+
+## Version Check
+
+```bash
+# Python
+uvx --from semantic-complexity semantic-complexity-py-mcp --version
+
+# TypeScript
+npx -y semantic-complexity-mcp --version
+
+# Go
+sc-go-mcp --version
+```
 
 ## Documentation
 
