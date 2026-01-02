@@ -19,7 +19,7 @@ import (
 	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
-const version = "0.0.21"
+const version = "0.0.22"
 
 // Canonical profiles (ideal simplex coordinates by module type)
 var canonicalProfiles = map[string]types.SimplexCoordinates{

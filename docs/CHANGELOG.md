@@ -2,24 +2,35 @@
 
 ---
 
+## [0.0.22] - 2026-01-03
+
+### TypeScript MCP bin Rename
+
+#### bin Name Consistency
+
+| Language | Before | After |
+|----------|--------|-------|
+| Python | `semantic-complexity-py-mcp` | (unchanged) |
+| TypeScript | `semantic-complexity-mcp` | `semantic-complexity-ts-mcp` |
+| Go | `sc-go-mcp` | (unchanged) |
+
+---
+
 ## [0.0.21] - 2026-01-03
 
 ### CLI Version Flag
 
-Added `--version` flag to all MCP servers:
+Added `--version` / `-v` flag to all MCP servers:
 
 ```bash
 # Python
 semantic-complexity-py-mcp --version
-# semantic-complexity-py-mcp 0.0.21
 
 # TypeScript
-npx -y semantic-complexity-mcp --version
-# semantic-complexity-mcp 0.0.21
+semantic-complexity-ts-mcp --version
 
 # Go
 sc-go-mcp --version
-# sc-go-mcp 0.0.21
 ```
 
 ---

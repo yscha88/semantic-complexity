@@ -26,16 +26,16 @@ uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- "uvx --from
 
 ```bash
 # Install
-claude mcp add sc-ts -- npx -y semantic-complexity-mcp
+claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
 
 # Update (clear npx cache and re-run)
-npm cache clean --force && npx -y semantic-complexity-mcp --version
+npm cache clean --force && npx -y -p semantic-complexity semantic-complexity-ts-mcp --version
 
 # Remove
 claude mcp remove sc-ts
 
 # Reinstall
-npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- npx -y semantic-complexity-mcp
+npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
 ```
 
 ### Go
@@ -90,7 +90,7 @@ go clean -cache && go install github.com/yscha88/semantic-complexity/src/go/cmd/
 uvx --from semantic-complexity semantic-complexity-py-mcp --version
 
 # TypeScript
-npx -y semantic-complexity-mcp --version
+npx -y -p semantic-complexity semantic-complexity-ts-mcp --version
 
 # Go
 sc-go-mcp --version

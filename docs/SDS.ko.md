@@ -1563,7 +1563,7 @@ const MCP_RESOURCES = [
 semantic-complexity-py-mcp --version
 
 # TypeScript
-semantic-complexity-mcp --version
+semantic-complexity-ts-mcp --version
 
 # Go
 sc-go-mcp --version
@@ -1589,3 +1589,4 @@ sc-go-mcp --version
 | 1.2 | 2026-01-02 | 3.9.3 Waiver 스키마 개선 (pattern, adr, justification, approved_at, expires_at, approver) |
 | 1.3 | 2026-01-03 | 5.2 MCP Tools 파라미터 업데이트, 5.3 MCP Resources 추가 (docs://usage-guide) |
 | 1.4 | 2026-01-03 | 5.4 CLI 인터페이스 추가 (--version 플래그) |
+| 1.5 | 2026-01-03 | TS bin 이름 변경 (semantic-complexity-ts-mcp) |
