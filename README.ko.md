@@ -26,16 +26,16 @@ uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- "uvx --from
 
 ```bash
 # 설치
-claude mcp add sc-ts -- npx -y semantic-complexity-mcp
+claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
 
 # 업데이트 (npx 캐시 클리어 후 재실행)
-npm cache clean --force && npx -y semantic-complexity-mcp --version
+npm cache clean --force && npx -y -p semantic-complexity semantic-complexity-ts-mcp --version
 
 # 삭제
 claude mcp remove sc-ts
 
 # 재설치
-npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- npx -y semantic-complexity-mcp
+npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
 ```
 
 ### Go
@@ -90,7 +90,7 @@ go clean -cache && go install github.com/yscha88/semantic-complexity/src/go/cmd/
 uvx --from semantic-complexity semantic-complexity-py-mcp --version
 
 # TypeScript
-npx -y semantic-complexity-mcp --version
+npx -y -p semantic-complexity semantic-complexity-ts-mcp --version
 
 # Go
 sc-go-mcp --version
