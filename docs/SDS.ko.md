@@ -1554,6 +1554,21 @@ const MCP_RESOURCES = [
 | TypeScript | `ListResourcesRequestSchema` + `ReadResourceRequestSchema` 핸들러 |
 | Go | `mcp.NewResource()` + `s.AddResource()` |
 
+### 5.4 CLI 인터페이스
+
+모든 MCP 서버가 `--version` 플래그 지원:
+
+```bash
+# Python
+semantic-complexity-py-mcp --version
+
+# TypeScript
+semantic-complexity-mcp --version
+
+# Go
+sc-go-mcp --version
+```
+
 ---
 
 ## 6. 참조
@@ -1573,3 +1588,4 @@ const MCP_RESOURCES = [
 | 1.1 | 2026-01-01 | 2.1 ML 파이프라인 구조 추가, 3.3 Bread / 3.4 Ham 알고리즘 추가, 3.8 Gate / 3.9 Waiver 추가 |
 | 1.2 | 2026-01-02 | 3.9.3 Waiver 스키마 개선 (pattern, adr, justification, approved_at, expires_at, approver) |
 | 1.3 | 2026-01-03 | 5.2 MCP Tools 파라미터 업데이트, 5.3 MCP Resources 추가 (docs://usage-guide) |
+| 1.4 | 2026-01-03 | 5.4 CLI 인터페이스 추가 (--version 플래그) |
