@@ -2,15 +2,24 @@
  * Essential Complexity Waiver System
  *
  * 본질적 복잡도 면제 시스템:
- * - __essential_complexity__ 파싱
+ * - __essential_complexity__ 파싱 (인라인)
+ * - .waiver.json 파일 지원 (외부)
  * - ADR 존재 여부 검증
  * - ComplexityContext (토대 정보) 생성
  *
  * 사용법:
- *   // 모듈에서 선언
+ *   // 방법 1: 모듈에서 인라인 선언
  *   export const __essential_complexity__ = {
  *     adr: "docs/adr/003-inference-complexity.md",
  *   };
+ *
+ *   // 방법 2: 프로젝트 루트에 .waiver.json 파일 생성
+ *   // {
+ *   //   "version": "1.0",
+ *   //   "waivers": [
+ *   //     { "pattern": "src/crypto/*.ts", "adr": "ADR-007" }
+ *   //   ]
+ *   // }
  *
  *   // Gate에서 체크
  *   const waiver = checkWaiver(source, filePath);
@@ -21,7 +30,7 @@
 
 import * as ts from 'typescript';
 import { existsSync, readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, relative } from 'path';
 
 // ============================================================
 // 타입 정의
@@ -52,6 +61,26 @@ export interface WaiverResult {
   reason?: string;
   adrPath?: string;
   config?: EssentialComplexityConfig;
+  externalWaiver?: ExternalWaiverEntry;
+}
+
+// ============================================================
+// 외부 .waiver.json 타입 정의
+// ============================================================
+
+export interface ExternalWaiverEntry {
+  pattern: string;
+  adr: string;
+  justification?: string;
+  approvedAt?: string;  // YYYY-MM-DD
+  expiresAt?: string | null;  // YYYY-MM-DD or null (영구)
+  approver?: string;
+}
+
+export interface WaiverFile {
+  $schema?: string;
+  version: string;
+  waivers: ExternalWaiverEntry[];
 }
 
 // ============================================================
@@ -303,10 +332,181 @@ export function buildComplexityContext(
 }
 
 // ============================================================
-// Waiver 체크
+// Layer 1: 외부 .waiver.json 파일 파싱
+// ============================================================
+
+export function parseWaiverFile(waiverPath: string): WaiverFile | null {
+  try {
+    if (!existsSync(waiverPath)) {
+      return null;
+    }
+    const content = readFileSync(waiverPath, 'utf-8');
+    const data = JSON.parse(content);
+
+    // 기본 스키마 검증
+    if (!data.version || !Array.isArray(data.waivers)) {
+      return null;
+    }
+
+    // waivers 배열 파싱
+    const waivers: ExternalWaiverEntry[] = data.waivers.map((w: Record<string, unknown>) => ({
+      pattern: String(w.pattern || ''),
+      adr: String(w.adr || ''),
+      justification: w.justification ? String(w.justification) : undefined,
+      approvedAt: w.approved_at ? String(w.approved_at) : undefined,
+      expiresAt: w.expires_at === null ? null : (w.expires_at ? String(w.expires_at) : undefined),
+      approver: w.approver ? String(w.approver) : undefined,
+    }));
+
+    return {
+      $schema: data.$schema,
+      version: data.version,
+      waivers,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ============================================================
+// Layer 2: .waiver.json 파일 탐색
+// ============================================================
+
+export function findWaiverFile(filePath: string, projectRoot: string): string | null {
+  const normalizedPath = filePath.replace(/\\/g, '/');
+  const normalizedRoot = projectRoot.replace(/\\/g, '/');
+
+  let currentDir = dirname(normalizedPath);
+
+  while (currentDir.startsWith(normalizedRoot) || currentDir === normalizedRoot) {
+    const waiverPath = join(currentDir, '.waiver.json');
+    if (existsSync(waiverPath)) {
+      return waiverPath;
+    }
+
+    const parentDir = dirname(currentDir);
+    if (parentDir === currentDir) {
+      break;  // 루트 도달
+    }
+    currentDir = parentDir;
+  }
+
+  return null;
+}
+
+// ============================================================
+// Layer 3: 파일 패턴 매칭
+// ============================================================
+
+export function matchFilePattern(filePath: string, pattern: string): boolean {
+  // 경로 정규화 (Windows 백슬래시 -> 슬래시)
+  const normalizedPath = filePath.replace(/\\/g, '/');
+  const normalizedPattern = pattern.replace(/\\/g, '/');
+
+  // 글롭 패턴을 정규식으로 변환
+  const regexPattern = normalizedPattern
+    .replace(/\./g, '\\.')
+    .replace(/\*\*/g, '<<<DOUBLE_STAR>>>')
+    .replace(/\*/g, '[^/]*')
+    .replace(/<<<DOUBLE_STAR>>>/g, '.*')
+    .replace(/\?/g, '.');
+
+  const regex = new RegExp(`^${regexPattern}$`);
+  return regex.test(normalizedPath);
+}
+
+// ============================================================
+// Layer 4: 외부 waiver 만료 체크
+// ============================================================
+
+export function isWaiverExpired(entry: ExternalWaiverEntry): boolean {
+  if (!entry.expiresAt) {
+    return false;  // null 또는 undefined = 영구
+  }
+
+  try {
+    const expiryDate = new Date(entry.expiresAt);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return today > expiryDate;
+  } catch {
+    return false;  // 파싱 실패 시 만료되지 않은 것으로 처리
+  }
+}
+
+// ============================================================
+// Layer 5: 외부 waiver 체크
+// ============================================================
+
+export function checkExternalWaiver(
+  filePath: string,
+  projectRoot: string
+): WaiverResult {
+  const waiverFilePath = findWaiverFile(filePath, projectRoot);
+
+  if (!waiverFilePath) {
+    return { waived: false, reason: '.waiver.json 파일 없음' };
+  }
+
+  const waiverFile = parseWaiverFile(waiverFilePath);
+  if (!waiverFile) {
+    return { waived: false, reason: '.waiver.json 파싱 실패' };
+  }
+
+  // 상대 경로로 변환하여 패턴 매칭
+  const relativePath = relative(projectRoot, filePath).replace(/\\/g, '/');
+
+  for (const entry of waiverFile.waivers) {
+    if (matchFilePattern(relativePath, entry.pattern)) {
+      // 만료 체크
+      if (isWaiverExpired(entry)) {
+        return {
+          waived: false,
+          reason: `waiver 만료됨: ${entry.expiresAt}`,
+          adrPath: entry.adr,
+          externalWaiver: entry,
+        };
+      }
+
+      return {
+        waived: true,
+        reason: entry.justification,
+        adrPath: entry.adr,
+        externalWaiver: entry,
+      };
+    }
+  }
+
+  return { waived: false, reason: '매칭되는 waiver 패턴 없음' };
+}
+
+// ============================================================
+// Layer 6: 통합 Waiver 체크 (외부 우선, 인라인 폴백)
 // ============================================================
 
 export function checkWaiver(
+  source: string,
+  filePath?: string,
+  projectRoot?: string
+): WaiverResult {
+  // 1. 외부 waiver 체크 (우선순위 높음)
+  if (filePath && projectRoot) {
+    const externalResult = checkExternalWaiver(filePath, projectRoot);
+    if (externalResult.waived || externalResult.externalWaiver) {
+      return externalResult;
+    }
+  }
+
+  // 2. 인라인 waiver 체크 (폴백)
+  return checkInlineWaiver(source, filePath, projectRoot);
+}
+
+// ============================================================
+// 인라인 Waiver 체크 (기존 로직)
+// ============================================================
+
+export function checkInlineWaiver(
   source: string,
   filePath?: string,
   projectRoot?: string

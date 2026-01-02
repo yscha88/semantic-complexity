@@ -2,6 +2,147 @@
 
 ---
 
+## [0.0.15] - 2026-01-02
+
+### 다국어 기능 동기화
+
+Python, TypeScript, Go 세 언어의 MCP 도구와 기능을 동기화합니다.
+
+#### 🔧 TypeScript 기능 확장
+
+**외부 .waiver.json 지원 추가:**
+- `parseWaiverFile()` - JSON 파싱
+- `findWaiverFile()` - 상위 디렉토리 탐색
+- `matchFilePattern()` - 글롭 패턴 매칭
+- `isWaiverExpired()` - 만료 체크
+- `checkExternalWaiver()` - 외부 waiver 체크
+- `checkWaiver()` - 통합 API (외부 우선, 인라인 폴백)
+
+**MCP 도구 추가 (Python과 동기화):**
+- `suggest_refactor` - 리팩토링 권장사항
+- `check_budget` - PR 변경 예산 검사
+- `get_label` - 지배 축 라벨
+- `check_degradation` - 인지 저하 탐지
+
+#### 🆕 Go 구현 신규 추가
+
+Go 언어로 semantic-complexity를 새로 구현:
+
+**패키지 구조:**
+```
+src/go/
+├── cmd/mcp/         # MCP 서버 진입점
+├── pkg/analyzer/    # Bread, Cheese, Ham 분석기
+├── pkg/gate/        # Gate 및 Waiver 시스템
+├── pkg/simplex/     # 정규화 및 균형 계산
+└── pkg/types/       # 공통 타입 정의
+```
+
+**MCP 도구 (Python/TypeScript와 동일):**
+- `analyze_sandwich` - 3축 복잡도 분석
+- `check_gate` - Gate 검사 (waiver 포함)
+- `analyze_cheese` - 인지 가능성 분석
+- `suggest_refactor` - 리팩토링 권장사항
+- `check_budget` - PR 변경 예산 검사
+- `get_label` - 지배 축 라벨
+- `check_degradation` - 인지 저하 탐지
+
+#### 🔄 MCP 도구 출력 형식 동기화
+
+모든 언어에서 동일한 출력 형식을 보장:
+
+**`analyze_sandwich` 출력 확장:**
+```json
+{
+  "bread": { ... },
+  "cheese": { ... },
+  "ham": { ... },
+  "simplex": { "bread": 0.33, "cheese": 0.34, "ham": 0.33 },
+  "equilibrium": { "inEquilibrium": true, "energy": 0.01 },
+  "label": "balanced",
+  "confidence": 0.95,
+  "canonical": { "bread": 0.33, "cheese": 0.34, "ham": 0.33 },
+  "deviation": { "bread": 0.0, "cheese": 0.0, "ham": 0.0 },
+  "recommendations": []
+}
+```
+
+**`check_gate` 구조 통일:**
+```json
+{
+  "passed": true,
+  "gateType": "mvp",
+  "violations": [],
+  "waiverApplied": false
+}
+```
+
+**`check_degradation` delta 객체:**
+```json
+{
+  "degraded": false,
+  "severity": "none",
+  "indicators": [],
+  "beforeAccessible": true,
+  "afterAccessible": true,
+  "delta": {
+    "nesting": 0,
+    "hiddenDeps": 0,
+    "violations": 0
+  }
+}
+```
+
+#### 🔤 JSON 필드명 케이스 통일 (camelCase)
+
+Go의 모든 JSON 태그를 TypeScript와 일치하도록 camelCase로 통일:
+
+| 타입 | 변경 전 (snake_case) | 변경 후 (camelCase) |
+|------|---------------------|---------------------|
+| CheeseResult | `max_nesting` | `maxNesting` |
+| | `hidden_dependencies` | `hiddenDependencies` |
+| | `state_async_retry` | `stateAsyncRetry` |
+| StateAsyncRetry | `has_state/async/retry` | `hasState/Async/Retry` |
+| EquilibriumResult | `in_equilibrium` | `inEquilibrium` |
+| | `dominant_axis` | `dominantAxis` |
+| GateResult | `gate_type` | `gateType` |
+| | `waiver_applied` | `waiverApplied` |
+| BreadResult | `trust_boundary_count` | `trustBoundaryCount` |
+| | `auth_explicitness` | `authExplicitness` |
+| | `secret_patterns` | `secretPatterns` |
+| HamResult | `golden_test_coverage` | `goldenTestCoverage` |
+| | `unprotected_paths` | `unprotectedPaths` |
+| | `test_files_found` | `testFilesFound` |
+| Recommendation | `expected_impact` | `expectedImpact` |
+| | `target_equilibrium` | `targetEquilibrium` |
+| BudgetResult | `module_type` | `moduleType` |
+| Delta | `state_transitions` | `stateTransitions` |
+| | `public_api` | `publicAPI` |
+| | `breaking_changes` | `breakingChanges` |
+
+#### 📁 Go 패키지 구조 완성
+
+```
+src/go/pkg/gate/
+├── gate.go    # CheckGate, GetThresholds, GateViolation (신규)
+└── waiver.go  # CheckWaiver, 외부 .waiver.json 지원
+```
+
+#### 📊 언어별 기능 매트릭스
+
+| 기능 | Python | TypeScript | Go |
+|------|--------|------------|-----|
+| analyze_sandwich | ✅ | ✅ | ✅ |
+| analyze_cheese | ✅ | ✅ | ✅ |
+| check_gate | ✅ | ✅ | ✅ |
+| suggest_refactor | ✅ | ✅ | ✅ |
+| check_budget | ✅ | ✅ | ✅ |
+| get_label | ✅ | ✅ | ✅ |
+| check_degradation | ✅ | ✅ | ✅ |
+| 외부 .waiver.json | ✅ | ✅ | ✅ |
+
+---
+
 ## [0.0.14] - 2026-01-02
 
 ### 외부 Waiver 파일 지원 + 스키마 개선
