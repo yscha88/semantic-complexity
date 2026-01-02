@@ -42,6 +42,7 @@ npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- "n
 
 ```bash
 # 설치 (go install)
+# @latest 사용 시 src/go/vX.X.X 형식 태그 필요
 go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 claude mcp add sc-go -- sc-go-mcp
 
