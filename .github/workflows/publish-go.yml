@@ -2,15 +2,16 @@ name: Publish Go Package
 
 on:
   push:
-    tags:
-      - '[0-9]*'  # X.Y.Z 형식 태그 푸시 시 트리거
+    branches: [main]
+    paths:
+      - 'src/go/**'
   workflow_dispatch:
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # 태그 생성 권한
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -32,18 +33,27 @@ jobs:
           go mod tidy
           go mod verify
 
+      - name: Get version from main.go
+        id: version
+        run: |
+          VERSION=$(grep 'const version' src/go/cmd/sc-go-mcp/main.go | sed 's/.*"\(.*\)".*/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+
       - name: Create Go submodule tag
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          GO_TAG="src/go/v$VERSION"  # X.Y.Z → src/go/vX.Y.Z
+          VERSION="${{ steps.version.outputs.version }}"
+          GO_TAG="src/go/v$VERSION"
 
           # 이미 존재하는지 확인
           if git rev-parse "$GO_TAG" >/dev/null 2>&1; then
             echo "Tag $GO_TAG already exists, skipping"
           else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
             git tag "$GO_TAG"
             git push origin "$GO_TAG"
             echo "Created and pushed tag: $GO_TAG"
           fi
 
-          echo "Install with: go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest"
+          echo "Install with: go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@v$VERSION"

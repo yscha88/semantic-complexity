@@ -412,3 +412,4 @@ sc-go-mcp --version
 | 1.1 | 2026-01-03 | English translation, MCP Resources section |
 | 1.2 | 2026-01-03 | CLI Interface section (--version flag) |
 | 1.3 | 2026-01-03 | TS bin rename (semantic-complexity-ts-mcp) |
+| 1.4 | 2026-01-03 | TS shebang, Go CI/CD workflow improvement |
