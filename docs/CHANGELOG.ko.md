@@ -2,6 +2,34 @@
 
 ---
 
+## [0.0.23] - 2026-01-03
+
+### TypeScript shebang 추가 + Go CI/CD 개선
+
+#### 🔧 TypeScript MCP shebang 추가
+
+`src/ts/src/mcp/index.ts` 첫 줄에 shebang 추가:
+```
+#!/usr/bin/env node
+```
+
+Windows에서 `npx` 실행 시 파일이 열리는 문제 해결.
+
+#### 🔄 Go GitHub Actions workflow 개선
+
+| 항목 | 이전 | 변경 후 |
+|------|------|---------|
+| 트리거 | 태그 푸시 | main 브랜치 푸시 |
+| 버전 | 태그에서 추출 | `main.go`에서 추출 |
+| 태그 생성 | 수동 | 자동 (`src/go/vX.Y.Z`) |
+
+이제 모든 언어(Python/TypeScript/Go)가 동일한 CI/CD 패턴:
+- main 브랜치 푸시 시 트리거
+- 해당 경로 변경 시에만 실행
+- 소스 코드에서 버전 추출
+
+---
+
 ## [0.0.22] - 2026-01-03
 
 ### TypeScript MCP bin 이름 변경

@@ -1590,3 +1590,4 @@ sc-go-mcp --version
 | 1.3 | 2026-01-03 | 5.2 MCP Tools 파라미터 업데이트, 5.3 MCP Resources 추가 (docs://usage-guide) |
 | 1.4 | 2026-01-03 | 5.4 CLI 인터페이스 추가 (--version 플래그) |
 | 1.5 | 2026-01-03 | TS bin 이름 변경 (semantic-complexity-ts-mcp) |
+| 1.6 | 2026-01-03 | TS shebang 추가, Go CI/CD workflow 개선 |
