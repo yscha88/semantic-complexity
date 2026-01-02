@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/yscha88/semantic-complexity/pkg/types"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
 var secretPatterns = []struct {

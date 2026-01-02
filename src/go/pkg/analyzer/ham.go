@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yscha88/semantic-complexity/pkg/types"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
 // AnalyzeHam analyzes behavioral preservation (test coverage) of Go source code

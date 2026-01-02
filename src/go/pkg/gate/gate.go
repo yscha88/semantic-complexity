@@ -4,7 +4,7 @@ package gate
 import (
 	"fmt"
 
-	"github.com/yscha88/semantic-complexity/pkg/types"
+	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
 // BaseThresholds defines MVP baseline thresholds
