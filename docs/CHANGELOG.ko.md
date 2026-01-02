@@ -2,6 +2,27 @@
 
 ---
 
+## [0.0.24] - 2026-01-03
+
+### TypeScript 런타임 의존성 수정
+
+#### 🐛 typescript 의존성 위치 수정
+
+`typescript`가 `devDependencies`에만 있어서 `npx` 실행 시 AST 파싱 실패 문제 발생.
+
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'typescript'
+```
+
+**수정:**
+| 항목 | 이전 | 변경 후 |
+|------|------|---------|
+| typescript | devDependencies | dependencies |
+
+TypeScript compiler API를 사용하여 소스 코드 AST를 파싱하므로 런타임에도 필요.
+
+---
+
 ## [0.0.23] - 2026-01-03
 
 ### TypeScript shebang 추가 + Go CI/CD 개선

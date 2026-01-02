@@ -2,6 +2,27 @@
 
 ---
 
+## [0.0.24] - 2026-01-03
+
+### TypeScript Runtime Dependency Fix
+
+#### 🐛 typescript dependency location fix
+
+`typescript` was only in `devDependencies`, causing AST parsing failure when running via `npx`.
+
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'typescript'
+```
+
+**Fix:**
+| Item | Before | After |
+|------|--------|-------|
+| typescript | devDependencies | dependencies |
+
+TypeScript compiler API is used for source code AST parsing, so it's required at runtime.
+
+---
+
 ## [0.0.23] - 2026-01-03
 
 ### TypeScript shebang + Go CI/CD Improvement
