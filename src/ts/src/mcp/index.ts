@@ -7,6 +7,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
@@ -20,6 +22,56 @@ import { checkGate } from '../gate/index.js';
 import { checkBudget, calculateDelta } from '../budget/index.js';
 import { suggestRefactor, checkDegradation } from '../recommend/index.js';
 import type { GateType, ModuleType, SimplexCoordinates } from '../types/index.js';
+
+// Usage guide for LLM
+const USAGE_GUIDE = `# semantic-complexity 사용 가이드
+
+## 개요
+Ham Sandwich Theorem 기반 코드 복잡도 분석기입니다.
+코드를 3가지 축으로 분석하여 균형 잡힌 품질을 측정합니다.
+
+## 3축 모델 (Bread-Cheese-Ham)
+
+### 🍞 Bread (보안성)
+- Trust Boundary 정의 여부
+- 인증/인가 명시성
+- 시크릿 하드코딩 탐지
+- 숨겨진 의존성 (환경변수, 파일I/O)
+
+### 🧀 Cheese (인지 가능성)
+- 중첩 깊이 (≤4 권장)
+- 개념 수 (≤9개/함수, Miller's Law)
+- state×async×retry 동시 사용 금지
+- 숨겨진 의존성 최소화
+
+### 🥓 Ham (행동 보존)
+- 테스트 커버리지
+- Golden Test 존재 여부
+- Critical Path 보호율
+
+## 도구 사용 시나리오
+
+| 시나리오 | 도구 |
+|----------|------|
+| 코드 전체 품질 분석 | analyze_sandwich |
+| 인지 복잡도만 확인 | analyze_cheese |
+| PR 리뷰 시 품질 게이트 | check_gate |
+| 리팩토링 방향 제안 | suggest_refactor |
+| 코드 변경 전후 비교 | check_degradation |
+| 변경 예산 초과 확인 | check_budget |
+| 코드 특성 라벨링 | get_label |
+
+## Gate 단계
+- PoC: 빠른 검증, 느슨한 기준
+- MVP: 첫 릴리스, 기본 기준
+- Production: 운영, 엄격한 기준 + Waiver 지원
+
+## 인지 복잡도 정의
+인지 복잡도는 개발자가 코드를 읽고 이해하는 데 필요한 정신적 노력입니다.
+- 중첩이 깊으면 컨텍스트 스택이 커짐
+- 상태+비동기+재시도가 동시에 있으면 경우의 수 폭발
+- 숨겨진 의존성은 예측 불가능한 부작용 유발
+`;
 
 // Canonical profile (ideal simplex coordinates by module type)
 const CANONICAL_PROFILES: Record<string, SimplexCoordinates> = {
@@ -57,9 +109,41 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
+      resources: {},
     },
   }
 );
+
+// List available resources
+server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+  resources: [
+    {
+      uri: 'docs://usage-guide',
+      name: '사용 가이드',
+      description: 'semantic-complexity MCP 서버 사용 가이드',
+      mimeType: 'text/markdown',
+    },
+  ],
+}));
+
+// Read resource content
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  const { uri } = request.params;
+
+  if (uri === 'docs://usage-guide') {
+    return {
+      contents: [
+        {
+          uri: 'docs://usage-guide',
+          mimeType: 'text/markdown',
+          text: USAGE_GUIDE,
+        },
+      ],
+    };
+  }
+
+  throw new Error(`Resource not found: ${uri}`);
+});
 
 // List available tools
 server.setRequestHandler(ListToolsRequestSchema, async () => ({

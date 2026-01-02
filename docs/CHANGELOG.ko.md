@@ -4,7 +4,7 @@
 
 ## [0.0.15] - 2026-01-02
 
-### 다국어 기능 동기화
+### 다국어 기능 동기화 + MCP 사용 가이드 리소스
 
 Python, TypeScript, Go 세 언어의 MCP 도구와 기능을 동기화합니다.
 
@@ -31,12 +31,17 @@ Go 언어로 semantic-complexity를 새로 구현:
 **패키지 구조:**
 ```
 src/go/
-├── cmd/mcp/         # MCP 서버 진입점
+├── cmd/sc-go-mcp/   # MCP 서버 진입점 (이름 변경)
 ├── pkg/analyzer/    # Bread, Cheese, Ham 분석기
 ├── pkg/gate/        # Gate 및 Waiver 시스템
 ├── pkg/simplex/     # 정규화 및 균형 계산
 └── pkg/types/       # 공통 타입 정의
 ```
+
+**Go 모듈 경로 변경:**
+- 변경 전: `github.com/yscha88/semantic-complexity`
+- 변경 후: `github.com/yscha88/semantic-complexity/src/go`
+- 이유: 서브모듈 태그(`src/go/vX.Y.Z`)로 `@latest` 지원
 
 **MCP 도구 (Python/TypeScript와 동일):**
 - `analyze_sandwich` - 3축 복잡도 분석
@@ -140,6 +145,62 @@ src/go/pkg/gate/
 | get_label | ✅ | ✅ | ✅ |
 | check_degradation | ✅ | ✅ | ✅ |
 | 외부 .waiver.json | ✅ | ✅ | ✅ |
+| **사용 가이드 리소스** | ✅ | ✅ | ✅ |
+
+#### 📚 MCP 사용 가이드 리소스 추가
+
+LLM이 MCP 서버를 설치한 후 사용 방법을 알 수 있도록 리소스 추가:
+
+**리소스 URI:** `docs://usage-guide`
+
+**내용:**
+- 3축 모델 설명 (Bread/Cheese/Ham)
+- 도구별 사용 시나리오
+- Gate 단계 설명
+- 인지 복잡도 정의
+
+**구현:**
+| 언어 | 방식 |
+|------|------|
+| Python | `@mcp.resource("docs://usage-guide")` |
+| TypeScript | `ListResourcesRequestSchema` + `ReadResourceRequestSchema` |
+| Go | `s.AddResource()` |
+
+#### 🔄 GitHub Actions Go Workflow 개선
+
+**자동 서브모듈 태그 생성:**
+- 트리거: `X.Y.Z` 형식 태그 푸시
+- 동작: `src/go/vX.Y.Z` 서브모듈 태그 자동 생성
+- 효과: `go install ...@latest` 지원
+
+```yaml
+on:
+  push:
+    tags:
+      - '[0-9]*'  # X.Y.Z 형식
+
+- name: Create Go submodule tag
+  run: |
+    VERSION=${GITHUB_REF#refs/tags/}
+    GO_TAG="src/go/v$VERSION"
+    git tag "$GO_TAG" && git push origin "$GO_TAG"
+```
+
+#### 📄 README.md 추가
+
+MCP 서버 설치/업데이트/삭제/재설치 가이드:
+
+```bash
+# Python
+claude mcp add sc-py -- uvx semantic-complexity-py-mcp
+
+# TypeScript
+claude mcp add sc-ts -- "npx -y semantic-complexity-mcp"
+
+# Go
+go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
+claude mcp add sc-go -- sc-go-mcp
+```
 
 ---
 
