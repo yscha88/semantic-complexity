@@ -2,6 +2,68 @@
 
 ---
 
+## [0.0.14] - 2026-01-02
+
+### 외부 Waiver 파일 지원 + 스키마 개선
+
+#### 📁 `.waiver.json` 외부 파일 지원
+
+프로젝트 레벨에서 waiver를 관리할 수 있는 외부 파일 지원:
+
+```json
+{
+  "$schema": "https://semantic-complexity.dev/schemas/waiver.json",
+  "version": "1.0",
+  "waivers": [
+    {
+      "pattern": "src/crypto/*.py",
+      "adr": "ADR-007",
+      "justification": "AES-256 암호화 알고리즘",
+      "approved_at": "2025-01-15",
+      "expires_at": "2025-12-31",
+      "approver": "security-team"
+    }
+  ]
+}
+```
+
+**기능:**
+- 상위 디렉토리 순회 탐색
+- 글롭 패턴 매칭 (`src/crypto/*.py`)
+- 만료일 체크 (`expires_at: null` = 영구)
+- 외부 waiver 우선, 인라인 `__essential_complexity__` 폴백
+
+#### 🔧 스키마 필드명 개선
+
+| 기존 | 변경 | 이유 |
+|------|------|------|
+| `file_pattern` | `pattern` | 간결 |
+| `adr_ref` | `adr` | 간결 |
+| `reason` | `justification` | 의미 명확 (정당화 근거) |
+| - | `approved_at` | 승인일 추가 |
+| `expires` | `expires_at` | 일관성 (`_at` 접미사) |
+| `approved_by` | `approver` | SDS-WAIVER와 일치 |
+
+#### 📦 선택적 의존성 추가
+
+`pyproject.toml`에 선택적 의존성 그룹 추가:
+
+```toml
+[project.optional-dependencies]
+yaml = ["pyyaml>=6.0"]
+numpy = ["numpy>=1.24"]
+all = ["pyyaml>=6.0", "numpy>=1.24"]
+```
+
+**설치:**
+```bash
+pip install semantic-complexity[yaml]   # YAML ADR 파싱
+pip install semantic-complexity[numpy]  # 벡터 연산
+pip install semantic-complexity[all]    # 전체
+```
+
+---
+
 ## [0.0.13] - 2025-12-30
 
 ### Essential Complexity Waiver + 3단계 Gate 시스템

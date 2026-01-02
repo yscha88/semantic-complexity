@@ -115,6 +115,178 @@ E(v)를 감소시키는 모든 리팩토링은 안정 방향으로 이동한다.
     └───────────────┘       └───────────────┘       └───────────────┘
 ```
 
+### 2.5 이론 계층 구조
+
+시스템은 **ML 파이프라인**과 유사한 처리 구조를 가집니다:
+
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║  INPUT (Feature Extraction)                          [데이터 수집] ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  5D Vector: [C, N, S, A, Λ]                                       ║
+║  AST 정적 분석 (결정적, context-free)                              ║
+║  패턴 탐지 (Trust Boundary, Secret, Test 등)                       ║
+╚═══════════════════════════════════════════════════════════════════╝
+                                 │
+                                 ▼
+┌───────────────────────────────────────────────────────────────────┐
+│  PROCESSING (Preprocessing + Parameters)         [전처리/가중치]  │
+├───────────────────────────────────────────────────────────────────┤
+│  L2: 정규화                                                       │
+│    - Simplex 사영 (5D → 3축)                                      │
+│    - Anti-pattern Penalty                                         │
+│    - 제외 항목 필터 (self/cls, built-in)                           │
+├───────────────────────────────────────────────────────────────────┤
+│  L3: 판단 [LLM/Human 개입]                                        │
+│    - Essential Complexity Waiver                                  │
+│    - 모듈 타입 Context 주입                                        │
+│    - 본질적 vs 우발적 복잡도 판단                                   │
+└───────────────────────────────────────────────────────────────────┘
+                                 │
+                                 ▼
+╔═══════════════════════════════════════════════════════════════════╗
+║  OUTPUT (Inference)                                    [추론]     ║
+╠═══════════════════════════════════════════════════════════════════╣
+║  3축 점수: [🍞 Bread, 🧀 Cheese, 🥓 Ham]                          ║
+║  Gate 결과 (PoC/MVP/Production)                                   ║
+║  리팩토링 권장사항 (-∇E)                                          ║
+║  Canonical 편차 보고                                              ║
+╚═══════════════════════════════════════════════════════════════════╝
+```
+
+**핵심 원칙:**
+- **INPUT (5D)**: Context-free 측정, 결정적
+- **PROCESSING**: Context 주입, 가중치/필터 적용
+- **OUTPUT (3축)**: Context-aware 추론 결과
+
+#### Layer 1: 측정 계층 (5D Complexity Vector)
+
+**특성**: 순수 정적 분석, 결정적, LLM 판단 불필요
+
+| 차원 | 기호 | 측정 대상 | 가중치 |
+|------|------|-----------|--------|
+| Control | C | if, switch, loop, 논리연산자 | ×1.0 |
+| Nesting | N | 중첩 깊이, 콜백 | ×1.5 |
+| State | S | 상태 변이, hooks | ×2.0 |
+| Async | A | async/await, Promise, goroutine | ×2.5 |
+| Coupling | Λ | 전역 접근, I/O, 부수효과 | ×3.0 |
+
+#### Layer 2: 정규화 계층
+
+**특성**: 자동 변환, 규칙 기반
+
+```
+5D → 3축 사영:
+🧀 Raw = f(C, N, hidden_coupling)
+🍞 Raw = g(S, A, Λ, trust_boundary, auth_flow)
+🥓 Raw = h(test_coverage, critical_path_protection)
+
+Simplex 정규화:
+🧀 + 🍞 + 🥓 = 100
+
+Anti-pattern Penalty:
+*args/kwargs 사용 시 +3 개념 수 추가
+```
+
+#### Layer 3: 판단/면제 계층
+
+**특성**: LLM 또는 Human 판단 필요
+
+| 판단 유형 | 입력 | 결과 |
+|-----------|------|------|
+| Essential Complexity Waiver | ADR 파일 참조 | Gate 검사 우회 |
+| 모듈 타입 오버라이드 | `__module_type__` 선언 | Canonical Profile 변경 |
+| 본질적 복잡도 신호 | math/algorithm/domain 패턴 | Waiver 자격 판단 |
+
+```python
+# 예: Essential Complexity Waiver
+__essential_complexity__ = {
+    "adr": "docs/adr/003-inference.md",
+}
+# → Production Gate에서만 복잡도 검사 우회
+```
+
+#### Layer 4: 해석 계층
+
+**특성**: Gate 결과 및 권장사항 생성
+
+모듈 타입별 Canonical Profile:
+
+| 모듈 타입 | 🍞 Bread | 🧀 Cheese | 🥓 Ham |
+|-----------|----------|-----------|--------|
+| deploy | 70 | 10 | 20 |
+| api-external | 50 | 20 | 30 |
+| api-internal | 30 | 30 | 40 |
+| app | 20 | 50 | 30 |
+| lib-domain | 10 | 30 | 60 |
+| lib-infra | 20 | 30 | 50 |
+
+편차 및 리팩토링 방향:
+```
+deviation = ||current - canonical||₂
+E(v) = deviation² (에너지 함수)
+리팩토링 방향 = -∇E (에너지 감소 방향)
+```
+
+#### 축별 Layer 결합
+
+각 축(🍞🧀🥓)은 4개 layer를 **모두** 거쳐 계산됩니다:
+
+```
+🧀 Cheese (Cognitive) - 인지 가능 여부
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+L1 측정   │ C(Control), N(Nesting), hidden_deps 카운트
+L2 정규화 │ Anti-pattern Penalty (+3 per *args/**kwargs)
+          │ 제외 항목 적용 (self/cls, built-in, numpy)
+L3 판단   │ state×async×retry 공존 판단
+          │ 본질적 복잡도 신호 탐지 (math/algorithm/domain)
+L4 해석   │ 인지 가능 조건 4가지 검증
+          │ → accessible: true/false
+
+
+🍞 Bread (Security) - 구조 안정성
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+L1 측정   │ S(State), A(Async), Λ(Coupling) 카운트
+          │ Trust Boundary 패턴 탐지
+          │ Secret 패턴 탐지
+L2 정규화 │ SECRET_LEAK_PATTERNS 적용
+          │ AUTH_EXPLICIT_PATTERNS 점수화
+L3 판단   │ AUTH_FLOW 선언 확인 (NONE 포함)
+          │ Essential Waiver 적용 여부
+L4 해석   │ Trust Boundary 정의 여부
+          │ Auth 명시성 점수
+          │ → violations 목록
+
+
+🥓 Ham (Behavioral) - 행동 보존성
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+L1 측정   │ 소스 함수명 추출
+          │ 테스트 파일 자동 탐색 (discover_tests)
+          │ Critical Path 패턴 탐지 (payment, auth, data_mutation)
+L2 정규화 │ 함수-테스트 매칭
+          │ Golden/Contract 테스트 분류
+L3 판단   │ Critical Path 보호 여부 판단
+          │ 테스트 충분성 판단
+L4 해석   │ Golden Test 커버리지 비율
+          │ Contract Test 존재 플래그
+          │ → critical_paths_protected/total
+```
+
+#### Context에 의한 해석
+
+**동일한 5D 측정값도 모듈 타입에 따라 다르게 해석됩니다:**
+
+| Context | 🧀 Cheese 해석 | 🍞 Bread 해석 | 🥓 Ham 해석 |
+|---------|---------------|---------------|-------------|
+| api/external | 엄격 (N≤3) | 매우 엄격 | Contract 필수 |
+| lib/domain | 중간 (N≤4) | 완화 | Golden 필수 |
+| app | 완화 (N≤5) | 중간 | 권장 |
+| deploy | - | 최엄격 | - |
+
+**핵심 원칙**: 5D는 context-free 측정, 3축은 context-aware 해석. 각 계층은 분리되어 있으며 혼용 금지.
+
+> 📄 상세 이론: [THEORY.ko.md](./THEORY.ko.md)
+
 ---
 
 ## 3. 기능 요구사항
@@ -137,12 +309,43 @@ E(v)를 감소시키는 모든 리팩토링은 안정 방향으로 이동한다.
 | FR-3.1.1.4 | 암호화 사용 패턴 식별 | SHOULD |
 | FR-3.1.1.5 | 보안 변경의 blast radius 계산 | SHOULD |
 | FR-3.1.1.6 | 규제 민감 코드 영역 탐지 | MAY |
+| FR-3.1.1.7 | 민감정보 출력 탐지 (print/logger) | MUST |
+| FR-3.1.1.8 | AUTH_FLOW 명시적 선언 인식 | MUST |
+
+**FR-3.1.1.1 Trust Boundary 패턴 (상세):**
+
+| 패턴 유형 | 예시 | 설명 |
+|-----------|------|------|
+| marker | `TRUST_BOUNDARY = True` | 변수 마커 |
+| marker | `TRUST_BOUNDARY: EXTERNAL API` | docstring 헤더 |
+| marker | `"""Trust Boundary: ...` | 함수 docstring |
+| marker | `# TRUST_BOUNDARY` | 주석 마커 |
+| api | `@app.get()`, `@api_view()` | API 엔드포인트 |
+| auth | `@login_required`, `verify_token()` | 인증 경계 |
+| data | `@validate`, `sanitize()` | 데이터 검증 |
+
+**FR-3.1.1.7 민감정보 출력 탐지 (SECRET_LEAK_PATTERNS):**
+
+| 탐지 대상 | 예시 | 심각도 |
+|-----------|------|--------|
+| print 출력 | `print(password)` | high |
+| logger 출력 | `logger.info(api_key)` | medium |
+| PII 출력 | `print(patient_id)` | high |
+
+**FR-3.1.1.8 AUTH_FLOW 선언:**
+
+`AUTH_FLOW` 변수가 명시적으로 선언되면 인증 흐름이 정의된 것으로 간주:
+```python
+AUTH_FLOW = "OAuth2"    # 인증 필요
+AUTH_FLOW = "NONE"      # 명시적 인증 불필요 (파일 처리 등)
+```
 
 **메트릭:**
 - Trust boundary 수
 - 인증 레이어 명시성 점수
 - Secret lifecycle 자동화 점수
 - 보안 변경 blast radius
+- 민감정보 출력 위반 수
 
 #### FR-3.1.2 인지 축 (🧀) 분석
 
@@ -174,11 +377,42 @@ E(v)를 감소시키는 모든 리팩토링은 안정 방향으로 이동한다.
 | FR-3.1.2.3 | 숨겨진 의존성 탐지 (전역, 환경변수, 암묵적 I/O, 클로저) | MUST |
 | FR-3.1.2.4 | 중첩 깊이 측정 | MUST |
 | FR-3.1.2.5 | 함수당 개념 수 계산 (> 9 = 위반) | MUST |
+| FR-3.1.2.6 | 개념 수 계산 시 제외 항목 적용 | MUST |
+| FR-3.1.2.7 | Anti-pattern Penalty 적용 | MUST |
+
+**FR-3.1.2.6 개념 수 제외 항목:**
+
+인지 부하가 없는 항목은 개념 수에서 제외:
+
+| 제외 항목 | 예시 | 이유 |
+|-----------|------|------|
+| self/cls 파라미터 | `def method(self, x)` | 클래스 메서드 규약 |
+| Python built-in | `str`, `int`, `len`, `list`, `dict` | 기본 지식 |
+| numpy 기본 함수 | `array`, `zeros`, `asanyarray` | 도메인 기본 지식 |
+| pathlib 기본 | `Path` | 표준 라이브러리 |
+
+**FR-3.1.2.7 Anti-pattern Penalty:**
+
+개념 수를 숨기는 패턴에 페널티 부과:
+
+| Anti-pattern | Penalty | 이유 |
+|--------------|---------|------|
+| `*args` 사용 | +3 개념 | 실제 파라미터 수를 숨김 |
+| `**kwargs` 사용 | +3 개념 | 실제 파라미터 수를 숨김 |
+
+```python
+# 예시: penalty 적용
+def process(*args, **kwargs):  # raw: 1, penalty: +6, total: 7
+    return args[0]
+```
+
+> 📄 LLM 금지 사항: [LLM_REFACTORING_PROTOCOL.md](./LLM_REFACTORING_PROTOCOL.md)
 
 **출력:**
 - 인지 가능 여부 (Boolean)
 - 위반 시 사유
 - 각 조건별 측정값
+- raw_concept_count vs concept_count (penalty 포함)
 
 #### FR-3.1.3 행동 축 (🥓) 분석
 
@@ -196,6 +430,38 @@ E(v)를 감소시키는 모든 리팩토링은 안정 방향으로 이동한다.
 | FR-3.1.3.4 | git 히스토리에서 변경 리드타임 분석 | MAY |
 | FR-3.1.3.5 | 결함 유입률 분석 | MAY |
 | FR-3.1.3.6 | PR 크기 패턴 탐지 | MAY |
+| FR-3.1.3.7 | 테스트 파일 자동 탐색 (Test Discovery) | MUST |
+| FR-3.1.3.8 | Critical Path 패턴 탐지 | MUST |
+
+**FR-3.1.3.7 Test Discovery:**
+
+소스 파일에서 대응하는 테스트 파일 자동 탐색:
+
+| 소스 파일 | 탐색 패턴 |
+|-----------|-----------|
+| `src/auth/login.py` | `test_login.py`, `login_test.py` |
+| `src/auth/login.py` | `tests/test_login.py` |
+| `src/auth/login.py` | `tests/auth/test_login.py` |
+
+**FR-3.1.3.8 Critical Path 패턴:**
+
+| path_type | 탐지 패턴 | 예시 |
+|-----------|-----------|------|
+| payment | `process_payment`, `stripe.Charge`, `charge()` | 결제 처리 |
+| auth | `login`, `authenticate`, `register` | 인증/인가 |
+| data_mutation | `db.session.commit()`, `.save()`, `create_*` | 데이터 변경 |
+| external_api | `requests.get/post`, `http.client` | 외부 API 호출 |
+
+**Critical Path 보호 상태:**
+
+```python
+@dataclass
+class CriticalPath:
+    function_name: str
+    path_type: str      # payment, auth, data_mutation, external_api
+    line: int
+    protected: bool     # 테스트 존재 여부
+```
 
 **메트릭:**
 - Golden test 커버리지 비율
@@ -316,6 +582,45 @@ interface CanonicalProfile {
 
 ### 3.5 게이트 시스템
 
+#### 3단계 Gate 개요
+
+| 단계 | 엄격도 | Waiver | 용도 |
+|------|--------|--------|------|
+| **PoC** | 느슨 | ❌ | 빠른 검증, 일단 돌아가면 OK |
+| **MVP** | 바싹 | ❌ | 첫 릴리스, 제대로 설계 강제 |
+| **Production** | 엄격 | ✅ | 운영 중 입증된 기술부채 허용 |
+
+**임계값 비교:**
+
+| 조건 | PoC | MVP | Production |
+|------|-----|-----|------------|
+| nesting_max | 6 | 4 | 3 |
+| concepts_per_function | 12 | 9 | 7 |
+| test_coverage | 50% | 80% | 95% |
+
+**기준점 기반 계산:**
+```python
+BASE_THRESHOLDS = {
+    "nesting_max": 4,           # MVP 기준
+    "concepts_per_function": 9,
+    "golden_test_min": 0.8,
+}
+# PoC: +2, +3, -0.3 조정
+# MVP: 기준 (조정 없음)
+# Production: -1, -2, +0.15 조정
+```
+
+#### FR-3.5.0 PoC 게이트
+
+**요구사항:**
+
+| ID | 요구사항 | 우선순위 |
+|----|----------|----------|
+| FR-3.5.0.1 | 🧀 체크: nesting ≤ 6 | MUST |
+| FR-3.5.0.2 | 🧀 체크: concepts ≤ 12 | MUST |
+| FR-3.5.0.3 | 🥓 체크: test_coverage ≥ 50% | SHOULD |
+| FR-3.5.0.4 | Waiver 불허 | MUST |
+
 #### FR-3.5.1 MVP 진입 게이트
 
 **요구사항:**
@@ -323,17 +628,45 @@ interface CanonicalProfile {
 | ID | 요구사항 | 우선순위 |
 |----|----------|----------|
 | FR-3.5.1.1 | 🍞 체크: Trust boundary 명시적 정의 | MUST |
-| FR-3.5.1.2 | 🍞 체크: 인증/인가 흐름 고정 | MUST |
-| FR-3.5.1.3 | 🧀 체크: 핵심 모듈 cognitive 임계값 미만 | MUST |
-| FR-3.5.1.4 | 🧀 체크: state×async×retry 위반 없음 | MUST |
-| FR-3.5.1.5 | 🥓 체크: 핵심 플로우에 Golden test 존재 | MUST |
-| FR-3.5.1.6 | 하나라도 실패 시 "샌드위치 미형성" 반환 | MUST |
+| FR-3.5.1.2 | 🍞 체크: 인증/인가 흐름 고정 (AUTH_FLOW) | MUST |
+| FR-3.5.1.3 | 🧀 체크: nesting ≤ 4 | MUST |
+| FR-3.5.1.4 | 🧀 체크: concepts ≤ 9 | MUST |
+| FR-3.5.1.5 | 🧀 체크: state×async×retry 위반 없음 | MUST |
+| FR-3.5.1.6 | 🥓 체크: test_coverage ≥ 80% | MUST |
+| FR-3.5.1.7 | Waiver 불허 | MUST |
+| FR-3.5.1.8 | 하나라도 실패 시 "샌드위치 미형성" 반환 | MUST |
 
-**게이트 결과:**
+#### FR-3.5.2 Production 게이트
+
+**요구사항:**
+
+| ID | 요구사항 | 우선순위 |
+|----|----------|----------|
+| FR-3.5.2.1 | MVP 조건 모두 충족 | MUST |
+| FR-3.5.2.2 | 🧀 체크: nesting ≤ 3 | MUST |
+| FR-3.5.2.3 | 🧀 체크: concepts ≤ 7 | MUST |
+| FR-3.5.2.4 | 🥓 체크: test_coverage ≥ 95% | MUST |
+| FR-3.5.2.5 | Essential Complexity Waiver 허용 | MUST |
+
+#### FR-3.5.3 PR 게이트
+
+**요구사항:**
+
+| ID | 요구사항 | 우선순위 |
+|----|----------|----------|
+| FR-3.5.3.1 | PR의 change budget 체크 | MUST |
+| FR-3.5.3.2 | 보호구역 수정 탐지 | MUST |
+| FR-3.5.3.3 | 🍞 변경 시 ADR 요구 | MUST |
+| FR-3.5.3.4 | 🥓 행동 변경은 단일 목적 요구 | SHOULD |
+| FR-3.5.3.5 | 🧀 감소 PR은 자유롭게 허용 | MUST |
+
+**게이트 결과 타입:**
 
 ```typescript
 interface GateResult {
-  canEnterMvp: boolean;
+  gate: 'poc' | 'mvp' | 'production';
+  passed: boolean;
+  sandwichFormed: boolean;
 
   bread: {
     passed: boolean;
@@ -344,33 +677,24 @@ interface GateResult {
 
   cheese: {
     passed: boolean;
-    maxCognitive: number;
-    threshold: number;
+    maxNesting: number;
+    maxConcepts: number;
     stateAsyncRetryViolations: string[];
   };
 
   ham: {
     passed: boolean;
     goldenTestCoverage: number;
-    criticalPathsProtected: string[];
-    unprotectedPaths: string[];
+    criticalPathsProtected: number;
+    criticalPathsTotal: number;
   };
 
-  sandwichFormed: boolean;
+  waiver?: {
+    applied: boolean;
+    adrPath: string;
+  };
 }
 ```
-
-#### FR-3.5.2 PR 게이트
-
-**요구사항:**
-
-| ID | 요구사항 | 우선순위 |
-|----|----------|----------|
-| FR-3.5.2.1 | PR의 change budget 체크 | MUST |
-| FR-3.5.2.2 | 보호구역 수정 탐지 | MUST |
-| FR-3.5.2.3 | 🍞 변경 시 ADR 요구 | MUST |
-| FR-3.5.2.4 | 🥓 행동 변경은 단일 목적 요구 | SHOULD |
-| FR-3.5.2.5 | 🧀 감소 PR은 자유롭게 허용 | MUST |
 
 ### 3.6 Change Budget 시스템
 
@@ -477,6 +801,61 @@ interface Recommendation {
   targetEquilibrium: boolean;
 }
 ```
+
+### 3.10 Essential Complexity Waiver
+
+본질적 복잡도(Essential Complexity)와 우발적 복잡도(Accidental Complexity)를 구분하여,
+본질적으로 복잡한 코드에 대해 Gate 검사를 유예합니다.
+
+#### FR-3.10.1 Waiver 시스템
+
+**요구사항:**
+
+| ID | 요구사항 | 우선순위 |
+|----|----------|----------|
+| FR-3.10.1.1 | `__essential_complexity__` 마커 인식 | MUST |
+| FR-3.10.1.2 | ADR 파일 참조 검증 | MUST |
+| FR-3.10.1.3 | Production Gate에서만 Waiver 적용 | MUST |
+| FR-3.10.1.4 | PoC/MVP Gate에서 Waiver 불허 | MUST |
+| FR-3.10.1.5 | 본질적 복잡도 신호 탐지 | SHOULD |
+
+**Waiver 선언 형식:**
+
+```python
+__module_type__ = "lib/domain"
+__essential_complexity__ = {
+    "adr": "docs/adr/003-inference.md",
+}
+```
+
+**본질적 복잡도 신호 (자동 탐지):**
+
+| 카테고리 | 신호 예시 | 설명 |
+|----------|-----------|------|
+| math | `np.linalg`, `torch.matmul`, `fft` | 수학 연산 |
+| algorithm | `memo[`, `visited`, `heapq` | 알고리즘 패턴 |
+| domain | `voxel`, `segmentation`, `cipher` | 도메인 특화 |
+
+**Waiver 동작:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Gate 검사                                                    │
+├─────────────────────────────────────────────────────────────┤
+│ 1. __essential_complexity__ 마커 확인                        │
+│ 2. ADR 파일 존재 확인                                        │
+│ 3. Gate 타입 확인                                            │
+│    - PoC/MVP: Waiver 불허 → 검사 실행                        │
+│    - Production: Waiver 허용 → 검사 우회                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**LLM 금지 사항:**
+
+> ⚠️ LLM은 `__essential_complexity__` 선언 및 ADR 파일을 생성/수정할 수 없습니다.
+> 리팩토링 대신 면제로 도피하는 것을 방지합니다.
+
+> 📄 상세: [LLM_REFACTORING_PROTOCOL.md](./LLM_REFACTORING_PROTOCOL.md)
 
 ---
 
@@ -750,3 +1129,5 @@ const MODULE_PATTERNS = {
 | 버전 | 날짜         | 작성자 | 변경사항 |
 |------|------------|--------|----------|
 | 1.0 | 2025-12-24 | semantic-complexity team | 이론적 토대 기반 초기 SRS |
+| 1.1 | 2026-01-01 | semantic-complexity team | 2.5절 이론 계층 구조 추가 (5D→3축 사영 관계 명확화) |
+| 1.2 | 2026-01-01 | semantic-complexity team | FR-3.1.1~3.1.3 패턴 보충, FR-3.5 3단계 Gate 체계, FR-3.10 Essential Complexity Waiver 추가 |
