@@ -1,0 +1,58 @@
+{
+  "name": "semantic-complexity",
+  "version": "0.0.13",
+  "description": "Multi-dimensional code complexity analyzer (Bread-Cheese-Ham sandwich model)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "semantic-complexity": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp/index.d.ts",
+      "import": "./dist/mcp/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/**/*.test.js",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "complexity",
+    "cognitive-complexity",
+    "static-analysis",
+    "code-quality",
+    "bread-cheese-ham",
+    "mcp"
+  ],
+  "author": "yscha88",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yscha88/semantic-complexity.git",
+    "directory": "src/ts"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.50.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}

@@ -38,6 +38,7 @@ ENV/
 src/py/.venv/
 src/py/uv.lock
 src/py/.python-version
+src/py/.complexipy_cache
 
 # Test reports (generated)
 *-report.md
