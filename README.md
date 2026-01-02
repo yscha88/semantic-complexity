@@ -41,15 +41,13 @@ npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- np
 ### Go
 
 ```bash
-# 빌드 (로컬)
-cd src/go && go build -o semantic-complexity-mcp ./cmd/mcp
-
-# 설치 (로컬 빌드 사용)
-claude mcp add sc-go -- /path/to/semantic-complexity-mcp
-
 # 설치 (go install)
-go install github.com/yscha88/semantic-complexity/src/go/cmd/mcp@latest
-claude mcp add sc-go -- $(go env GOPATH)/bin/mcp
+go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
+claude mcp add sc-go -- sc-go-mcp
+
+# 빌드 (로컬)
+cd src/go && go build -o sc-go-mcp ./cmd/sc-go-mcp
+claude mcp add sc-go -- /path/to/sc-go-mcp
 
 # 삭제
 claude mcp remove sc-go
@@ -58,7 +56,7 @@ claude mcp remove sc-go
 go clean -cache -modcache
 
 # 재설치
-go clean -cache && go install github.com/yscha88/semantic-complexity/src/go/cmd/mcp@latest
+go clean -cache && go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 ```
 
 ## MCP 도구 목록
