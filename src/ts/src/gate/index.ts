@@ -14,7 +14,13 @@ import { checkWaiver } from './waiver.js';
 // Re-export waiver functions
 export {
   checkWaiver,
+  checkInlineWaiver,
+  checkExternalWaiver,
   parseEssentialComplexity,
+  parseWaiverFile,
+  findWaiverFile,
+  matchFilePattern,
+  isWaiverExpired,
   detectComplexitySignals,
   detectComplexImports,
   buildComplexityContext,
@@ -28,6 +34,8 @@ export type {
   ComplexitySignal,
   ComplexityContext,
   WaiverResult,
+  ExternalWaiverEntry,
+  WaiverFile,
 } from './waiver.js';
 
 // Base thresholds (MVP baseline)
