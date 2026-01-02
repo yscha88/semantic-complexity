@@ -11,6 +11,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.0
         version: 1.25.1(hono@4.11.1)(zod@4.2.1)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.2
@@ -21,9 +24,6 @@ importers:
       eslint:
         specifier: ^9.39.2
         version: 9.39.2
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
       typescript-eslint:
         specifier: ^8.50.0
         version: 8.50.0(eslint@9.39.2)(typescript@5.9.3)
