@@ -10,11 +10,11 @@ Ham Sandwich Theorem 기반 코드 복잡도 분석기
 # 설치
 claude mcp add sc-py -- uvx semantic-complexity-py-mcp
 
+# 업데이트
+uv cache clean && uvx semantic-complexity-py-mcp --version
+
 # 삭제
 claude mcp remove sc-py
-
-# 캐시 삭제
-uv cache clean
 
 # 재설치
 uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- uvx semantic-complexity-py-mcp
@@ -26,13 +26,11 @@ uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- uvx semanti
 # 설치
 claude mcp add sc-ts -- "npx -y semantic-complexity-mcp"
 
+# 업데이트
+npm cache clean --force
+
 # 삭제
 claude mcp remove sc-ts
-
-# 캐시 삭제 (npm)
-npm cache clean --force
-# 또는 npx 캐시만
-rm -rf ~/.npm/_npx
 
 # 재설치
 npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- "npx -y semantic-complexity-mcp"
@@ -42,9 +40,11 @@ npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- "n
 
 ```bash
 # 설치 (go install)
-# @latest 사용 시 src/go/vX.X.X 형식 태그 필요
 go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 claude mcp add sc-go -- sc-go-mcp
+
+# 업데이트
+go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 
 # 빌드 (로컬)
 cd src/go && go build -o sc-go-mcp ./cmd/sc-go-mcp
