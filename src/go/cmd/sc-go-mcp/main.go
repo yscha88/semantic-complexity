@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -18,7 +19,7 @@ import (
 	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
-const version = "0.0.20"
+const version = "0.0.21"
 
 // Canonical profiles (ideal simplex coordinates by module type)
 var canonicalProfiles = map[string]types.SimplexCoordinates{
@@ -200,9 +201,16 @@ For full documentation: https://github.com/yscha88/semantic-complexity/blob/main
 `
 
 func main() {
+	// Handle --version flag
+	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
+		fmt.Printf("sc-go-mcp %s\n", version)
+		os.Exit(0)
+	}
+
 	s := server.NewMCPServer(
 		"semantic-complexity",
 		version,
+		server.WithResourceCapabilities(false, false),
 	)
 
 	// Register usage guide resource

@@ -2,6 +2,28 @@
 
 ---
 
+## [0.0.21] - 2026-01-03
+
+### CLI Version Flag
+
+Added `--version` flag to all MCP servers:
+
+```bash
+# Python
+semantic-complexity-py-mcp --version
+# semantic-complexity-py-mcp 0.0.21
+
+# TypeScript
+npx -y semantic-complexity-mcp --version
+# semantic-complexity-mcp 0.0.21
+
+# Go
+sc-go-mcp --version
+# sc-go-mcp 0.0.21
+```
+
+---
+
 ## [0.0.20] - 2026-01-03
 
 ### MCP Document Resources
