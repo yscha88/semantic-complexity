@@ -10,7 +10,7 @@ ADR (Architecture Decision Record) 기반 Essential Complexity Waiver.
 - expiry.py: 만료 관리
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .schema import (
     ADRStatus,

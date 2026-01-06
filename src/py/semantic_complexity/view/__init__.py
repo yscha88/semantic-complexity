@@ -9,7 +9,7 @@ Views:
 - boundary.py: View B - Boundary Flux (경계 흐름)
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .hotspot import (
     HotspotCandidate,

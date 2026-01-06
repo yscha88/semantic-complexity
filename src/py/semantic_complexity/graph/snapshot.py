@@ -5,7 +5,7 @@ Snapshot (커밋 단위 스냅샷)
 commit + timestamp + repo 정보.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 import uuid
 from dataclasses import dataclass

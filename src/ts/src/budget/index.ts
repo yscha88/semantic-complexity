@@ -12,7 +12,7 @@
  * | lib/util      | ≤ 8        | ≤ 3    | with ADR |
  */
 
-import type { ModuleType } from '../types/index.js';
+import type { ArchitectureRole } from '../types/index.js';
 import type { CheeseResult } from '../analyzers/cheese.js';
 
 // =============================================================
@@ -36,7 +36,7 @@ export interface BudgetViolation {
 
 export interface BudgetCheckResult {
   passed: boolean;
-  moduleType: ModuleType;
+  architectureRole: ArchitectureRole;
   violations: BudgetViolation[];
   delta: Delta;
 }
@@ -52,7 +52,7 @@ export interface ChangeBudget {
 // Budget Configuration by Module Type
 // =============================================================
 
-const MODULE_BUDGETS: Record<ModuleType, ChangeBudget> = {
+const MODULE_BUDGETS: Record<ArchitectureRole, ChangeBudget> = {
   'api/external': {
     deltaCognitive: 3,
     deltaState: 1,
@@ -90,12 +90,12 @@ const MODULE_BUDGETS: Record<ModuleType, ChangeBudget> = {
 // =============================================================
 
 export class BudgetTracker {
-  private moduleType: ModuleType;
+  private architectureRole: ArchitectureRole;
   private budget: ChangeBudget;
 
-  constructor(moduleType: ModuleType) {
-    this.moduleType = moduleType;
-    this.budget = MODULE_BUDGETS[moduleType] || MODULE_BUDGETS['app'];
+  constructor(architectureRole: ArchitectureRole) {
+    this.architectureRole = architectureRole;
+    this.budget = MODULE_BUDGETS[architectureRole] || MODULE_BUDGETS['app'];
   }
 
   check(delta: Delta): BudgetCheckResult {
@@ -124,7 +124,7 @@ export class BudgetTracker {
     }
 
     // ΔPublicAPI check (not for app)
-    if (this.moduleType !== 'app' && delta.publicApi > this.budget.deltaPublicApi) {
+    if (this.architectureRole !== 'app' && delta.publicApi > this.budget.deltaPublicApi) {
       violations.push({
         dimension: 'ΔPublicAPI',
         allowed: this.budget.deltaPublicApi,
@@ -147,7 +147,7 @@ export class BudgetTracker {
 
     return {
       passed: violations.length === 0,
-      moduleType: this.moduleType,
+      architectureRole: this.architectureRole,
       violations,
       delta,
     };
@@ -185,13 +185,13 @@ export function calculateDelta(
 // =============================================================
 
 export function checkBudget(
-  moduleType: ModuleType,
+  architectureRole: ArchitectureRole,
   delta: Delta
 ): BudgetCheckResult {
-  const tracker = new BudgetTracker(moduleType);
+  const tracker = new BudgetTracker(architectureRole);
   return tracker.check(delta);
 }
 
-export function getBudget(moduleType: ModuleType): ChangeBudget {
-  return MODULE_BUDGETS[moduleType] || MODULE_BUDGETS['app'];
+export function getBudget(architectureRole: ArchitectureRole): ChangeBudget {
+  return MODULE_BUDGETS[architectureRole] || MODULE_BUDGETS['app'];
 }

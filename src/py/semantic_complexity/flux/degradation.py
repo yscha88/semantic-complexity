@@ -8,7 +8,7 @@
 Bread 약화 = 보안 경계 침식 = 위험
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 from enum import Enum

@@ -4,7 +4,7 @@ Gradient Recommender
 균형점으로 향하는 리팩토링 권장사항
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .gradient import (
     suggest_refactor,

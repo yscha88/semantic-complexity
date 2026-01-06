@@ -22,7 +22,7 @@ import { normalize, calculateEquilibrium, getLabel } from '../simplex/index.js';
 import { checkGate } from '../gate/index.js';
 import { checkBudget, calculateDelta } from '../budget/index.js';
 import { suggestRefactor, checkDegradation } from '../recommend/index.js';
-import type { GateType, ModuleType, SimplexCoordinates } from '../types/index.js';
+import type { GateType, ArchitectureRole, SimplexCoordinates } from '../types/index.js';
 
 // Usage guide for LLM
 const USAGE_GUIDE = `# semantic-complexity 사용 가이드
@@ -342,10 +342,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
             type: 'string',
             description: 'Source code to analyze',
           },
-          module_type: {
+          architecture_role: {
             type: 'string',
             enum: ['api/external', 'api/internal', 'lib/domain', 'lib/util', 'app'],
-            description: 'Module type for context-aware recommendations',
+            description: 'Architecture role for context-aware recommendations',
           },
         },
         required: ['source'],
@@ -365,10 +365,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
             type: 'string',
             description: 'Source code after changes',
           },
-          module_type: {
+          architecture_role: {
             type: 'string',
             enum: ['api/external', 'api/internal', 'lib/domain', 'lib/util', 'app'],
-            description: 'Module type for budget limits',
+            description: 'Architecture role for budget limits',
           },
         },
         required: ['before_source', 'after_source'],
@@ -425,19 +425,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const label = getLabel(simplex);
       const recommendations = suggestRefactor(simplex, equilibrium, cheese);
 
-      // Determine module type from file path or use default
-      let moduleType = 'default';
+      // Determine architecture role from file path or use default
+      let architectureRole = 'default';
       if (filePath) {
         if (filePath.includes('/api/') || filePath.includes('\\api\\')) {
-          moduleType = filePath.includes('external') ? 'api/external' : 'api/internal';
+          architectureRole = filePath.includes('external') ? 'api/external' : 'api/internal';
         } else if (filePath.includes('/lib/') || filePath.includes('\\lib\\')) {
-          moduleType = filePath.includes('domain') ? 'lib/domain' : 'lib/util';
+          architectureRole = filePath.includes('domain') ? 'lib/domain' : 'lib/util';
         } else if (filePath.includes('/app/') || filePath.includes('\\app\\')) {
-          moduleType = 'app';
+          architectureRole = 'app';
         }
       }
 
-      const canonical = CANONICAL_PROFILES[moduleType] || CANONICAL_PROFILES['default'];
+      const canonical = CANONICAL_PROFILES[architectureRole] || CANONICAL_PROFILES['default'];
       const deviation = calculateDeviation(simplex, canonical);
 
       return {
@@ -524,11 +524,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     case 'check_budget': {
       const beforeSource = args?.before_source as string;
       const afterSource = args?.after_source as string;
-      const moduleType = (args?.module_type as ModuleType) || 'app';
+      const architectureRole = (args?.architecture_role as ArchitectureRole) || 'app';
       const before = analyzeCheese(beforeSource);
       const after = analyzeCheese(afterSource);
       const delta = calculateDelta(before, after);
-      const result = checkBudget(moduleType, delta);
+      const result = checkBudget(architectureRole, delta);
 
       return {
         content: [

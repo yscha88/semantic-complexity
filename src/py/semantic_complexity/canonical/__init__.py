@@ -4,7 +4,7 @@ Canonical Profile System
 모듈 타입별 기준 프로파일
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from ..types.profile import (
     CanonicalProfile,

@@ -9,7 +9,7 @@
 - L: Lambda/Coupling (결합도)
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 import ast
 from dataclasses import dataclass, field

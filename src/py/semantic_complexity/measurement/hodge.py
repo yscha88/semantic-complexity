@@ -7,7 +7,7 @@ Hodge Bucket 분류
 - architectural = S + Λ    (🍞 Bread + 🥓 Ham - 구조적 복잡도)
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from enum import Enum
 

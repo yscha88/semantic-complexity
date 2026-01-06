@@ -1,15 +1,15 @@
 // Package types defines core types for semantic-complexity
 package types
 
-// ModuleType represents the type of code module
-type ModuleType string
+// ArchitectureRole represents the type of code module
+type ArchitectureRole string
 
 const (
-	APIExternal ModuleType = "api/external"
-	APIInternal ModuleType = "api/internal"
-	LibDomain   ModuleType = "lib/domain"
-	LibUtil     ModuleType = "lib/util"
-	App         ModuleType = "app"
+	APIExternal ArchitectureRole = "api/external"
+	APIInternal ArchitectureRole = "api/internal"
+	LibDomain   ArchitectureRole = "lib/domain"
+	LibUtil     ArchitectureRole = "lib/util"
+	App         ArchitectureRole = "app"
 )
 
 // GateType represents the quality gate level
@@ -145,7 +145,7 @@ type BudgetViolation struct {
 // BudgetResult represents budget check result
 type BudgetResult struct {
 	Passed     bool              `json:"passed"`
-	ModuleType ModuleType        `json:"moduleType"`
+	ArchitectureRole ArchitectureRole        `json:"architectureRole"`
 	Violations []BudgetViolation `json:"violations"`
 	Delta      Delta             `json:"delta"`
 }

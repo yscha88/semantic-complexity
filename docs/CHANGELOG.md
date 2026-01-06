@@ -2,11 +2,47 @@
 
 ---
 
-## [0.0.24] - 2026-01-03
+## [0.0.25] - 2026-01-06
+
+### Go Prompts Capability + All Languages: module_type → architecture_role
+
+#### 🔧 Go: Prompts Capability added
+
+Fixed Gemini CLI error:
+```
+✕ Error discovering prompts from sc-go: MCP error -32601: Prompts not supported
+```
+
+```go
+server.WithPromptCapabilities(false)  // added
+```
+
+#### 🏷️ All Languages: `module_type` → `architecture_role` full rename
+
+| Item | Before | After |
+|------|--------|-------|
+| File declaration | `__module_type__` | `__architecture_role__` |
+| Parameter | `module_type` | `architecture_role` |
+| Internal variable | `moduleType` | `architectureRole` |
+| Type name | `ModuleType` | `ArchitectureRole` |
+
+**Affected:**
+| Language | Files |
+|----------|-------|
+| Python | 63 |
+| TypeScript | 3 |
+| Go | 3 |
+| Docs | 9 |
+
+**Reason**: "type" can be confused with Python's built-in type. Full rename to clearly express architectural role.
+
+---
+
+## [0.0.24] - 2026-01-06
 
 ### TypeScript Runtime Dependency Fix
 
-#### 🐛 typescript dependency location fix
+#### 🐛 TypeScript: typescript dependency location fix
 
 `typescript` was only in `devDependencies`, causing AST parsing failure when running via `npx`.
 
@@ -14,12 +50,11 @@
 Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'typescript'
 ```
 
-**Fix:**
 | Item | Before | After |
 |------|--------|-------|
 | typescript | devDependencies | dependencies |
 
-TypeScript compiler API is used for source code AST parsing, so it's required at runtime.
+TypeScript compiler API is used for AST parsing, required at runtime.
 
 ---
 
@@ -279,7 +314,7 @@ Project-level waiver management via external file:
 #### Essential Complexity Waiver
 
 ```python
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 __essential_complexity__ = {
     "adr": "docs/adr/003-inference.md",
 }

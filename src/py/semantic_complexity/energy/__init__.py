@@ -9,7 +9,7 @@ energy 모듈
 - convergence: ε-수렴 판정 및 ADR 발급 조건 검사
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .potential import (
     PotentialConfig,

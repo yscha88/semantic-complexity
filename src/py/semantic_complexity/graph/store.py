@@ -5,7 +5,7 @@ SQLite 기반 저장소
 SDS 11.8 SQLite 스키마 구현.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 import json
 import sqlite3
@@ -51,7 +51,7 @@ class SQLiteStore:
     CREATE TABLE IF NOT EXISTS metrics (
         snapshot_id TEXT NOT NULL,
         entity_id TEXT NOT NULL,
-        module_type TEXT NOT NULL,
+        architecture_role TEXT NOT NULL,
         c REAL, n REAL, s REAL, a REAL, lambda REAL,
         raw_sum REAL,
         canonical_deviation REAL,
@@ -240,14 +240,14 @@ class SQLiteStore:
 
         self.conn.execute("""
             INSERT OR REPLACE INTO metrics
-            (snapshot_id, entity_id, module_type,
+            (snapshot_id, entity_id, architecture_role,
              c, n, s, a, lambda, raw_sum, canonical_deviation,
              h_alg, h_bal, h_arch, confidence)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             metrics.snapshot_id,
             metrics.entity_id,
-            metrics.module_type,
+            metrics.architecture_role,
             metrics.x.C,
             metrics.x.N,
             metrics.x.S,
@@ -314,7 +314,7 @@ class SQLiteStore:
             raw_sum=row["raw_sum"],
             d=row["canonical_deviation"],
             hodge=hodge,
-            module_type=row["module_type"],
+            architecture_role=row["architecture_role"],
             confidence=row["confidence"] or 1.0,
         )
 

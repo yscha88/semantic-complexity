@@ -156,7 +156,7 @@
 packages/core/src/
 ├── types/                    # 타입 정의
 │   ├── axis.ts              # Axis = '🍞' | '🧀' | '🥓'
-│   ├── module.ts            # ModuleType
+│   ├── module.ts            # ArchitectureRole
 │   ├── score.ts             # SandwichScore
 │   └── index.ts
 │
@@ -1010,7 +1010,7 @@ function labelDominantAxis(score: SandwichScore): DominantLabel {
 #### 3.6.1 모듈 타입별 Canonical 정의
 
 ```typescript
-const CANONICAL_PROFILES: Record<ModuleType, SandwichScore> = {
+const CANONICAL_PROFILES: Record<ArchitectureRole, SandwichScore> = {
   'deploy':       { bread: 70, cheese: 10, ham: 20 },
   'api-external': { bread: 50, cheese: 20, ham: 30 },
   'api-internal': { bread: 30, cheese: 30, ham: 40 },
@@ -1352,7 +1352,7 @@ FUNCTION check_waiver(
 type Axis = '🍞' | '🧀' | '🥓';
 
 // 모듈 타입
-type ModuleType =
+type ArchitectureRole =
   | 'deploy'
   | 'api-external'
   | 'api-internal'
@@ -1370,7 +1370,7 @@ interface SandwichScore {
 // 분석 결과
 interface ModuleAnalysis {
   path: string;
-  moduleType: ModuleType;
+  architectureRole: ArchitectureRole;
 
   // Raw scores (정규화 전)
   raw: {
@@ -1447,7 +1447,7 @@ interface BudgetCheckResult {
   }[];
 }
 
-const CHANGE_BUDGETS: Record<ModuleType, ChangeBudget> = {
+const CHANGE_BUDGETS: Record<ArchitectureRole, ChangeBudget> = {
   'deploy':       { deltaCognitive: 2,  deltaStateTransitions: 0, deltaPublicApi: 0, breakingChangesAllowed: false },
   'api-external': { deltaCognitive: 3,  deltaStateTransitions: 1, deltaPublicApi: 2, breakingChangesAllowed: false },
   'api-internal': { deltaCognitive: 5,  deltaStateTransitions: 2, deltaPublicApi: 3, breakingChangesAllowed: true },
@@ -1505,7 +1505,7 @@ const MCP_TOOLS = [
   {
     name: 'check_budget',
     description: 'PR 변경 예산 검사',
-    parameters: { before_source: string, after_source: string, module_type?: string },
+    parameters: { before_source: string, after_source: string, architecture_role?: string },
   },
   {
     name: 'get_label',
@@ -1515,7 +1515,7 @@ const MCP_TOOLS = [
   {
     name: 'suggest_refactor',
     description: '균형 방향 리팩토링 제안',
-    parameters: { source: string, module_type?: string },
+    parameters: { source: string, architecture_role?: string },
   },
   {
     name: 'check_degradation',
@@ -1591,3 +1591,5 @@ sc-go-mcp --version
 | 1.4 | 2026-01-03 | 5.4 CLI 인터페이스 추가 (--version 플래그) |
 | 1.5 | 2026-01-03 | TS bin 이름 변경 (semantic-complexity-ts-mcp) |
 | 1.6 | 2026-01-03 | TS shebang 추가, Go CI/CD workflow 개선 |
+| 1.7 | 2026-01-06 | TS 런타임 의존성 수정 (v0.0.24) |
+| 1.8 | 2026-01-06 | Go Prompts Capability, `__architecture_role__` 변경 (v0.0.25) |

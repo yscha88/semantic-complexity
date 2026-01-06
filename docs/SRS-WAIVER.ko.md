@@ -47,7 +47,7 @@
 │  ├── rawSum, tensor                                        │
 │  ├── d = ‖x/μ_t - 1‖₂              ← 정준 편차            │
 │  ├── hodge: algorithmic|balanced|architectural             │
-│  ├── moduleType, confidence                                │
+│  ├── architectureRole, confidence                                │
 ├─────────────────────────────────────────────────────────────┤
 │  rule_hits (근거 = Evidence)                                │
 │  ├── rule_id, count                                        │
@@ -459,7 +459,7 @@ references:
 ```python
 # complexity/measurement.py
 def measure_entity(source: str, entity_id: str) -> Metrics
-def calculate_deviation(metrics: Metrics, module_type: str) -> float
+def calculate_deviation(metrics: Metrics, architecture_role: str) -> float
 def detect_signals(source: str) -> list[ComplexitySignal]
 
 # complexity/energy.py
