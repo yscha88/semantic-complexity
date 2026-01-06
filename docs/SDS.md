@@ -221,7 +221,7 @@ function normalizeToSimplex(raw: RawScores): SandwichScore {
 ### 3.5 Canonical Profile Deviation
 
 ```typescript
-const CANONICAL_PROFILES: Record<ModuleType, SandwichScore> = {
+const CANONICAL_PROFILES: Record<ArchitectureRole, SandwichScore> = {
   'deploy':       { bread: 70, cheese: 10, ham: 20 },
   'api-external': { bread: 50, cheese: 20, ham: 30 },
   'api-internal': { bread: 30, cheese: 30, ham: 40 },
@@ -318,7 +318,7 @@ const MCP_TOOLS = [
   {
     name: 'check_budget',
     description: 'PR change budget check',
-    parameters: { before_source: string, after_source: string, module_type?: string },
+    parameters: { before_source: string, after_source: string, architecture_role?: string },
   },
   {
     name: 'get_label',
@@ -328,7 +328,7 @@ const MCP_TOOLS = [
   {
     name: 'suggest_refactor',
     description: 'Equilibrium direction refactoring suggestions',
-    parameters: { source: string, module_type?: string },
+    parameters: { source: string, architecture_role?: string },
   },
   {
     name: 'check_degradation',
@@ -413,3 +413,5 @@ sc-go-mcp --version
 | 1.2 | 2026-01-03 | CLI Interface section (--version flag) |
 | 1.3 | 2026-01-03 | TS bin rename (semantic-complexity-ts-mcp) |
 | 1.4 | 2026-01-03 | TS shebang, Go CI/CD workflow improvement |
+| 1.5 | 2026-01-06 | TS runtime dependency fix (v0.0.24) |
+| 1.6 | 2026-01-06 | Go Prompts Capability, `__architecture_role__` rename (v0.0.25) |

@@ -4,7 +4,7 @@ ADR 만료 관리
 만료 상태 확인 및 경고.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 from datetime import date

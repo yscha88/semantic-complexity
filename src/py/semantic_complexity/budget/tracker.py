@@ -13,12 +13,12 @@ PR당 변경 예산 추적 및 검사
 | deploy        | ≤ 2        | N/A    | N/A        | ADR+Review|
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass, field
 from typing import Literal
 
-from ..types import ModuleType, ChangeBudget, get_canonical_profile, DEFAULT_MODULE_TYPE
+from ..types import ArchitectureRole, ChangeBudget, get_canonical_profile, DEFAULT_MODULE_TYPE
 from ..analyzers import CognitiveAnalysis
 
 
@@ -40,7 +40,7 @@ class BudgetViolation:
 class BudgetCheckResult:
     """예산 검사 결과"""
     passed: bool
-    module_type: ModuleType
+    architecture_role: ArchitectureRole
     violations: list[BudgetViolation] = field(default_factory=list)
 
     # Delta 값들
@@ -53,7 +53,7 @@ class BudgetCheckResult:
     def summary(self) -> str:
         """결과 요약"""
         if self.passed:
-            return f"✅ Budget check PASSED for {self.module_type}"
+            return f"✅ Budget check PASSED for {self.architecture_role}"
 
         violation_msgs = [v.message for v in self.violations]
         return f"❌ Budget EXCEEDED: {', '.join(violation_msgs)}"
@@ -71,9 +71,9 @@ class Delta:
 class BudgetTracker:
     """Change Budget 추적기"""
 
-    def __init__(self, module_type: ModuleType):
-        self.module_type = module_type
-        self.profile = get_canonical_profile(module_type)
+    def __init__(self, architecture_role: ArchitectureRole):
+        self.architecture_role = architecture_role
+        self.profile = get_canonical_profile(architecture_role)
         self.budget = self.profile.change_budget
 
     def check(self, delta: Delta) -> BudgetCheckResult:
@@ -107,7 +107,7 @@ class BudgetTracker:
             ))
 
         # ΔPublicAPI 검사 (app 제외)
-        if self.module_type != DEFAULT_MODULE_TYPE:
+        if self.architecture_role != DEFAULT_MODULE_TYPE:
             if delta.public_api > self.budget.delta_public_api:
                 violations.append(BudgetViolation(
                     dimension="ΔPublicAPI",
@@ -127,7 +127,7 @@ class BudgetTracker:
 
         return BudgetCheckResult(
             passed=len(violations) == 0,
-            module_type=self.module_type,
+            architecture_role=self.architecture_role,
             violations=violations,
             delta_cognitive=delta.cognitive,
             delta_state_transitions=delta.state_transitions,
@@ -173,24 +173,24 @@ def calculate_delta(
 # ============================================================
 
 def check_budget(
-    module_type: ModuleType,
+    architecture_role: ArchitectureRole,
     delta: Delta,
 ) -> BudgetCheckResult:
     """
     Change Budget 검사
 
     Args:
-        module_type: 모듈 타입
+        architecture_role: 모듈 타입
         delta: 변경량
 
     Returns:
         BudgetCheckResult: 검사 결과
     """
-    tracker = BudgetTracker(module_type)
+    tracker = BudgetTracker(architecture_role)
     return tracker.check(delta)
 
 
-def get_budget(module_type: ModuleType) -> ChangeBudget:
+def get_budget(architecture_role: ArchitectureRole) -> ChangeBudget:
     """모듈 타입의 Change Budget 반환"""
-    profile = get_canonical_profile(module_type)
+    profile = get_canonical_profile(architecture_role)
     return profile.change_budget

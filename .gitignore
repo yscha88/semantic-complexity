@@ -57,3 +57,4 @@ src/py/.complexipy_cache
 # Go binaries
 *.exe
 go-complexity
+.gemini

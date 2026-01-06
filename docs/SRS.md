@@ -216,9 +216,9 @@ semantic-complexity budget ./src --base main --head feature
 - analyze_sandwich(source, file_path?)
 - analyze_cheese(source)
 - check_gate(source, gate_type?, file_path?, project_root?)
-- check_budget(before_source, after_source, module_type?)
+- check_budget(before_source, after_source, architecture_role?)
 - get_label(source)
-- suggest_refactor(source, module_type?)
+- suggest_refactor(source, architecture_role?)
 - check_degradation(before_source, after_source)
 
 // Resources

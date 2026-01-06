@@ -9,7 +9,7 @@ View B: Boundary Flux
 Bread (보안) 관련 가시화.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 

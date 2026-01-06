@@ -14,13 +14,13 @@ Essential Complexity Waiver:
 - Production Gate: waiver 가능 (ADR 필수)
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
-from ..types import Axis, ModuleType, SandwichScore, get_canonical_profile, DEFAULT_MODULE_TYPE
+from ..types import Axis, ArchitectureRole, SandwichScore, get_canonical_profile, DEFAULT_MODULE_TYPE
 from ..analyzers import BreadResult, CognitiveAnalysis, HamResult
 from .waiver import check_waiver, WaiverResult, EssentialComplexityConfig
 
@@ -173,7 +173,7 @@ class MVPGate:
         bread_result: BreadResult,
         cheese_result: CognitiveAnalysis,
         ham_result: HamResult,
-        module_type: ModuleType | None = None,
+        architecture_role: ArchitectureRole | None = None,
         gate_type: Literal["poc", "mvp", "production"] = "mvp",
         source: str | None = None,
         file_path: str | Path | None = None,
@@ -182,7 +182,7 @@ class MVPGate:
         self.bread_result = bread_result
         self.cheese_result = cheese_result
         self.ham_result = ham_result
-        self.module_type = module_type or DEFAULT_MODULE_TYPE
+        self.architecture_role = architecture_role or DEFAULT_MODULE_TYPE
         self.gate_type = gate_type
         self.source = source
         self.file_path = file_path
@@ -400,7 +400,7 @@ def check_poc_gate(
     bread_result: BreadResult,
     cheese_result: CognitiveAnalysis,
     ham_result: HamResult,
-    module_type: ModuleType | None = None,
+    architecture_role: ArchitectureRole | None = None,
 ) -> GateResult:
     """
     PoC Gate 검사 (느슨)
@@ -412,12 +412,12 @@ def check_poc_gate(
         bread_result: 🍞 Security 분석 결과
         cheese_result: 🧀 Cognitive 분석 결과 (인지 가능 여부)
         ham_result: 🥓 Behavioral 분석 결과
-        module_type: 모듈 타입
+        architecture_role: 모듈 타입
 
     Returns:
         GateResult: Gate 검사 결과
     """
-    gate = MVPGate(bread_result, cheese_result, ham_result, module_type, "poc")
+    gate = MVPGate(bread_result, cheese_result, ham_result, architecture_role, "poc")
     return gate.check()
 
 
@@ -425,7 +425,7 @@ def check_mvp_gate(
     bread_result: BreadResult,
     cheese_result: CognitiveAnalysis,
     ham_result: HamResult,
-    module_type: ModuleType | None = None,
+    architecture_role: ArchitectureRole | None = None,
 ) -> GateResult:
     """
     MVP Gate 검사 (바싹)
@@ -437,12 +437,12 @@ def check_mvp_gate(
         bread_result: 🍞 Security 분석 결과
         cheese_result: 🧀 Cognitive 분석 결과 (인지 가능 여부)
         ham_result: 🥓 Behavioral 분석 결과
-        module_type: 모듈 타입
+        architecture_role: 모듈 타입
 
     Returns:
         GateResult: Gate 검사 결과
     """
-    gate = MVPGate(bread_result, cheese_result, ham_result, module_type, "mvp")
+    gate = MVPGate(bread_result, cheese_result, ham_result, architecture_role, "mvp")
     return gate.check()
 
 
@@ -450,7 +450,7 @@ def check_production_gate(
     bread_result: BreadResult,
     cheese_result: CognitiveAnalysis,
     ham_result: HamResult,
-    module_type: ModuleType | None = None,
+    architecture_role: ArchitectureRole | None = None,
     source: str | None = None,
     file_path: str | Path | None = None,
     project_root: str | Path | None = None,
@@ -465,7 +465,7 @@ def check_production_gate(
         bread_result: 🍞 Security 분석 결과
         cheese_result: 🧀 Cognitive 분석 결과 (인지 가능 여부)
         ham_result: 🥓 Behavioral 분석 결과
-        module_type: 모듈 타입
+        architecture_role: 모듈 타입
         source: 소스 코드 (waiver 체크용)
         file_path: 파일 경로 (ADR 상대 경로 해석용)
         project_root: 프로젝트 루트 (ADR 경로 해석용)
@@ -477,7 +477,7 @@ def check_production_gate(
         bread_result,
         cheese_result,
         ham_result,
-        module_type,
+        architecture_role,
         "production",
         source,
         file_path,

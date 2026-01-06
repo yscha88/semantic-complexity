@@ -4,7 +4,7 @@ ADR 유효성 검증기
 수렴 증명 검증 포함.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass, field
 from datetime import date

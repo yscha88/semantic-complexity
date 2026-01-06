@@ -2,24 +2,59 @@
 
 ---
 
-## [0.0.24] - 2026-01-03
+## [0.0.25] - 2026-01-06
+
+### Go Prompts Capability + Python 모듈 타입 변수명 변경
+
+#### 🔧 Go: Prompts Capability 추가
+
+Gemini CLI에서 발생하던 에러 수정:
+```
+✕ Error discovering prompts from sc-go: MCP error -32601: Prompts not supported
+```
+
+```go
+server.WithPromptCapabilities(false)  // 추가
+```
+
+#### 🏷️ 전 언어: `module_type` → `architecture_role` 전면 변경
+
+| 항목 | 이전 | 변경 후 |
+|------|------|---------|
+| 파일 선언 | `__module_type__` | `__architecture_role__` |
+| 파라미터 | `module_type` | `architecture_role` |
+| 내부 변수 | `moduleType` | `architectureRole` |
+| 타입명 | `ModuleType` | `ArchitectureRole` |
+
+**영향 범위:**
+| 언어 | 파일 수 |
+|------|---------|
+| Python | 63개 |
+| TypeScript | 3개 |
+| Go | 3개 |
+| 문서 | 9개 |
+
+**변경 이유**: "type"이 Python 내장 type과 혼동될 수 있어, 아키텍처에서의 역할을 명확히 표현하는 이름으로 전면 변경.
+
+---
+
+## [0.0.24] - 2026-01-06
 
 ### TypeScript 런타임 의존성 수정
 
-#### 🐛 typescript 의존성 위치 수정
+#### 🐛 TypeScript: typescript 의존성 위치 수정
 
-`typescript`가 `devDependencies`에만 있어서 `npx` 실행 시 AST 파싱 실패 문제 발생.
+`typescript`가 `devDependencies`에만 있어서 `npx` 실행 시 AST 파싱 실패.
 
 ```
 Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'typescript'
 ```
 
-**수정:**
 | 항목 | 이전 | 변경 후 |
 |------|------|---------|
 | typescript | devDependencies | dependencies |
 
-TypeScript compiler API를 사용하여 소스 코드 AST를 파싱하므로 런타임에도 필요.
+TypeScript compiler API로 AST 파싱하므로 런타임에 필요.
 
 ---
 
@@ -202,7 +237,7 @@ Go의 모든 JSON 태그를 TypeScript와 일치하도록 camelCase로 통일:
 | | `test_files_found` | `testFilesFound` |
 | Recommendation | `expected_impact` | `expectedImpact` |
 | | `target_equilibrium` | `targetEquilibrium` |
-| BudgetResult | `module_type` | `moduleType` |
+| BudgetResult | `architecture_role` | `architectureRole` |
 | Delta | `state_transitions` | `stateTransitions` |
 | | `public_api` | `publicAPI` |
 | | `breaking_changes` | `breakingChanges` |
@@ -540,7 +575,7 @@ BASE_THRESHOLDS = {
 
 **사용법:**
 ```python
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 __essential_complexity__ = {
     "adr": "docs/adr/003-inference.md",
 }
@@ -803,7 +838,7 @@ def process(input_data, config, options):  # concepts: 4
 ```json
 {
   "tensor": { "score": 12.5, "zone": "review", "rawSum": 8, ... },
-  "moduleType": { "inferred": "lib", "confidence": 0.85 },
+  "architectureRole": { "inferred": "lib", "confidence": 0.85 },
   "canonical": { "profile": "lib", "deviation": 0.12, ... },
   "hodge": { "algorithmic": 3, "balanced": 2, "architectural": 3 },
   "recommendations": [{ "priority": 1, "suggestion": "..." }]
@@ -817,7 +852,7 @@ def process(input_data, config, options):  # concepts: 4
 type FunctionResult struct {
     // ... 기존 필드
     Tensor          TensorScoreOutput      `json:"tensor"`
-    ModuleType      ModuleTypeOutput       `json:"moduleType"`
+    ArchitectureRole      ArchitectureRoleOutput       `json:"architectureRole"`
     Canonical       CanonicalOutput        `json:"canonical"`
     Hodge           HodgeOutput            `json:"hodge"`
     Recommendations []RecommendationOutput `json:"recommendations"`
@@ -842,7 +877,7 @@ type FunctionResult struct {
 |------|------|------|
 | `compare_mccabe_dimensional` | → `analyze_function` | 통합 (comparison 필드) |
 | `get_dimension_breakdown` | → `analyze_function` | 통합 (dimensions 필드) |
-| `infer_module_type` | → `validate_complexity` | 통합 |
+| `infer_architecture_role` | → `validate_complexity` | 통합 |
 | `check_canonical` | → `validate_complexity` | 통합 |
 
 **통합된 6개 도구:**
@@ -999,7 +1034,7 @@ packages/core/src/tensor/
 └── index.ts
 
 py/semantic_complexity/core/
-├── tensor.py      # ModuleType, Vector5D, InteractionMatrix
+├── tensor.py      # ArchitectureRole, Vector5D, InteractionMatrix
 ├── convergence.py # ConvergenceResult, analyze_convergence
 └── canonical.py   # CanonicalProfile, HodgeDecomposition
 ```
@@ -1016,9 +1051,9 @@ py/semantic_complexity/core/
 
 **모듈 타입별 정준형**
 ```typescript
-type ModuleType = 'api' | 'app' | 'lib' | 'deploy';
+type ArchitectureRole = 'api' | 'app' | 'lib' | 'deploy';
 
-Φ: ModuleType → CanonicalProfile
+Φ: ArchitectureRole → CanonicalProfile
 ```
 
 **메타 차원 (Ham Sandwich)**

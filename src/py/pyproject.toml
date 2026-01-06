@@ -1,6 +1,6 @@
 [project]
 name = "semantic-complexity"
-version = "0.0.24"
+version = "0.0.25"
 description = "Multi-dimensional code complexity analyzer"
 readme = "README.md"
 license = { text = "MIT" }

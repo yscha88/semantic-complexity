@@ -5,7 +5,7 @@ Edge (그래프 간선)
 가중치 구성요소: coupling, boundary, cognitive, failure_propagation.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass, field
 from enum import Enum

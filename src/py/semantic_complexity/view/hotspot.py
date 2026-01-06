@@ -8,7 +8,7 @@ View A: Hotspot Trajectory
 Cheese (인지 복잡도) 관련 핵심 지표.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 from typing import Literal

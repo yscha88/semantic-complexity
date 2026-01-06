@@ -206,7 +206,7 @@ class TestMetrics:
             x=x,
             d=1.5,
             hodge=HodgeBucket.ALGORITHMIC,
-            module_type="lib/domain",
+            architecture_role="lib/domain",
         )
         assert metrics.raw_sum == 15.0
         assert metrics.d == 1.5

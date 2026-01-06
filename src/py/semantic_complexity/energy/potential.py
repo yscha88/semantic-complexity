@@ -9,7 +9,7 @@
 - Φ 수렴 = 더 이상 개선 여지 없음 (본질적 복잡도)
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING

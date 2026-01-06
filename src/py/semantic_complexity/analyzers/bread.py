@@ -8,7 +8,7 @@
 - Blast radius 계산
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 import re
 from dataclasses import dataclass, field
