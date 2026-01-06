@@ -74,7 +74,7 @@ export interface GateViolation {
 // Module Types
 // =============================================================
 
-export type ModuleType =
+export type ArchitectureRole =
   | 'api/external'
   | 'api/internal'
   | 'lib/domain'

@@ -19,7 +19,7 @@ import (
 	"github.com/yscha88/semantic-complexity/src/go/pkg/types"
 )
 
-const version = "0.0.24"
+const version = "0.0.25"
 
 // Canonical profiles (ideal simplex coordinates by module type)
 var canonicalProfiles = map[string]types.SimplexCoordinates{
@@ -31,7 +31,7 @@ var canonicalProfiles = map[string]types.SimplexCoordinates{
 	"default":      {Bread: 1.0 / 3.0, Cheese: 1.0 / 3.0, Ham: 1.0 / 3.0},
 }
 
-func inferModuleType(filePath string) string {
+func inferArchitectureRole(filePath string) string {
 	if filePath == "" {
 		return "default"
 	}
@@ -211,6 +211,7 @@ func main() {
 		"semantic-complexity",
 		version,
 		server.WithResourceCapabilities(false, false),
+		server.WithPromptCapabilities(false),
 	)
 
 	// Register usage guide resource
@@ -323,14 +324,14 @@ func main() {
 	s.AddTool(mcp.NewTool("suggest_refactor",
 		mcp.WithDescription("Suggest refactoring actions based on complexity analysis"),
 		mcp.WithString("source", mcp.Required(), mcp.Description("Source code to analyze")),
-		mcp.WithString("module_type", mcp.Description("Module type for context-aware recommendations")),
+		mcp.WithString("architecture_role", mcp.Description("Architecture role for context-aware recommendations")),
 	), suggestRefactor)
 
 	s.AddTool(mcp.NewTool("check_budget",
 		mcp.WithDescription("Check if code changes stay within allowed complexity budget"),
 		mcp.WithString("before_source", mcp.Required(), mcp.Description("Source code before changes")),
 		mcp.WithString("after_source", mcp.Required(), mcp.Description("Source code after changes")),
-		mcp.WithString("module_type", mcp.Description("Module type for budget limits")),
+		mcp.WithString("architecture_role", mcp.Description("Architecture role for budget limits")),
 	), checkBudgetHandler)
 
 	// Start server
@@ -354,9 +355,9 @@ func analyzeSandwich(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	label := simplex.GetLabel(simplexCoords)
 	recommendations := recommend.SuggestRefactor(simplexCoords, equilibrium, &cheese, 3)
 
-	// Get canonical profile based on inferred module type
-	moduleType := inferModuleType(filePath)
-	canonical := canonicalProfiles[moduleType]
+	// Get canonical profile based on inferred architecture role
+	architectureRole := inferArchitectureRole(filePath)
+	canonical := canonicalProfiles[architectureRole]
 	deviation := calculateDeviation(simplexCoords, canonical)
 
 	result := map[string]interface{}{
@@ -526,15 +527,15 @@ func suggestRefactor(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 func checkBudgetHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	beforeSource := request.Params.Arguments["before_source"].(string)
 	afterSource := request.Params.Arguments["after_source"].(string)
-	moduleType := types.App
-	if mt, ok := request.Params.Arguments["module_type"].(string); ok && mt != "" {
-		moduleType = types.ModuleType(mt)
+	architectureRole := types.App
+	if ar, ok := request.Params.Arguments["architecture_role"].(string); ok && ar != "" {
+		architectureRole = types.ArchitectureRole(ar)
 	}
 
 	before := analyzer.AnalyzeCheese(beforeSource)
 	after := analyzer.AnalyzeCheese(afterSource)
 	delta := budget.CalculateDelta(before, after)
-	result := budget.CheckBudget(moduleType, delta)
+	result := budget.CheckBudget(architectureRole, delta)
 
 	jsonBytes, _ := json.MarshalIndent(result, "", "  ")
 	return mcp.NewToolResultText(string(jsonBytes)), nil

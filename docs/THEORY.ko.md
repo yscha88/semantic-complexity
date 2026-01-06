@@ -297,7 +297,7 @@ Gate pass/fail 결과
 | Gate 로직 | `checkGate()`, `runGatePipeline()` | pass/warn/fail 결정 |
 | Delta 분석 | `analyzeDelta()`, `detectViolations()` | baseline vs current |
 | Lyapunov 에너지 | `calculateTensorScore()` | 수학적 프레임워크 |
-| Canonical Centroid | `CANONICAL_5D_PROFILES[moduleType]` | 목표 프로파일 |
+| Canonical Centroid | `CANONICAL_5D_PROFILES[architectureRole]` | 목표 프로파일 |
 | Gradient Descent | `recommendRefactoring()` | 방향 제안 |
 
 ---

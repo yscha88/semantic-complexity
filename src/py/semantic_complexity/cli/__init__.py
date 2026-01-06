@@ -6,7 +6,7 @@ Usage:
     semantic-complexity gate <file> [--gate=mvp|production]
 """
 
-__module_type__ = "app"
+__architecture_role__ = "app"
 
 import click
 from rich.console import Console
@@ -38,7 +38,7 @@ def analyze(file: str, format: str):
         import json
         click.echo(json.dumps({
             "path": result.path,
-            "module_type": str(result.module_type),
+            "architecture_role": str(result.architecture_role),
             "accessible": result.cheese.accessible,
             "max_nesting": result.cheese.max_nesting,
             "in_equilibrium": result.in_equilibrium,

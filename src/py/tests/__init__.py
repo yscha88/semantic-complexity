@@ -1,3 +1,3 @@
 """semantic-complexity tests"""
 
-__module_type__ = "test"
+__architecture_role__ = "test"

@@ -4,7 +4,7 @@ Simplex 라벨링
 모듈/PR에 지배 축 라벨 (🍞/🧀/🥓) 할당
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 from typing import Literal

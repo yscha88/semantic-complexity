@@ -21,7 +21,7 @@
     - docs/THEORY.ko.md 섹션 1
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 import ast
 import re

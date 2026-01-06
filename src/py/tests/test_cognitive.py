@@ -11,7 +11,7 @@
     4. state×async×retry 2개 이상 공존 금지
 """
 
-__module_type__ = "test"
+__architecture_role__ = "test"
 
 import pytest
 from semantic_complexity.analyzers.cheese import (

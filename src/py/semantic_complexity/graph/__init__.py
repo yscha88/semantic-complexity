@@ -11,7 +11,7 @@ graph 모듈
 - store.py: SQLite 기반 저장소
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .entity import (
     EntityType,

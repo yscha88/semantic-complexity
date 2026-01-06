@@ -5,7 +5,7 @@ RuleHit: 규칙 히트 (측정 근거)
 Location: 코드 위치 정보
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass, field
 

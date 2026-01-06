@@ -17,14 +17,14 @@ Canonical Profile 정의 - 2계층 구조
 
 from __future__ import annotations
 
-__module_type__ = "types"
+__architecture_role__ = "types"
 
 from dataclasses import dataclass
 from typing import NamedTuple
 
 from .axis import Axis
 from .module import (
-    ModuleType,
+    ArchitectureRole,
     StructuralAxis,
     STRUCTURAL_AXES,
     get_registry,
@@ -50,7 +50,7 @@ class ChangeBudget:
 @dataclass(frozen=True)
 class CanonicalProfile:
     """모듈 타입별 Canonical 프로파일"""
-    module_type: ModuleType | str
+    architecture_role: ArchitectureRole | str
     canonical: SandwichScore
     thresholds: dict[Axis, Threshold]
     change_budget: ChangeBudget
@@ -298,7 +298,7 @@ def _normalize_weights(bread: int, cheese: int, ham: int) -> tuple[int, int, int
     return (b, c, h)
 
 
-def calculate_canonical(module_type: ModuleType) -> SandwichScore:
+def calculate_canonical(architecture_role: ArchitectureRole) -> SandwichScore:
     """
     모듈 타입의 canonical 비율 계산
 
@@ -306,7 +306,7 @@ def calculate_canonical(module_type: ModuleType) -> SandwichScore:
         최종 가중치 = 1차 베이스라인 + 2차 Delta (정규화)
     """
     # 1차 베이스라인
-    baseline = STRUCTURAL_BASELINES.get(module_type.structural)
+    baseline = STRUCTURAL_BASELINES.get(architecture_role.structural)
     if not baseline:
         # fallback: 균형
         return SandwichScore(bread=33, cheese=33, ham=34)
@@ -316,8 +316,8 @@ def calculate_canonical(module_type: ModuleType) -> SandwichScore:
     ham = baseline.ham
 
     # 2차 Delta 적용
-    if module_type.domain:
-        full_type = str(module_type)
+    if architecture_role.domain:
+        full_type = str(architecture_role)
         delta = DOMAIN_DELTAS.get(full_type)
         if delta:
             bread += delta.d_bread
@@ -347,29 +347,29 @@ def calculate_thresholds(canonical: SandwichScore) -> dict[Axis, Threshold]:
     }
 
 
-def get_canonical_profile(module_type: ModuleType | str) -> CanonicalProfile:
+def get_canonical_profile(architecture_role: ArchitectureRole | str) -> CanonicalProfile:
     """
     모듈 타입에 해당하는 Canonical Profile 반환
 
     Args:
-        module_type: ModuleType 객체 또는 문자열 ("api", "api/external")
+        architecture_role: ArchitectureRole 객체 또는 문자열 ("api", "api/external")
 
     Returns:
         CanonicalProfile
     """
     # 문자열이면 변환
-    if isinstance(module_type, str):
-        module_type = ModuleType.from_string(module_type)
+    if isinstance(architecture_role, str):
+        architecture_role = ArchitectureRole.from_string(architecture_role)
 
     # Canonical 계산
-    canonical = calculate_canonical(module_type)
+    canonical = calculate_canonical(architecture_role)
 
     # Threshold 계산
     thresholds = calculate_thresholds(canonical)
 
     # Change budget
     budget = DEFAULT_CHANGE_BUDGETS.get(
-        module_type.structural,
+        architecture_role.structural,
         ChangeBudget(
             delta_cognitive=5,
             delta_state_transitions=2,
@@ -379,7 +379,7 @@ def get_canonical_profile(module_type: ModuleType | str) -> CanonicalProfile:
     )
 
     return CanonicalProfile(
-        module_type=module_type,
+        architecture_role=architecture_role,
         canonical=canonical,
         thresholds=thresholds,
         change_budget=budget,
@@ -420,7 +420,7 @@ def adjust_for_asvs_level(
     new_thresholds = calculate_thresholds(new_canonical)
 
     return CanonicalProfile(
-        module_type=profile.module_type,
+        architecture_role=profile.architecture_role,
         canonical=new_canonical,
         thresholds=new_thresholds,
         change_budget=profile.change_budget,
@@ -440,8 +440,8 @@ def _init_profiles() -> None:
 
     # 1차 구조축 프로파일
     for axis in STRUCTURAL_AXES:
-        module_type = ModuleType(structural=axis)
-        CANONICAL_PROFILES[axis] = get_canonical_profile(module_type)
+        architecture_role = ArchitectureRole(structural=axis)
+        CANONICAL_PROFILES[axis] = get_canonical_profile(architecture_role)
 
     # 2차 도메인축 프로파일
     for full_type in DOMAIN_DELTAS.keys():

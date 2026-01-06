@@ -4,12 +4,12 @@ Gradient-based Recommender
 균형점으로 향하는 리팩토링 권장사항 생성
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 from typing import Literal
 
-from ..types import Axis, ModuleType, SandwichScore, get_canonical_profile
+from ..types import Axis, ArchitectureRole, SandwichScore, get_canonical_profile
 from ..simplex import (
     GradientDirection,
     EquilibriumStatus,
@@ -93,12 +93,12 @@ class GradientRecommender:
     def __init__(
         self,
         current: SandwichScore,
-        module_type: ModuleType,
+        architecture_role: ArchitectureRole,
         cognitive_result: CognitiveAnalysis | None = None,
     ):
         self.current = current
-        self.module_type = module_type
-        self.profile = get_canonical_profile(module_type)
+        self.architecture_role = architecture_role
+        self.profile = get_canonical_profile(architecture_role)
         self.cognitive_result = cognitive_result
 
     def recommend(self, max_recommendations: int = 3) -> list[Recommendation]:
@@ -170,7 +170,7 @@ class GradientRecommender:
 
 def suggest_refactor(
     current: SandwichScore,
-    module_type: ModuleType,
+    architecture_role: ArchitectureRole,
     cognitive_result: CognitiveAnalysis | None = None,
     max_recommendations: int = 3,
 ) -> list[Recommendation]:
@@ -179,32 +179,32 @@ def suggest_refactor(
 
     Args:
         current: 현재 SandwichScore
-        module_type: 모듈 타입
+        architecture_role: 모듈 타입
         cognitive_result: Cognitive 분석 결과 (인지 가능 여부)
         max_recommendations: 최대 권장사항 수
 
     Returns:
         우선순위순 정렬된 권장사항 리스트
     """
-    recommender = GradientRecommender(current, module_type, cognitive_result)
+    recommender = GradientRecommender(current, architecture_role, cognitive_result)
     return recommender.recommend(max_recommendations)
 
 
 def get_priority_action(
     current: SandwichScore,
-    module_type: ModuleType,
+    architecture_role: ArchitectureRole,
 ) -> Recommendation | None:
     """
     가장 우선순위 높은 액션 반환
 
     Args:
         current: 현재 SandwichScore
-        module_type: 모듈 타입
+        architecture_role: 모듈 타입
 
     Returns:
         최우선 권장사항 또는 None (이미 균형)
     """
-    recommendations = suggest_refactor(current, module_type, max_recommendations=1)
+    recommendations = suggest_refactor(current, architecture_role, max_recommendations=1)
     return recommendations[0] if recommendations else None
 
 

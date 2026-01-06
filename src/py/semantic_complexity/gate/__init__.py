@@ -5,7 +5,7 @@ PoC → MVP → Production 게이트 조건 검사
 Essential Complexity Waiver 시스템 포함
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .mvp import (
     check_poc_gate,

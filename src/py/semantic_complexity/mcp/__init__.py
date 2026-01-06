@@ -9,7 +9,7 @@ Ham Sandwich Theorem 기반 코드 복잡도 분석기
 - Ham (Behavioral): 행동 보존 - Golden test, Contract test
 """
 
-__module_type__ = "app"
+__architecture_role__ = "app"
 
 from mcp.server.fastmcp import FastMCP
 
@@ -247,7 +247,7 @@ def analyze_sandwich(source: str, file_path: str | None = None) -> dict:
 
     return {
         "path": result.path,
-        "module_type": str(result.module_type),
+        "architecture_role": str(result.architecture_role),
         "current": {
             "bread": result.current.bread,
             "cheese": result.current.cheese,
@@ -432,7 +432,7 @@ def check_gate(
 
 
 @mcp.tool()
-def suggest_refactor(source: str, module_type: str | None = None) -> list[dict]:
+def suggest_refactor(source: str, architecture_role: str | None = None) -> list[dict]:
     """
     리팩토링 권장사항 - 코드 개선을 위한 구체적 액션 제안
 
@@ -453,12 +453,12 @@ def suggest_refactor(source: str, module_type: str | None = None) -> list[dict]:
 
     Args:
         source: Python 소스 코드 문자열
-        module_type: 모듈 타입 (예: "api/external", "lib/domain", "app")
+        architecture_role: 모듈 타입 (예: "api/external", "lib/domain", "app")
     """
     from semantic_complexity import (
         analyze_cognitive,
         suggest_refactor as _suggest,
-        ModuleType,
+        ArchitectureRole,
         DEFAULT_MODULE_TYPE,
     )
     from semantic_complexity.simplex import results_to_sandwich
@@ -470,8 +470,8 @@ def suggest_refactor(source: str, module_type: str | None = None) -> list[dict]:
 
     sandwich = results_to_sandwich(bread, cheese, ham)
 
-    if module_type:
-        mt = ModuleType.from_string(module_type)
+    if architecture_role:
+        mt = ArchitectureRole.from_string(architecture_role)
     else:
         mt = DEFAULT_MODULE_TYPE
 
@@ -492,7 +492,7 @@ def suggest_refactor(source: str, module_type: str | None = None) -> list[dict]:
 def check_budget(
     before_source: str,
     after_source: str,
-    module_type: str | None = None,
+    architecture_role: str | None = None,
 ) -> dict:
     """
     PR 변경 예산 검사 - 한 PR에서 허용되는 복잡도 증가량 검증
@@ -516,13 +516,13 @@ def check_budget(
     Args:
         before_source: 변경 전 소스 코드
         after_source: 변경 후 소스 코드
-        module_type: 모듈 타입 (예: "api/external")
+        architecture_role: 모듈 타입 (예: "api/external")
     """
     from semantic_complexity import (
         analyze_cognitive,
         check_budget as _check_budget,
         calculate_delta,
-        ModuleType,
+        ArchitectureRole,
         DEFAULT_MODULE_TYPE,
     )
 
@@ -530,8 +530,8 @@ def check_budget(
     after = analyze_cognitive(after_source)
     delta = calculate_delta(before, after)
 
-    if module_type:
-        mt = ModuleType.from_string(module_type)
+    if architecture_role:
+        mt = ArchitectureRole.from_string(architecture_role)
     else:
         mt = DEFAULT_MODULE_TYPE
 
@@ -539,7 +539,7 @@ def check_budget(
 
     return {
         "passed": result.passed,
-        "module_type": str(result.module_type),
+        "architecture_role": str(result.architecture_role),
         "summary": result.summary,
         "delta": {
             "cognitive": result.delta_cognitive,
@@ -660,7 +660,7 @@ def main():
     """Run MCP server"""
     import sys
     if len(sys.argv) > 1 and sys.argv[1] in ("--version", "-v"):
-        print("semantic-complexity-py-mcp 0.0.24")
+        print("semantic-complexity-py-mcp 0.0.25")
         sys.exit(0)
     mcp.run()
 

@@ -7,7 +7,7 @@ Essential Complexity Waiver를 위한 ADR 문서 스키마.
 지원 형식: YAML, JSON, TOML
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass, field
 from datetime import date, timedelta

@@ -7,7 +7,7 @@ Ham Sandwich Theorem 기반 3차원 simplex:
 - 균형점: Lyapunov 에너지 기반 균형 탐지
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .normalizer import (
     normalize_to_simplex,

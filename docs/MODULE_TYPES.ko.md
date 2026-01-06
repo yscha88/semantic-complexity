@@ -163,7 +163,7 @@
 `.semantic-complexity.yaml`에서 정의:
 
 ```yaml
-module_types:
+architecture_roles:
   # 1차 추가
   ml:
     baseline:
@@ -200,16 +200,16 @@ module_types:
 
 ```python
 # tests/test_user.py
-__module_type__ = "test"
+__architecture_role__ = "test"
 
 # src/config/settings.py
-__module_type__ = "config"
+__architecture_role__ = "config"
 
 # src/types/user.py
-__module_type__ = "types"
+__architecture_role__ = "types"
 
 # src/generated/api_pb2.py
-__module_type__ = "generated"
+__architecture_role__ = "generated"
 ```
 
 ### 숨겨진 의존성 허용 목록
@@ -233,7 +233,7 @@ __module_type__ = "generated"
 # .semantic-complexity.yaml
 exclude:
   # 분석 제외 모듈 타입
-  module_types:
+  architecture_roles:
     - test
     - config
     - types
@@ -278,7 +278,7 @@ exclude:
 #### Python
 
 ```python
-__module_type__ = "api/external"
+__architecture_role__ = "api/external"
 
 def create_user():
     ...
@@ -310,7 +310,7 @@ func CreateUser() { ... }
 #### Java
 
 ```java
-@ModuleType("api/external")
+@ArchitectureRole("api/external")
 public class UserController { }
 ```
 

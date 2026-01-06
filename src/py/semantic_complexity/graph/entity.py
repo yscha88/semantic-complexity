@@ -7,7 +7,7 @@ entity_id: AST fingerprint 기반 stable ID
 type: module | file | func | object
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 import hashlib
 from dataclasses import dataclass

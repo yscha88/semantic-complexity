@@ -5,7 +5,7 @@ Metrics (엔티티별 메트릭)
 5D 벡터 + 파생 점수 + Hodge bucket.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass, field
 
@@ -23,7 +23,7 @@ class Metrics:
     raw_sum: 벡터 요소 합
     d: 정준 편차
     hodge: Hodge bucket
-    module_type: 모듈 타입
+    architecture_role: 모듈 타입
     confidence: 신뢰도
     """
     entity_id: str
@@ -32,7 +32,7 @@ class Metrics:
     raw_sum: float = 0.0
     d: float = 0.0
     hodge: HodgeBucket = HodgeBucket.ALGORITHMIC
-    module_type: str = "app"
+    architecture_role: str = "app"
     confidence: float = 1.0
 
     def __post_init__(self) -> None:
@@ -49,7 +49,7 @@ class Metrics:
             "raw_sum": self.raw_sum,
             "d": self.d,
             "hodge": self.hodge.value,
-            "module_type": self.module_type,
+            "architecture_role": self.architecture_role,
             "confidence": self.confidence,
         }
 
@@ -60,7 +60,7 @@ def create_metrics(
     x: ComplexityVector,
     d: float,
     hodge: HodgeBucket,
-    module_type: str = "app",
+    architecture_role: str = "app",
     confidence: float = 1.0,
 ) -> Metrics:
     """Metrics 생성
@@ -71,7 +71,7 @@ def create_metrics(
         x: 5D 벡터
         d: 정준 편차
         hodge: Hodge bucket
-        module_type: 모듈 타입
+        architecture_role: 모듈 타입
         confidence: 신뢰도
 
     Returns:
@@ -84,7 +84,7 @@ def create_metrics(
         raw_sum=x.raw_sum,
         d=d,
         hodge=hodge,
-        module_type=module_type,
+        architecture_role=architecture_role,
         confidence=confidence,
     )
 

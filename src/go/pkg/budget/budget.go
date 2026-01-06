@@ -14,7 +14,7 @@ type ChangeBudget struct {
 }
 
 // ModuleBudgets defines budgets for each module type
-var ModuleBudgets = map[types.ModuleType]ChangeBudget{
+var ModuleBudgets = map[types.ArchitectureRole]ChangeBudget{
 	types.APIExternal: {DeltaCognitive: 3, DeltaState: 1, DeltaPublicAPI: 2, BreakingAllowed: false},
 	types.APIInternal: {DeltaCognitive: 5, DeltaState: 2, DeltaPublicAPI: 3, BreakingAllowed: true},
 	types.LibDomain:   {DeltaCognitive: 5, DeltaState: 2, DeltaPublicAPI: 5, BreakingAllowed: true},
@@ -48,8 +48,8 @@ func cognitiveScore(result types.CheeseResult) int {
 }
 
 // CheckBudget checks if changes are within budget
-func CheckBudget(moduleType types.ModuleType, delta types.Delta) types.BudgetResult {
-	budget, ok := ModuleBudgets[moduleType]
+func CheckBudget(architectureRole types.ArchitectureRole, delta types.Delta) types.BudgetResult {
+	budget, ok := ModuleBudgets[architectureRole]
 	if !ok {
 		budget = ModuleBudgets[types.App]
 	}
@@ -91,7 +91,7 @@ func CheckBudget(moduleType types.ModuleType, delta types.Delta) types.BudgetRes
 
 	return types.BudgetResult{
 		Passed:     len(violations) == 0,
-		ModuleType: moduleType,
+		ArchitectureRole: architectureRole,
 		Violations: violations,
 		Delta:      delta,
 	}

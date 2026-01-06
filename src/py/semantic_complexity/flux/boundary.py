@@ -7,7 +7,7 @@ Trust Boundary를 넘는 간선들의 가중치 합.
 Bread (보안) 관련 핵심 지표.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 
