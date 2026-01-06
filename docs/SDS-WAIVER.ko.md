@@ -79,7 +79,7 @@ semantic_complexity/
 │  DEVIATION PHASE                                                  │
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  x_u + moduleType ──▶ μ_t(u) ──▶ d_u = ‖x_u/μ_t - 1‖₂          │
+│  x_u + architectureRole ──▶ μ_t(u) ──▶ d_u = ‖x_u/μ_t - 1‖₂          │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
                               │
@@ -207,7 +207,7 @@ class Metrics:
 
     # 분류
     hodge: HodgeBucket = HodgeBucket.ALGORITHMIC
-    module_type: str = "app"          # api/external, lib/domain, app
+    architecture_role: str = "app"          # api/external, lib/domain, app
 
     # 신뢰도
     confidence: float = 1.0           # 0.0 ~ 1.0
@@ -409,18 +409,18 @@ CANONICAL_PROFILES: dict[str, ComplexityVector] = {
 }
 
 
-def get_canonical_profile(module_type: str) -> ComplexityVector:
+def get_canonical_profile(architecture_role: str) -> ComplexityVector:
     """모듈 타입의 정준 프로파일 반환"""
-    return CANONICAL_PROFILES.get(module_type, CANONICAL_PROFILES["app"])
+    return CANONICAL_PROFILES.get(architecture_role, CANONICAL_PROFILES["app"])
 
 
-def calculate_deviation(x: ComplexityVector, module_type: str) -> float:
+def calculate_deviation(x: ComplexityVector, architecture_role: str) -> float:
     """
     정준 편차 계산
 
     d_u = ‖x_u / μ_t(u) - 1‖₂
     """
-    mu = get_canonical_profile(module_type)
+    mu = get_canonical_profile(architecture_role)
 
     x_arr = x.to_array()
     mu_arr = mu.to_array()
@@ -1253,7 +1253,7 @@ CREATE TABLE entities (
 CREATE TABLE metrics (
   snapshot_id BIGINT NOT NULL REFERENCES snapshots(snapshot_id),
   entity_id UUID NOT NULL REFERENCES entities(entity_id),
-  module_type TEXT NOT NULL,
+  architecture_role TEXT NOT NULL,
   module_confidence REAL NOT NULL,
 
   -- 5D 벡터
@@ -1407,7 +1407,7 @@ ORDER BY snapshot_id;
       "type": "function",
       "path": "src/py/semantic_complexity/analyzers/cheese.py",
       "symbol": "semantic_complexity.analyzers.cheese.analyze_cheese",
-      "moduleType": { "inferred": "lib/domain", "confidence": 0.95 },
+      "architectureRole": { "inferred": "lib/domain", "confidence": 0.95 },
       "vector": { "C": 12, "N": 7, "S": 3, "A": 0, "L": 5 },
       "scores": {
         "rawSum": 27,
@@ -1591,7 +1591,7 @@ class SQLiteStore:
     CREATE TABLE IF NOT EXISTS metrics (
         snapshot_id INTEGER NOT NULL,
         entity_id TEXT NOT NULL,
-        module_type TEXT NOT NULL,
+        architecture_role TEXT NOT NULL,
         c REAL, n REAL, s REAL, a REAL, lambda REAL,
         raw_sum REAL,
         canonical_deviation REAL,
@@ -1647,7 +1647,7 @@ class SQLiteStore:
             INSERT OR REPLACE INTO metrics
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            snapshot_id, metrics.entity_id, metrics.module_type,
+            snapshot_id, metrics.entity_id, metrics.architecture_role,
             metrics.x.C, metrics.x.N, metrics.x.S, metrics.x.A, metrics.x.L,
             metrics.raw_sum, metrics.d,
             int(metrics.x.C + metrics.x.N),  # h_alg
@@ -1775,8 +1775,8 @@ class EvidencePackager:
             }
 
             if m:
-                entity_data["moduleType"] = {
-                    "inferred": m.module_type,
+                entity_data["architectureRole"] = {
+                    "inferred": m.architecture_role,
                     "confidence": m.confidence,
                 }
                 entity_data["vector"] = {

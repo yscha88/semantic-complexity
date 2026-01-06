@@ -195,7 +195,7 @@ Anti-pattern Penalty:
 | 판단 유형 | 입력 | 결과 |
 |-----------|------|------|
 | Essential Complexity Waiver | ADR 파일 참조 | Gate 검사 우회 |
-| 모듈 타입 오버라이드 | `__module_type__` 선언 | Canonical Profile 변경 |
+| 모듈 타입 오버라이드 | `__architecture_role__` 선언 | Canonical Profile 변경 |
 | 본질적 복잡도 신호 | math/algorithm/domain 패턴 | Waiver 자격 판단 |
 
 ```python
@@ -501,7 +501,7 @@ class CriticalPath:
 
 ```typescript
 interface CanonicalProfile {
-  moduleType: ModuleType;
+  architectureRole: ArchitectureRole;
 
   // 기대 🍞🧀🥓 비율 (합계 100)
   bread: number;    // Security 가중치
@@ -822,7 +822,7 @@ interface Recommendation {
 **Waiver 선언 형식:**
 
 ```python
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 __essential_complexity__ = {
     "adr": "docs/adr/003-inference.md",
 }
@@ -922,9 +922,9 @@ semantic-complexity label ./src/auth
 - analyze_sandwich(source, file_path?)
 - analyze_cheese(source)
 - check_gate(source, gate_type?, file_path?, project_root?)
-- check_budget(before_source, after_source, module_type?)
+- check_budget(before_source, after_source, architecture_role?)
 - get_label(source)
-- suggest_refactor(source, module_type?)
+- suggest_refactor(source, architecture_role?)
 - check_degradation(before_source, after_source)
 
 // 리소스
@@ -948,7 +948,7 @@ semantic-complexity label ./src/auth
 ```json
 {
   "module": "src/auth",
-  "moduleType": "api-external",
+  "architectureRole": "api-external",
   "sandwich": {
     "bread": 45,
     "cheese": 25,
@@ -992,7 +992,7 @@ semantic-complexity label ./src/auth
 ```typescript
 type Axis = '🍞' | '🧀' | '🥓';
 
-type ModuleType =
+type ArchitectureRole =
   | 'deploy'
   | 'api-external'
   | 'api-internal'
@@ -1008,7 +1008,7 @@ interface SandwichScore {
 }
 
 interface CanonicalProfile {
-  moduleType: ModuleType;
+  architectureRole: ArchitectureRole;
   canonical: SandwichScore;
   thresholds: Record<Axis, { min: number; max: number }>;
   changeBudget: ChangeBudget;
@@ -1016,7 +1016,7 @@ interface CanonicalProfile {
 
 interface ModuleAnalysis {
   path: string;
-  moduleType: ModuleType;
+  architectureRole: ArchitectureRole;
   current: SandwichScore;
   canonical: SandwichScore;
   deviation: SandwichScore;

@@ -9,7 +9,7 @@ Essential Complexity Waiver System
 
 사용법 1 - 인라인:
     # 모듈에서 선언
-    __module_type__ = "lib/domain"
+    __architecture_role__ = "lib/domain"
     __essential_complexity__ = {
         "adr": "docs/adr/003-inference-complexity.md",
     }
@@ -44,7 +44,7 @@ Essential Complexity Waiver System
         # 복잡도 검사 유예
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 import ast
 import fnmatch

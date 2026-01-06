@@ -10,7 +10,7 @@ measurement 모듈
 - evidence: RuleHit, Location 증거 수집
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .vector import (
     ComplexityVector,

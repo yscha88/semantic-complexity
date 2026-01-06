@@ -85,7 +85,7 @@
 - **Go 언어 지원**: 텐서 프레임워크 포함 AST 기반 분석기
 - **총 367개 테스트**: npm(119) + Python(154) + Go(94)
 - **Python 96% 커버리지**: CLI 모듈 테스트 완료
-- **새 MCP 도구**: `generate_graph`, `infer_module_type`, `check_canonical`
+- **새 MCP 도구**: `generate_graph`, `infer_architecture_role`, `check_canonical`
 
 ---
 
@@ -181,7 +181,7 @@ A   │ 0.2   0.8   0.5   1.0   0.4 │  Async × Nesting ↑
 ```
 W ∈ ℝ⁴ˣ⁵ˣ⁵
 
-W[module_type, i, j] = 모듈별 상호작용 가중치
+W[architecture_role, i, j] = 모듈별 상호작용 가중치
 ```
 
 ```python
@@ -356,7 +356,7 @@ H^k = Closed / Exact = 본질적 복잡도
 각 모듈 타입은 **이상적인 복잡도 프로필**을 가집니다:
 
 ```
-Φ: ModuleType → CanonicalProfile
+Φ: ArchitectureRole → CanonicalProfile
 
 Φ(api)    = (C: low,  N: low,  S: low,  A: low,  Λ: low)
 Φ(lib)    = (C: med,  N: med,  S: low,  A: low,  Λ: low)
@@ -566,7 +566,7 @@ For ANY module type τ:
 #### 수정된 정리 (Conditional Canonical Existence)
 
 ```
-Theorem: Let τ ∈ ModuleTypes, and suppose:
+Theorem: Let τ ∈ ArchitectureRoles, and suppose:
   (i)   Φ(τ) ⊂ ℝ⁵ is compact (bounded constraints)
   (ii)  M is positive semi-definite (convex objective)
   (iii) ε > 0 (regularization active)
@@ -611,7 +611,7 @@ Moreover, iterative refinement converges:
 Raw Sum 임계값은 정준형 프로파일의 상한 합산에서 도출:
 
 ```
-rawSumThreshold(module_type) = Σ canonical_upper_bounds
+rawSumThreshold(architecture_role) = Σ canonical_upper_bounds
 
 예시 (api):
   control[1] + nesting[1] + state[1] + async[1] + coupling[1]
@@ -648,14 +648,14 @@ rawSumRatio = rawSum / rawSumThreshold
 ```python
 def calculate_score(
     v: Vector5D,
-    module_type: ModuleType,
+    architecture_role: ArchitectureRole,
     epsilon: float = 2.0
 ) -> ComplexityScore:
     # 1차 항
-    linear = dot(v, get_weights(module_type))
+    linear = dot(v, get_weights(architecture_role))
 
     # 2차 항 (상호작용)
-    M = get_interaction_matrix(module_type)
+    M = get_interaction_matrix(architecture_role)
     quadratic = v.T @ M @ v
 
     # ε-정규화
@@ -673,11 +673,11 @@ def calculate_score(
 ```python
 def analyze_convergence(
     current: Vector5D,
-    module_type: ModuleType,
+    architecture_role: ArchitectureRole,
     threshold: float = 10.0,
     epsilon: float = 2.0
 ) -> ConvergenceResult:
-    canonical = get_canonical_profile(module_type)
+    canonical = get_canonical_profile(architecture_role)
     deviation = mahalanobis_distance(current, canonical)
 
     conv_score = (deviation - (threshold - epsilon)) / epsilon
@@ -747,7 +747,7 @@ TypeScript/JavaScript, Python, Go 자동 언어 감지.
 | `suggest_refactor` | 리팩토링 제안 |
 | `get_dimension_breakdown` | 상세 차원 분석 |
 | `generate_graph` | 의존성/호출 그래프 생성 (v0.0.4) |
-| `infer_module_type` | 복잡도 프로필에서 모듈 타입 추론 (v0.0.4) |
+| `infer_architecture_role` | 복잡도 프로필에서 모듈 타입 추론 (v0.0.4) |
 | `check_canonical` | 정준형 경계 준수 검사 (v0.0.4) |
 
 ## CLI

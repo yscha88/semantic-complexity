@@ -9,7 +9,7 @@ Cost(Δ) = η₁·#filesChanged + η₂·#publicAPIChanged + ...
 비용 대비 에너지 감소 효과가 큰 리팩토링 우선.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 

@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 
-__module_type__ = "types"
+__architecture_role__ = "types"
 
 from dataclasses import dataclass, field
 from typing import Literal
@@ -428,11 +428,11 @@ DEFAULT_DOMAIN_DEFINITIONS: dict[str, DomainDefinition] = {
 
 
 # ============================================================
-# ModuleType - 확장 가능한 구조
+# ArchitectureRole - 확장 가능한 구조
 # ============================================================
 
 @dataclass
-class ModuleType:
+class ArchitectureRole:
     """
     모듈 타입 (확장 가능)
 
@@ -457,15 +457,15 @@ class ModuleType:
         return hash(str(self))
 
     def __eq__(self, other: object) -> bool:
-        if isinstance(other, ModuleType):
+        if isinstance(other, ArchitectureRole):
             return str(self) == str(other)
         if isinstance(other, str):
             return str(self) == other
         return False
 
     @classmethod
-    def from_string(cls, type_str: str) -> "ModuleType":
-        """문자열에서 ModuleType 생성"""
+    def from_string(cls, type_str: str) -> "ArchitectureRole":
+        """문자열에서 ArchitectureRole 생성"""
         if "/" in type_str:
             structural, domain = type_str.split("/", 1)
             return cls(structural=structural, domain=domain)  # type: ignore
@@ -483,7 +483,7 @@ class ModuleType:
 
 
 # 타입 힌트용
-ModuleTypeLiteral = str  # 실제로는 "api", "api/external" 등의 문자열
+ArchitectureRoleLiteral = str  # 실제로는 "api", "api/external" 등의 문자열
 
 
 # ============================================================
@@ -515,7 +515,7 @@ MODULE_DESCRIPTIONS.update({
 # 레지스트리 - 런타임 확장
 # ============================================================
 
-class ModuleTypeRegistry:
+class ArchitectureRoleRegistry:
     """
     모듈 타입 레지스트리
 
@@ -556,14 +556,14 @@ class ModuleTypeRegistry:
             return [k for k, v in self._domain.items() if v.parent == parent]
         return list(self._domain.keys())
 
-    def get_patterns(self, module_type: ModuleType) -> tuple[str, ...]:
+    def get_patterns(self, architecture_role: ArchitectureRole) -> tuple[str, ...]:
         """모듈 타입의 패턴 목록 조회"""
-        if module_type.domain:
-            domain_def = self.get_domain(str(module_type))
+        if architecture_role.domain:
+            domain_def = self.get_domain(str(architecture_role))
             if domain_def:
                 return domain_def.patterns
 
-        structural_def = self.get_structural(module_type.structural)
+        structural_def = self.get_structural(architecture_role.structural)
         if structural_def:
             return structural_def.patterns
 
@@ -571,10 +571,10 @@ class ModuleTypeRegistry:
 
 
 # 전역 레지스트리
-_registry = ModuleTypeRegistry()
+_registry = ArchitectureRoleRegistry()
 
 
-def get_registry() -> ModuleTypeRegistry:
+def get_registry() -> ArchitectureRoleRegistry:
     """전역 레지스트리 반환"""
     return _registry
 
@@ -582,12 +582,12 @@ def get_registry() -> ModuleTypeRegistry:
 def reset_registry() -> None:
     """레지스트리 초기화 (테스트용)"""
     global _registry
-    _registry = ModuleTypeRegistry()
+    _registry = ArchitectureRoleRegistry()
 
 
 # ============================================================
 # 기본 모듈 타입
 # ============================================================
 
-# __module_type__ 미선언 시 기본값
-DEFAULT_MODULE_TYPE = ModuleType(structural="app")
+# __architecture_role__ 미선언 시 기본값
+DEFAULT_MODULE_TYPE = ArchitectureRole(structural="app")

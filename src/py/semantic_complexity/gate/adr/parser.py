@@ -4,7 +4,7 @@ ADR 파일 파서
 YAML, JSON, TOML 형식 지원.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 import json
 from datetime import date, timedelta

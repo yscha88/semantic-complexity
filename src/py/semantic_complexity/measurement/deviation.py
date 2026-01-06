@@ -6,7 +6,7 @@ d_u = ‖x_u / μ_t(u) - 1‖₂
 모듈 타입별 정준 프로파일 μ_t에서의 편차를 계산.
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .vector import ComplexityVector
 
@@ -33,27 +33,27 @@ CANONICAL_5D_PROFILES: dict[str, ComplexityVector] = {
 }
 
 
-def get_canonical_5d_profile(module_type: str) -> ComplexityVector:
+def get_canonical_5d_profile(architecture_role: str) -> ComplexityVector:
     """모듈 타입의 5D 정준 프로파일 반환
 
     Args:
-        module_type: 모듈 타입 (api/external, lib/domain, app, ...)
+        architecture_role: 모듈 타입 (api/external, lib/domain, app, ...)
 
     Returns:
         해당 모듈 타입의 정준 프로파일
         알 수 없는 타입은 "app" 프로파일 반환
     """
-    return CANONICAL_5D_PROFILES.get(module_type, CANONICAL_5D_PROFILES["app"])
+    return CANONICAL_5D_PROFILES.get(architecture_role, CANONICAL_5D_PROFILES["app"])
 
 
-def calculate_deviation(x: ComplexityVector, module_type: str) -> float:
+def calculate_deviation(x: ComplexityVector, architecture_role: str) -> float:
     """정준 편차 계산
 
     d_u = ‖x_u / μ_t(u) - 1‖₂
 
     Args:
         x: 측정된 5D 벡터
-        module_type: 모듈 타입
+        architecture_role: 모듈 타입
 
     Returns:
         L2 노름 기반 정준 편차
@@ -65,7 +65,7 @@ def calculate_deviation(x: ComplexityVector, module_type: str) -> float:
     """
     import numpy as np
 
-    mu = get_canonical_5d_profile(module_type)
+    mu = get_canonical_5d_profile(architecture_role)
 
     x_arr = x.to_array()
     mu_arr = mu.to_array()

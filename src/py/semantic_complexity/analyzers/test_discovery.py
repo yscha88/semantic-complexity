@@ -7,7 +7,7 @@ Test file discovery for Ham analyzer.
 - 테스트 소스 코드 로드
 """
 
-__module_type__ = "lib/infra"
+__architecture_role__ = "lib/infra"
 
 import re
 from pathlib import Path

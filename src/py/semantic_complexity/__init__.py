@@ -20,7 +20,7 @@ Usage:
     gate = check_gate(result, "mvp")
 """
 
-__module_type__ = "lib/common"
+__architecture_role__ = "lib/common"
 __version__ = "0.0.8"
 
 # ============================================================
@@ -31,8 +31,8 @@ from .types import (
     Axis,
     AxisLiteral,
     # Module
-    ModuleType,
-    ModuleTypeLiteral,
+    ArchitectureRole,
+    ArchitectureRoleLiteral,
     DEFAULT_MODULE_TYPE,
     # Score
     SandwichScore,
@@ -97,7 +97,7 @@ from .simplex import (
 # ============================================================
 # Canonical
 # ============================================================
-# 모듈 타입은 __module_type__으로 명시적 선언 (추정 없음)
+# 모듈 타입은 __architecture_role__으로 명시적 선언 (추정 없음)
 
 # ============================================================
 # Gate
@@ -153,7 +153,7 @@ def analyze_sandwich(
     source: str,
     file_path: str | None = None,
     test_sources: dict[str, str] | None = None,
-    module_type: ModuleType | None = None,
+    architecture_role: ArchitectureRole | None = None,
 ) -> "ModuleAnalysis":
     """
     🍞🧀🥓 전체 분석 실행
@@ -162,7 +162,7 @@ def analyze_sandwich(
         source: Python 소스 코드
         file_path: 파일 경로 (선택)
         test_sources: 테스트 파일들 {path: source} (선택)
-        module_type: 모듈 타입 (__module_type__ 선언값 사용, 미제공시 기본값)
+        architecture_role: 모듈 타입 (__architecture_role__ 선언값 사용, 미제공시 기본값)
 
     Returns:
         ModuleAnalysis: 분석 결과
@@ -170,8 +170,8 @@ def analyze_sandwich(
     from dataclasses import dataclass
 
     # 모듈 타입: 명시적 제공 또는 기본값
-    if module_type is None:
-        module_type = DEFAULT_MODULE_TYPE
+    if architecture_role is None:
+        architecture_role = DEFAULT_MODULE_TYPE
 
     # 3축 분석
     bread_result = analyze_bread(source, file_path)
@@ -182,7 +182,7 @@ def analyze_sandwich(
     sandwich = results_to_sandwich(bread_result, cheese_result, ham_result)
 
     # Canonical 프로파일
-    profile = get_canonical_profile(module_type)
+    profile = get_canonical_profile(architecture_role)
     deviation = calculate_deviation(sandwich, profile.canonical)
 
     # 라벨링
@@ -192,13 +192,13 @@ def analyze_sandwich(
     eq_status = check_equilibrium(sandwich, profile)
 
     # 권장사항
-    recommendations = suggest_refactor(sandwich, module_type, cheese_result)
+    recommendations = suggest_refactor(sandwich, architecture_role, cheese_result)
 
     @dataclass
     class ModuleAnalysis:
         """모듈 분석 결과"""
         path: str | None
-        module_type: ModuleType
+        architecture_role: ArchitectureRole
         current: SandwichScore
         canonical: SandwichScore
         deviation: Deviation
@@ -212,7 +212,7 @@ def analyze_sandwich(
 
     return ModuleAnalysis(
         path=file_path,
-        module_type=module_type,
+        architecture_role=architecture_role,
         current=sandwich,
         canonical=profile.canonical,
         deviation=deviation,
@@ -232,8 +232,8 @@ __all__ = [
     # Types
     "Axis",
     "AxisLiteral",
-    "ModuleType",
-    "ModuleTypeLiteral",
+    "ArchitectureRole",
+    "ArchitectureRoleLiteral",
     "SandwichScore",
     "RawScores",
     "RawBreadScore",

@@ -14,7 +14,7 @@ Flux_boundary(k) = Σ w(e)  where boundary(e) = 1
 - Flux / |E_boundary| > α: 경계당 평균 부하 초과
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from .boundary import (
     FluxResult,

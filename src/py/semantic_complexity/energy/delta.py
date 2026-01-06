@@ -9,7 +9,7 @@
 - ΔΦ ≈ 0: 변화 없음 - 본질적 복잡도 도달?
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 

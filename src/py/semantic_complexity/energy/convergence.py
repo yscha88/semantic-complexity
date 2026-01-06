@@ -11,7 +11,7 @@ ADR 발급 조건:
 - Converged ∧ Flux stable ∧ Evidence complete ∧ Gate failed
 """
 
-__module_type__ = "lib/domain"
+__architecture_role__ = "lib/domain"
 
 from dataclasses import dataclass
 
