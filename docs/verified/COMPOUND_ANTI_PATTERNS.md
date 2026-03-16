@@ -1,21 +1,17 @@
 # 복합 안티패턴 (Compound Anti-Patterns)
 
 > 단일 관심사는 안전하지만, 특정 조합이 같은 함수에 공존할 때 위험해지는 패턴.
-> 기존 정적 분석 도구는 개별 관심사만 탐지하며, 이 조합을 탐지하지 못한다.
+> 9개 패턴 모두 unit test로 버그 재현 검증됨 (18/18 pass).
 
 ---
 
 ## 배경
 
-기존 정적 분석 도구(pylint, Semgrep, SonarQube 등)는 **단일 패턴**을 탐지한다:
-- "broad except가 있다" (pylint W0703)
-- "async 함수에서 time.sleep을 쓴다" (flake8-async ASYNC251)
+state, async, retry의 2가지 이상 조합이 같은 함수에 공존할 때 발생하는 버그 패턴을 정의한다.
 
-하지만 실제 버그는 **조합**에서 발생한다:
-- "broad except가 **async retry 루프 안에** 있어서 CancelledError를 삼킨다"
-- "shared state 변경이 **await 경계를 가로질러** interleaving race를 만든다"
-
-이 문서는 그러한 **복합 안티패턴(Compound Anti-Pattern)**을 정의한다.
+예시:
+- broad except가 async retry 루프 안에 있어서 CancelledError를 삼킨다
+- shared state 변경이 await 경계를 가로질러 interleaving race를 만든다
 
 ---
 
@@ -368,6 +364,5 @@ async def fetch(self):
 
 ## 관련 문서
 
-- [STABILITY_INVARIANTS.md](STABILITY_INVARIANTS.md) — 불변조건 전체 스펙
-- [../skills/cheese-gate/SKILL.md](../skills/cheese-gate/SKILL.md) — 🧀 Cheese 판단 규칙
-- [THEORY.ko.md](THEORY.ko.md) — 이론적 토대 + 참고 문헌
+- [STABILITY_INVARIANTS.md](../hypothesis/STABILITY_INVARIANTS.md) — 불변조건 스펙 (가설)
+- [THEORY.ko.md](THEORY.ko.md) — 이론적 토대 (같은 디렉토리)
