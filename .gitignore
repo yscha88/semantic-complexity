@@ -58,3 +58,6 @@ src/py/.complexipy_cache
 *.exe
 go-complexity
 .gemini
+
+# sisyphus
+.sisyphus

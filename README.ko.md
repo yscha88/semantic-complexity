@@ -1,104 +1,52 @@
 # semantic-complexity
 
-Ham Sandwich Theorem 기반 코드 복잡도 분석기
+다차원 코드 복잡도 분석기 — Security × Cognitive × Behavioral
 
 > [English](README.md)
 
-## MCP Server 설치
+## 개요
+
+기존 정적 분석(McCabe 등)의 한계를 LLM 의미론적 추론 + SKILLS(정책 프레임) + MCP(정량 측정) 조합으로 극복한다.
+
+| 축 | 측정 대상 | 핵심 |
+|----|----------|------|
+| 🍞 **Bread** (Security) | Trust boundary, 인증, secret | 구조 안정성 |
+| 🧀 **Cheese** (Cognitive) | 중첩, 개념 수, state×async×retry | 인지 가능성 |
+| 🥓 **Ham** (Behavioral) | Golden test, contract test, critical path | 행동 보존 |
+
+## MCP 서버
 
 ### Python
-
 ```bash
-# 설치
 claude mcp add sc-py -- "uvx --from semantic-complexity semantic-complexity-py-mcp"
-
-# 업데이트
-uv cache clean && uvx --from semantic-complexity semantic-complexity-py-mcp --version
-
-# 삭제
-claude mcp remove sc-py
-
-# 재설치
-uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- "uvx --from semantic-complexity semantic-complexity-py-mcp"
 ```
 
 ### TypeScript
-
 ```bash
-# 설치
 claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
-
-# 업데이트 (npx 캐시 클리어 후 재실행)
-npm cache clean --force && npx -y -p semantic-complexity semantic-complexity-ts-mcp --version
-
-# 삭제
-claude mcp remove sc-ts
-
-# 재설치
-npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
 ```
 
 ### Go
-
 ```bash
-# 설치 (go install)
 go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 claude mcp add sc-go -- sc-go-mcp
-
-# 업데이트
-go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
-
-# 빌드 (로컬)
-cd src/go && go build -o sc-go-mcp ./cmd/sc-go-mcp
-claude mcp add sc-go -- /path/to/sc-go-mcp
-
-# 삭제
-claude mcp remove sc-go
-
-# 캐시 삭제
-go clean -cache -modcache
-
-# 재설치
-go clean -cache && go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 ```
 
-## MCP 도구 목록
+## MCP 도구
 
 | 도구 | 설명 |
 |------|------|
-| `analyze_sandwich` | 전체 복잡도 분석 (Bread + Cheese + Ham 3축) |
+| `analyze_sandwich` | 전체 3축 복잡도 분석 |
 | `analyze_cheese` | 인지 가능성 분석 |
-| `check_gate` | 릴리스 Gate 검사 (MVP/Production) |
+| `check_gate` | 릴리스 Gate 검사 (PoC/MVP/Production) |
 | `suggest_refactor` | 리팩토링 권장사항 |
 | `check_budget` | PR 변경 예산 검사 |
 | `get_label` | 모듈 지배 축 라벨 |
 | `check_degradation` | 인지 저하 탐지 |
 
-## MCP 리소스
-
-| URI | 설명 |
-|-----|------|
-| `docs://usage-guide` | 사용 가이드 (3축 모델, 도구 시나리오, 인지 복잡도 정의) |
-| `docs://theory` | 이론적 토대 (Ham Sandwich Theorem, Lyapunov 안정성) |
-| `docs://srs` | 소프트웨어 요구사항 명세 |
-| `docs://sds` | 소프트웨어 설계 명세 |
-
-## 버전 확인
-
-```bash
-# Python
-uvx --from semantic-complexity semantic-complexity-py-mcp --version
-
-# TypeScript
-npx -y -p semantic-complexity semantic-complexity-ts-mcp --version
-
-# Go
-sc-go-mcp --version
-```
-
 ## 문서
 
-- [이론](docs/THEORY.ko.md) - Ham Sandwich Theorem 기반 이론
-- [요구사항](docs/SRS.ko.md) - 소프트웨어 요구사항 명세
-- [설계](docs/SDS.ko.md) - 소프트웨어 설계 명세
-- [변경이력](docs/CHANGELOG.ko.md) - 버전별 변경사항
+- [이론적 토대](docs/THEORY.ko.md) — 유효한 이론 + 명시적 한계
+- [불변조건](docs/STABILITY_INVARIANTS.md) — 안정성 경계 조건
+- [LLM 리팩토링 프로토콜](docs/LLM_REFACTORING_PROTOCOL.md) — LLM 허용/금지 영역
+- [모듈 타입](docs/MODULE_TYPES.ko.md) — 아키텍처 역할 분류 체계
