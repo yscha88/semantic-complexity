@@ -7,11 +7,12 @@
 
 ## 1. Purpose
 
-This document defines the **stability invariants** that guarantee the system remains
-maintainable, secure, and refactorable under continuous change.
+This document defines **proposed stability invariants** for the system.
 
-These invariants are **hard safety boundaries**, not optimization goals.  
-Any violation immediately disqualifies a release from production or export.
+> ⚠️ **These invariants are hypotheses, not verified rules.**
+> They are derived from external literature and engineering intuition,
+> but have not been validated through controlled experiments in this project.
+> See RESEARCH.md for experiment plans to validate them.
 
 ---
 
@@ -95,10 +96,11 @@ All refactoring must preserve observable behavior:
 
 ---
 
-## 6. Violation Policy
+## 6. Violation Policy (Proposed — Not Yet Validated)
 
-- Any invariant violation → **immediate release exclusion**
-- No exceptions
+> The enforcement policy below is a design goal, not a validated rule.
+
+- Any invariant violation → **proposed: release exclusion** (pending validation)
 - Resolution requires PR decomposition or structural isolation
 
 ---
