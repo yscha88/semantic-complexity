@@ -8,7 +8,7 @@
 | # | 규칙 | 근거 |
 |---|------|------|
 | C1 | **함수당 개념 수 ≤ 9** | Miller 1956: 작업기억 7±2. EXP-01v에서 5모델 검증 |
-| C2 | **state × async × retry 2개 이상 공존 금지** | 3가지 관심사가 동시 존재하면 사람도 LLM도 추론 불가 |
+| C2 | **SAR 3가지 공존 금지 (hard fail) + 2가지 조합 조건부 경고** | Lee 2006: shared state + async = interleaving race. Sweller 1988: 인지 부하 곱셈적 증가. Helland 2012: retry 시 멱등성 부재 → 상태 오염 |
 | C3 | **중첩 깊이 ≤ threshold** (아래 표 참조) | Campbell 2017: 중첩 시 인지 비용 비선형 증가 |
 | C4 | **숨겨진 의존성 최소화** | 함수 시그니처에 나타나지 않는 의존성은 추론을 방해 |
 
@@ -66,22 +66,86 @@
 | 로깅 | `logger.info(...)` |
 | 반환문 | `return result` |
 
-## state × async × retry 판정
+## C2: State × Async × Retry 판정
 
-| 관심사 | 탐지 패턴 |
-|--------|----------|
-| **State** | 가변 상태 관리: 파일 생성/삭제, DB 상태 갱신, 플래그, 캐시 |
-| **Async** | 비동기/병렬: async/await, multiprocessing, threading, Queue |
-| **Retry** | 재시도/복구: while + retry, 자동 재시작, backoff, 재연결 |
+### 정의
 
-2개 이상이 **같은 함수**에 존재하면 위반. 다른 함수로 분리되어 있으면 허용.
+| 관심사 | 탐지 패턴 | "shared"의 범위 |
+|--------|----------|----------------|
+| **State** | `self.`, 전역 변수, 클로저 캡처 변수의 변경 | **로컬 변수는 제외** |
+| **Async** | async/await, multiprocessing, threading, Queue | await 경계에서 실행 양보 |
+| **Retry** | while + retry, 자동 재시작, backoff, 재연결, max_retries | attempt 간 상태 전이 |
+
+### 판정 기준
+
+| 수준 | 조합 | 판정 | 조건 |
+|------|------|------|------|
+| **Hard fail** | **SAR** (3가지 모두) | ❌ 무조건 위반 | 같은 함수에 shared state 변경 + await + retry loop |
+| **Warn** | **SA** (state + async) | ⚠️ 조건부 | shared state 변경이 **await 경계를 가로지르면** 위반 |
+| **Warn** | **SR** (state + retry) | ⚠️ 조건부 | retry가 shared state를 attempt 간 **누적하고 정리 경로 없으면** 위반 |
+| **Warn** | **AR** (async + retry) | ⚠️ 조건부 | retry가 **cancellation/timeout을 보수적으로 제한하지 않으면** 위반 |
+
+### SA 경고 판정 예시
+
+```python
+# ⚠️ 위반: shared state가 await 경계를 가로지름
+async def process(self):
+    self.status = "running"     # shared state 변경
+    await do_work()             # ← 여기서 다른 코루틴이 self.status를 볼 수 있음
+    self.status = "done"        # interleaving race 가능
+
+# ✅ 안전: await 전후로 shared state 변경 없음
+async def process(self):
+    result = await do_work()    # 로컬 변수만 사용
+    return result
+```
+
+### SR 경고 판정 예시
+
+```python
+# ⚠️ 위반: retry 간 shared state 누적, 정리 없음
+def process(self):
+    for attempt in range(3):
+        self.status = "trying"  # 실패 시 이 상태가 남음
+        result = call_api()
+        if result: break
+    # self.status가 "trying"인 채로 끝날 수 있음
+
+# ✅ 안전: attempt-local state + finally 정리
+def process(self):
+    for attempt in range(3):
+        try:
+            return call_api()
+        except TransientError:
+            continue
+        finally:
+            self.status = "idle"  # 항상 정리
+```
+
+### AR 경고 판정 예시
+
+```python
+# ⚠️ 위반: broad except + 무제한 재시도
+async def fetch(self):
+    while True:
+        try: return await http.get(url)
+        except Exception: await sleep(1)  # 영구 장애에도 무한 재시도
+
+# ✅ 안전: 특정 예외 + timeout + 제한
+async def fetch(self):
+    for attempt in range(3):
+        try: return await asyncio.wait_for(http.get(url), timeout=5)
+        except (TimeoutError, ConnectionError): await sleep(attempt * 2)
+    raise MaxRetriesExceeded()
+```
 
 ## 위반 시 리팩토링 방향
 
 | 위반 | 방향 |
 |------|------|
 | 개념 수 초과 | **단계 함수 추출**: 각 단계를 독립 함수로 분리. 오케스트레이터는 호출만 |
-| SAR 공존 | **관심사 분리**: state 관리 함수, async 브릿지 함수, retry 감시 함수를 각각 분리 |
+| SAR 공존 (hard fail) | **관심사 분리**: state 관리 함수, async 브릿지 함수, retry 감시 함수를 각각 분리 |
+| SA/SR/AR 경고 | **경계 격리**: await 전후의 state를 로컬 변수로 격리, retry에 finally 정리 추가, retry 대상 예외를 특정 |
 | 중첩 초과 | **early return, guard clause**: 예외 조건 먼저 처리 후 정상 흐름 평탄화 |
 | 숨겨진 의존성 | **명시적 주입**: 함수 인자로 의존성 전달 또는 dataclass로 컨텍스트 묶기 |
 
