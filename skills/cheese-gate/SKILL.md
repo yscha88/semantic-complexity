@@ -85,59 +85,23 @@
 | **Warn** | **SR** (state + retry) | ⚠️ 조건부 | retry가 shared state를 attempt 간 **누적하고 정리 경로 없으면** 위반 |
 | **Warn** | **AR** (async + retry) | ⚠️ 조건부 | retry가 **cancellation/timeout을 보수적으로 제한하지 않으면** 위반 |
 
-### SA 경고 판정 예시
+### 패턴 상세 및 예시
 
-```python
-# ⚠️ 위반: shared state가 await 경계를 가로지름
-async def process(self):
-    self.status = "running"     # shared state 변경
-    await do_work()             # ← 여기서 다른 코루틴이 self.status를 볼 수 있음
-    self.status = "done"        # interleaving race 가능
+9개 복합 안티패턴의 상세 정의, 위험한 코드/안전한 코드 예시, 탐지 조건은
+[COMPOUND_ANTI_PATTERNS.md](../docs/COMPOUND_ANTI_PATTERNS.md) 참조.
 
-# ✅ 안전: await 전후로 shared state 변경 없음
-async def process(self):
-    result = await do_work()    # 로컬 변수만 사용
-    return result
-```
-
-### SR 경고 판정 예시
-
-```python
-# ⚠️ 위반: retry 간 shared state 누적, 정리 없음
-def process(self):
-    for attempt in range(3):
-        self.status = "trying"  # 실패 시 이 상태가 남음
-        result = call_api()
-        if result: break
-    # self.status가 "trying"인 채로 끝날 수 있음
-
-# ✅ 안전: attempt-local state + finally 정리
-def process(self):
-    for attempt in range(3):
-        try:
-            return call_api()
-        except TransientError:
-            continue
-        finally:
-            self.status = "idle"  # 항상 정리
-```
-
-### AR 경고 판정 예시
-
-```python
-# ⚠️ 위반: broad except + 무제한 재시도
-async def fetch(self):
-    while True:
-        try: return await http.get(url)
-        except Exception: await sleep(1)  # 영구 장애에도 무한 재시도
-
-# ✅ 안전: 특정 예외 + timeout + 제한
-async def fetch(self):
-    for attempt in range(3):
-        try: return await asyncio.wait_for(http.get(url), timeout=5)
-        except (TimeoutError, ConnectionError): await sleep(attempt * 2)
-    raise MaxRetriesExceeded()
-```
+**빠른 참조**:
+| 패턴 | 핵심 | 탐지 키워드 |
+|------|------|-----------|
+| SA-CROSS | `self.x = ; await; self.x = ` | state-await-state 순서 |
+| SA-LOOP | `while self.x: await` | state 조건 + await 루프 |
+| SA-ACCUM | `async for: self.list.append` | async 반복 중 state 누적 |
+| SR-LEAK | retry + `self.x = ` + no finally | state 잔존 |
+| SR-ACCUM | retry + `self.count += 1` | 비멱등 누적 |
+| SR-PARTIAL | retry + 여러 `self.x = ` | 부분 갱신 불일치 |
+| AR-SWALLOW | async retry + `except Exception` | CancelledError 삼킴 |
+| AR-INFINITE | `while True` + await + except | 무제한 재시도 |
+| AR-STORM | retry + `sleep(상수)` | backoff 없음 |
 
 ## 위반 시 리팩토링 방향
 
