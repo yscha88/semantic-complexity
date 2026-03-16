@@ -1,104 +1,53 @@
 # semantic-complexity
 
-Code complexity analyzer based on Ham Sandwich Theorem
+Multi-dimensional code complexity analyzer — Security × Cognitive × Behavioral
 
 > [한국어](README.ko.md)
 
-## MCP Server Installation
+## What it does
+
+Overcomes the limits of traditional static analysis (McCabe, etc.) by combining
+LLM semantic reasoning + SKILLS (policy frame) + MCP (quantitative measurement).
+
+| Axis | Measures | Core |
+|------|----------|------|
+| 🍞 **Bread** (Security) | Trust boundary, auth, secrets | Structural stability |
+| 🧀 **Cheese** (Cognitive) | Nesting, concept count, state×async×retry | Comprehensibility |
+| 🥓 **Ham** (Behavioral) | Golden test, contract test, critical path | Behavior preservation |
+
+## MCP Server
 
 ### Python
-
 ```bash
-# Install
 claude mcp add sc-py -- "uvx --from semantic-complexity semantic-complexity-py-mcp"
-
-# Update
-uv cache clean && uvx --from semantic-complexity semantic-complexity-py-mcp --version
-
-# Remove
-claude mcp remove sc-py
-
-# Reinstall
-uv cache clean && claude mcp remove sc-py && claude mcp add sc-py -- "uvx --from semantic-complexity semantic-complexity-py-mcp"
 ```
 
 ### TypeScript
-
 ```bash
-# Install
 claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
-
-# Update (clear npx cache and re-run)
-npm cache clean --force && npx -y -p semantic-complexity semantic-complexity-ts-mcp --version
-
-# Remove
-claude mcp remove sc-ts
-
-# Reinstall
-npm cache clean --force && claude mcp remove sc-ts && claude mcp add sc-ts -- npx -y -p semantic-complexity semantic-complexity-ts-mcp
 ```
 
 ### Go
-
 ```bash
-# Install (go install)
 go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 claude mcp add sc-go -- sc-go-mcp
-
-# Update
-go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
-
-# Build (local)
-cd src/go && go build -o sc-go-mcp ./cmd/sc-go-mcp
-claude mcp add sc-go -- /path/to/sc-go-mcp
-
-# Remove
-claude mcp remove sc-go
-
-# Clear cache
-go clean -cache -modcache
-
-# Reinstall
-go clean -cache && go install github.com/yscha88/semantic-complexity/src/go/cmd/sc-go-mcp@latest
 ```
 
 ## MCP Tools
 
 | Tool | Description |
 |------|-------------|
-| `analyze_sandwich` | Full complexity analysis (Bread + Cheese + Ham 3-axis) |
+| `analyze_sandwich` | Full 3-axis complexity analysis |
 | `analyze_cheese` | Cognitive accessibility analysis |
-| `check_gate` | Release gate check (MVP/Production) |
+| `check_gate` | Release gate check (PoC/MVP/Production) |
 | `suggest_refactor` | Refactoring recommendations |
 | `check_budget` | PR change budget check |
 | `get_label` | Module dominant axis label |
 | `check_degradation` | Cognitive degradation detection |
 
-## MCP Resources
-
-| URI | Description |
-|-----|-------------|
-| `docs://usage-guide` | Usage guide (3-axis model, tool scenarios, cognitive complexity) |
-| `docs://theory` | Theoretical foundation (Ham Sandwich Theorem, Lyapunov stability) |
-| `docs://srs` | Software Requirements Specification |
-| `docs://sds` | Software Design Specification |
-
-## Version Check
-
-```bash
-# Python
-uvx --from semantic-complexity semantic-complexity-py-mcp --version
-
-# TypeScript
-npx -y -p semantic-complexity semantic-complexity-ts-mcp --version
-
-# Go
-sc-go-mcp --version
-```
-
 ## Documentation
 
-- [Theory](docs/THEORY.md) - Ham Sandwich Theorem based theory
-- [Requirements](docs/SRS.md) - Software Requirements Specification
-- [Design](docs/SDS.md) - Software Design Specification
-- [Changelog](docs/CHANGELOG.md) - Version history
+- [Theory (한국어)](docs/THEORY.ko.md) — Theoretical foundation + explicit limitations
+- [Stability Invariants](docs/STABILITY_INVARIANTS.md) — Hard safety boundaries
+- [LLM Refactoring Protocol](docs/LLM_REFACTORING_PROTOCOL.md) — Allowed/prohibited LLM actions
+- [Module Types (한국어)](docs/MODULE_TYPES.ko.md) — Architecture role taxonomy
