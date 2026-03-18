@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-18T11:06:53.518178+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "e9fe5245b3a93728bbcfa3af3d6daeece84bfcd49bd4731cc29606d8547e8d0e",
+  "prompt_token_count": 3174,
+  "config": {
+    "model_id": "claude-sonnet-4-20250514",
+    "provider": "anthropic",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": 4096
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-20250514",
+    "model_id_actual": "claude-sonnet-4-20250514",
+    "content": "## Cognitive Complexity Analysis\n\n### C1: Cyclomatic Complexity per Function\n\n**Finding 1: `request_2fa` function**\n- **Rating: FAIL**\n- **Estimated Complexity: 26+ (F)**\n- **Analysis**: This function has multiple nested conditionals, loops, and branching paths:\n  - Initial device count check\n  - While loop for input validation\n  - Multiple validation conditions (empty, device index, six-digit code)\n  - Nested if-else for device selection vs direct code entry\n  - Another while loop for SMS code input\n  - Final validation branches\n- **Refactoring Recommendation**: Break into smaller functions like `handle_device_selection()`, `get_user_input_choice()`, `send_sms_code()`, `validate_direct_code()`\n\n**Finding 2: `request_2fa_web` function**\n- **Rating: WARNING**\n- **Estimated Complexity: 8 (B)**\n- **Analysis**: Contains nested conditionals within a while loop, status checking logic, and multiple branching paths for different status states.\n- **Refactoring Recommendation**: Extract status transition logic into separate functions.\n\n**Finding 3: `authenticator` function**\n- **Rating: WARNING**\n- **Estimated Complexity: 7 (B)**\n- **Analysis**: Multiple conditional branches for password handling, 2FA/2SA requirements, and provider management.\n- **Refactoring Recommendation**: Separate password handling, authentication type detection, and provider management.\n\n### C2: Nesting Depth\n\n**Finding 1: `request_2fa` function**\n- **Rating: FAIL**\n- **Nesting Depth: 4+ levels**\n- **Analysis**: \n  ```python\n  if devices_count > 0:  # Level 1\n      while True:        # Level 2\n          if is_empty_string(index_or_code):  # Level 3\n              continue   # Level 4\n  ```\n- **Refactoring Recommendation**: Extract nested logic into separate functions with early returns.\n\n**Finding 2: `request_2fa_web` function**\n- **Rating: FAIL**\n- **Nesting Depth: 4+ levels**\n- **Analysis**: While loop containing nested if-else statements with additional conditionals inside.\n\n### C3: Single Responsibility\n\n**Finding 1: `request_2fa` function**\n- **Rating: FAIL**\n- **Multiple Responsibilities**:\n  - Device enumeration and display\n  - User input validation and parsing\n  - SMS code sending\n  - Code validation (both direct and SMS)\n  - User interaction and prompting\n- **Refactoring Recommendation**: Split into `display_devices()`, `get_user_choice()`, `handle_sms_flow()`, `handle_direct_code_flow()`\n\n**Finding 2: `authenticator` function**\n- **Rating: FAIL**\n- **Multiple Responsibilities**:\n  - Password provider management\n  - iCloud service initialization\n  - Password saving across providers\n  - Authentication type detection and routing\n- **Refactoring Recommendation**: Separate into `PasswordManager`, `AuthenticationRouter`, and `ServiceInitializer`\n\n**Finding 3: `request_2fa_web` function**\n- **Rating: WARNING**\n- **Multiple Responsibilities**:\n  - Status management\n  - Code validation\n  - User communication\n- **Refactoring Recommendation**: Extract status management into a separate class\n\n### C4: Code Placement\n\n**Finding 1: Inline imports scattered throughout functions**\n- **Rating: FAIL**\n- **Analysis**: `from foundation.string_utils import strip` appears multiple times within function bodies\n- **Refactoring Recommendation**: Move all imports to the top of the file\n\n**Finding 2: Nested function in `authenticator`**\n- **Rating: WARNING**\n- **Analysis**: `password_provider` function is defined inside `authenticator` but could be a standalone utility\n- **Refactoring Recommendation**: Extract as a module-level function or method of a PasswordManager class\n\n**Finding 3: Hardcoded alphabet string in `request_2fa`**\n- **Rating: WARNING**\n- **Analysis**: `device_index_alphabet = \"abcdefghijklmnopqrstuvwxyz\"` should be a module constant\n- **Refactoring Recommendation**: Move to module level as `DEVICE_INDEX_ALPHABET`\n\n## Additional Free-form Analysis\n\n### Complexity Issues Not Covered by C1-C4:\n\n1. **State Management Complexity**: The `request_2fa_web` function implements a complex state machine manually with status transitions that are hard to follow and debug.\n\n2. **Error Handling Inconsistency**: Some functions use exceptions (`PyiCloudFailedMFAException`), others use `sys.exit(1)`, and some have no error handling. This makes the control flow unpredictable.\n\n3. **Temporal Coupling**: The `authenticator` function has hidden dependencies on the order of operations (password validation must happen before saving, 2FA detection must happen after service creation).\n\n4. **Data Structure Complexity**: The `password_providers` parameter is a complex nested structure `Dict[str, Tuple[Callable[[str], str | None], Callable[[str, str], None]]]` that's difficult to understand and use correctly.\n\n5. **Side Effect Complexity**: Functions have hidden side effects (writing to providers, changing global state, printing to stdout) that aren't obvious from their signatures.\n\n6. **Input Validation Scatter**: While there are pure validation functions, the actual input handling is scattered across multiple functions with inconsistent patterns.\n\n7. **Magic Numbers and Strings**: Hardcoded values like \"6\" for code length, specific status strings, and device limits make the code brittle and hard to maintain.\n\n**Overall Recommendation**: This module needs significant refactoring to separate concerns, reduce complexity, and improve maintainability. Consider implementing the Command pattern for different authentication flows and the State pattern for the web-based 2FA flow.",
+    "finish_reason": "end_turn",
+    "usage": {
+      "prompt_tokens": 3174,
+      "completion_tokens": 1409,
+      "total_tokens": 4583
+    },
+    "response_id": "msg_014QWY4AKujnwkgGwPqkmzdw",
+    "elapsed_seconds": 27.81
+  },
+  "experiment_id": "cheese-R3",
+  "unit_id": "cheese-R3_sonnet-4.6_D",
+  "input": {
+    "repo": "icloud-photos-downloader/icloud_photos_downloader",
+    "commit": "3a97872f9f44ac49bda54b66b5170575bd22ff18",
+    "file": "src/icloudpd/authentication.py",
+    "lines": "1-283",
+    "code_sha256": "d85f066430ecd2e745dac5b5408a4fb6216f2570346ce695e5b68c5e0db6da5f"
+  }
+}

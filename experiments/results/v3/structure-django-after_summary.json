@@ -1,0 +1,33 @@
+{
+  "experiment_id": "structure-django-after",
+  "input_file": "experiments/inputs/structure_django_after.json",
+  "code_sha256": "d2d3b53593d48aa7982ae41e88c9ced90b9ef949dc119ac470ea263c390ac4f4",
+  "models": [
+    "gpt-5.4",
+    "sonnet-4.6"
+  ],
+  "groups": [
+    "TASK"
+  ],
+  "total_units": 2,
+  "completed": 2,
+  "results": [
+    {
+      "unit_id": "structure-django-after_gpt-5.4_TASK",
+      "model": "gpt-5.4",
+      "group": "TASK",
+      "tokens": 4665,
+      "elapsed": 29.56,
+      "prompt_sha256": "269d554f56b876f74d0152505695ba750f82ec7619d57dccc8adf39d6166ae25"
+    },
+    {
+      "unit_id": "structure-django-after_sonnet-4.6_TASK",
+      "model": "sonnet-4.6",
+      "group": "TASK",
+      "tokens": 6136,
+      "elapsed": 30.25,
+      "prompt_sha256": "269d554f56b876f74d0152505695ba750f82ec7619d57dccc8adf39d6166ae25"
+    }
+  ],
+  "timestamp": "2026-03-18T09:45:39.604359+00:00"
+}
