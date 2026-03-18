@@ -1,0 +1,25 @@
+=== Measuring: https://github.com/docker/compose ===
+primary_language: go
+total_files: 284
+test_files: 93
+test_ratio: 32.7%
+
+--- Max Nesting Depth (top 5) ---
+3 ./pkg/e2e/build_test.go
+3 ./pkg/compose/dependencies_test.go
+2 ./pkg/e2e/config_test.go
+2 ./pkg/compose/create_test.go
+2 ./pkg/compose/convergence.go
+
+--- Auth patterns ---
+auth refs: 187
+
+--- Secret patterns ---
+secret/key refs: 0
+
+--- Largest functions ---
+294 ./pkg/compose/build_bake.go::func (s *composeService) doBuildBake(ctx context.Context, project *types.Project, serviceToBeBuild types.Services, options api.BuildOptions) (map[string]string, error) { //nolint:gocyclo
+262 ./pkg/compose/up.go::func (s *composeService) Up(ctx context.Context, project *types.Project, options api.UpOptions) error { //nolint:gocyclo
+254 ./pkg/e2e/compose_run_test.go::func TestLocalComposeRun(t *testing.T) {
+237 ./cmd/compose/compose.go::func RootCommand(dockerCli command.Cli, backendOptions *BackendOptions) *cobra.Command { //nolint:gocyclo
+185 ./pkg/compose/viz_test.go::func TestViz(t *testing.T) {

@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/freqtrade/freqtrade ===
+--- Basic Stats ---
+total_py: 468
+test_py: 95
+test_ratio: 20.2%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+12 ./freqtrade/freqai/base_models/BasePyTorchClassifier.py
+9 ./freqtrade/freqai/utils.py
+9 ./freqtrade/freqai/torch/PyTorchTransformerModel.py
+9 ./freqtrade/freqai/freqai_interface.py
+9 ./freqtrade/freqai/data_kitchen.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 7
+global keyword: 3
+
+--- B1: Auth patterns ---
+auth refs: 23
+
+--- B2: Secret patterns ---
+secret/key refs: 35
+
+--- B4: SQL patterns ---
+raw SQL: 30
+ORM: 127
+
+--- H3: Contract test ---
+contract/schema test: 35
+
+--- C1: Largest functions (by line count) ---
+ 998 ./tests/conftest_hyperopt.py::hyperopt_test_result
+ 822 ./tests/conftest.py::get_markets
+ 449 ./tests/conftest.py::leverage_tiers
+ 372 ./tests/commands/test_commands.py::test_hyperopt_list
+ 354 ./freqtrade/commands/arguments.py::_build_subcommands
+ 353 ./tests/conftest.py::tickers
+ 340 ./tests/exchange/test_hyperliquid.py::test_hyperliquid_dry_run_liquidation_price
+ 321 ./tests/exchange/test_binance.py::test_fill_leverage_tiers_binance
+ 304 ./tests/rpc/test_rpc_apiserver.py::test_api_pair_candles
+ 303 ./tests/commands/test_commands.py::test_list_markets
+
+--- C2: SAR (state+async+retry) candidates ---

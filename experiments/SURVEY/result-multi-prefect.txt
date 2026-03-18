@@ -1,0 +1,12 @@
+=== Measuring: https://github.com/PrefectHQ/prefect ===
+primary_language: py
+total_files: 1754
+test_files: 619
+test_ratio: 35.2%
+
+--- Max Nesting Depth (top 5) ---
+14 ./src/integrations/prefect-kubernetes/tests/test_worker.py
+12 ./tests/infrastructure/provisioners/test_container_instance.py
+12 ./tests/infrastructure/provisioners/test_cloud_run.py
+12 ./src/prefect/utilities/schema_tools/validation.py
+12 ./src/integrations/prefect-gcp/prefect_gcp/workers/cloud_run.py

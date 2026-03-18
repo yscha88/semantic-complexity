@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/explosion/spaCy ===
+--- Basic Stats ---
+total_py: 876
+test_py: 266
+test_ratio: 30.3%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+13 ./website/setup/jinja_to_js.py
+11 ./spacy/pipeline/legacy/entity_linker.py
+11 ./spacy/pipeline/entity_linker.py
+10 ./spacy/tests/tokenizer/test_explain.py
+9 ./spacy/tests/training/test_training.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 9
+global keyword: 3
+
+--- B1: Auth patterns ---
+auth refs: 192
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 55
+ORM: 15
+
+--- H3: Contract test ---
+contract/schema test: 30
+
+--- C1: Largest functions (by line count) ---
+ 656 ./spacy/cli/debug_data.py::debug_data
+ 423 ./spacy/pipeline/factories.py::register_factories
+ 233 ./spacy/registrations.py::populate_registry
+ 230 ./spacy/language.py::from_config
+ 185 ./spacy/cli/debug_data.py::_compile_gold
+ 172 ./spacy/cli/package.py::package
+ 167 ./spacy/cli/find_threshold.py::find_threshold
+ 166 ./spacy/tests/lang/nl/test_noun_chunks.py::nl_sample
+ 149 ./spacy/training/loggers.py::console_logger_v3
+ 134 ./spacy/scorer.py::score_cats
+
+--- C2: SAR (state+async+retry) candidates ---

@@ -1,0 +1,44 @@
+=== Measuring: https://github.com/tobymao/saq ===
+--- Basic Stats ---
+total_py: 43
+test_py: 11
+test_ratio: 25.5%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+9 ./saq/queue/postgres.py
+8 ./saq/worker.py
+7 ./saq/queue/redis.py
+7 ./saq/queue/base.py
+6 ./tests/test_settings_import.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 3
+global keyword: 1
+
+--- B1: Auth patterns ---
+auth refs: 3
+
+--- B2: Secret patterns ---
+secret/key refs: 1
+
+--- B4: SQL patterns ---
+raw SQL: 54
+ORM: 3
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+  97 ./saq/queue/postgres.py::sweep
+  91 ./saq/worker.py::process
+  83 ./tests/test_worker.py::test_startup_shutdown_hooks_many
+  83 ./saq/worker.py::__init__
+  74 ./tests/test_worker.py::test_abort
+  67 ./saq/queue/base.py::map
+  66 ./saq/queue/postgres.py::init_db
+  65 ./saq/queue/postgres_migrations.py::get_migrations
+  63 ./saq/queue/postgres.py::_dequeue
+  61 ./saq/queue/postgres.py::__init__
+
+--- C2: SAR (state+async+retry) candidates ---
+SAR candidate: ./saq/worker.py

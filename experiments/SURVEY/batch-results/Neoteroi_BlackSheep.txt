@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/Neoteroi/BlackSheep ===
+--- Basic Stats ---
+total_py: 188
+test_py: 57
+test_ratio: 30.3%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+11 ./tests/test_openapi_v3.py
+11 ./itests/app_2.py
+10 ./blacksheep/server/otel/__init__.py
+9 ./itests/test_server.py
+8 ./blacksheep/server/openapi/v3.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 21
+global keyword: 2
+
+--- B1: Auth patterns ---
+auth refs: 25
+
+--- B2: Secret patterns ---
+secret/key refs: 37
+
+--- B4: SQL patterns ---
+raw SQL: 46
+ORM: 20
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 261 ./tests/test_openapi_v3.py::test_mount_oad_generation
+ 245 ./tests/test_openapi_v3.py::test_sorting_api_controllers_tags
+ 232 ./tests/test_openapi_v3.py::test_any_of_pydantic_models
+ 210 ./blacksheep/multipart.py::parse_multipart_async
+ 197 ./tests/test_openapi_v3.py::test_cats_annotated_api_capital_operations_ids
+ 196 ./tests/test_openapi_v3.py::test_cats_api_capital_operations_ids
+ 192 ./tests/test_openapi_v3.py::test_cats_annotated_api
+ 191 ./tests/test_openapi_v3.py::test_cats_api
+ 177 ./tests/test_openapi_v3.py::test_handling_of_pydantic_class_with_child_models
+ 147 ./tests/test_openapi_v3.py::test_pydantic_constrained_types
+
+--- C2: SAR (state+async+retry) candidates ---

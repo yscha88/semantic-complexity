@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/encode/databases ===
+--- Basic Stats ---
+total_py: 24
+test_py: 5
+test_ratio: 20.8%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+6 ./tests/test_databases.py
+6 ./databases/backends/asyncmy.py
+5 ./databases/core.py
+5 ./databases/backends/sqlite.py
+5 ./databases/backends/mysql.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 6
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 114
+ORM: 12
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 102 ./tests/test_databases.py::test_queries_with_expose_backend_connection
+  73 ./tests/test_databases.py::test_queries
+  58 ./tests/test_databases.py::test_queries_raw
+  44 ./databases/backends/sqlite.py::_compile
+  42 ./tests/test_databases.py::test_transaction_commit_serializable
+  39 ./tests/test_databases.py::test_transaction_context_cleanup_garbagecollector
+  39 ./databases/backends/mysql.py::_compile
+  39 ./databases/backends/asyncmy.py::_compile
+  39 ./databases/backends/aiopg.py::_compile
+  38 ./databases/core.py::replace
+
+--- C2: SAR (state+async+retry) candidates ---

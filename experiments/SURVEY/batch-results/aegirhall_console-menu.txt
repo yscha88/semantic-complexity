@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/aegirhall/console-menu ===
+--- Basic Stats ---
+total_py: 54
+test_py: 20
+test_ratio: 37.0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+25 ./consolemenu/validators/regex.py
+14 ./consolemenu/menu_component.py
+13 ./test/base_test_case.py
+13 ./consolemenu/prompt_utils.py
+12 ./test/test_selection_menu.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 5
+
+--- B1: Auth patterns ---
+auth refs: 3
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 15
+ORM: 4
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+  75 ./examples/example2.py::main
+  50 ./test/test_prompt_utils.py::test_prompt_for_bilateral_choice
+  50 ./examples/example4.py::main
+  42 ./examples/example.py::main
+  41 ./consolemenu/console_menu.py::__init__
+  34 ./consolemenu/prompt_utils.py::validate_input
+  33 ./consolemenu/menu_formatter.py::format
+  32 ./consolemenu/prompt_utils.py::prompt_for_numbered_choice
+  31 ./consolemenu/prompt_utils.py::input
+  31 ./consolemenu/console_menu.py::start
+
+--- C2: SAR (state+async+retry) candidates ---

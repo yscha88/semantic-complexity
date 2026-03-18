@@ -1,0 +1,27 @@
+=== Measuring: https://github.com/python-visualization/folium ===
+primary_language: py
+total_files: 101
+test_files: 41
+test_ratio: 40.5%
+
+--- Max Nesting Depth (top 5) ---
+9 ./folium/plugins/timestamped_geo_json.py
+9 ./folium/features.py
+8 ./tests/plugins/test_timestamped_geo_json.py
+8 ./folium/plugins/heat_map_withtime.py
+7 ./tests/plugins/test_encoded.py
+
+--- Auth patterns ---
+auth refs: 4
+
+--- Secret patterns ---
+secret/key refs: 0
+
+--- Largest functions ---
+ 185 ./tests/plugins/test_timestamped_geo_json.py::test_timestamped_geo_json
+ 168 ./folium/features.py::__init__
+ 103 ./folium/vector_layers.py::path_options
+ 101 ./tests/test_features.py::test_geojson_find_identifier
+  88 ./folium/folium.py::__init__
+
+--- SAR candidates ---

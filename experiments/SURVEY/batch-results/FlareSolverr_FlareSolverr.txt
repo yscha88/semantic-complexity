@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/FlareSolverr/FlareSolverr ===
+--- Basic Stats ---
+total_py: 21
+test_py: 0
+test_ratio: 0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+10 ./src/undetected_chromedriver/__init__.py
+10 ./src/bottle_plugins/logger_plugin.py
+9 ./src/undetected_chromedriver/devtool.py
+8 ./src/undetected_chromedriver/reactor.py
+7 ./src/utils.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 18
+global keyword: 7
+
+--- B1: Auth patterns ---
+auth refs: 4
+
+--- B2: Secret patterns ---
+secret/key refs: 1
+
+--- B4: SQL patterns ---
+raw SQL: 1
+ORM: 11
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 393 ./src/undetected_chromedriver/__init__.py::__init__
+ 151 ./src/flaresolverr_service.py::_evil_logic
+ 139 ./src/undetected_chromedriver/__init__.py::_configure_headless
+ 133 ./src/undetected_chromedriver/__init__.py::get_wrapped
+  94 ./src/utils.py::get_webdriver
+  90 ./src/undetected_chromedriver/devtool.py::test
+  89 ./src/undetected_chromedriver/patcher.py::auto
+  75 ./src/utils.py::create_proxy_extension
+  75 ./src/undetected_chromedriver/patcher.py::__init__
+  49 ./src/bottle_plugins/prometheus_plugin.py::prometheus_plugin
+
+--- C2: SAR (state+async+retry) candidates ---

@@ -1,0 +1,27 @@
+=== Measuring: https://github.com/thedevsaddam/govalidator ===
+primary_language: go
+total_files: 17
+test_files: 6
+test_ratio: 35.2%
+
+--- Max Nesting Depth (top 5) ---
+1 ./validator.go
+1 ./validate_file.go
+1 ./rules_test.go
+1 ./rules.go
+1 ./roller.go
+
+--- Auth patterns ---
+auth refs: 0
+
+--- Secret patterns ---
+secret/key refs: 0
+
+--- Largest functions ---
+1041 ./rules.go::func init() {
+123 ./roller.go::func (r *roller) traverseMap(iface interface{}) {
+111 ./rules_test.go::func Test_max(t *testing.T) {
+110 ./rules_test.go::func Test_min(t *testing.T) {
+83 ./roller.go::func (r *roller) traverseStruct(iface interface{}) {
+
+--- SAR candidates ---

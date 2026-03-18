@@ -1,0 +1,42 @@
+{
+  "experiment_id": "bread-R1",
+  "input_file": "experiments/inputs/bread_R1.json",
+  "code_sha256": "f8712fe91435653c8cc35c66e0249277e8eb9db8cba33149a9af546d05938aad",
+  "models": [
+    "gpt-5.4"
+  ],
+  "groups": [
+    "A",
+    "B",
+    "C"
+  ],
+  "total_units": 3,
+  "completed": 3,
+  "results": [
+    {
+      "unit_id": "bread-R1_gpt-5.4_A",
+      "model": "gpt-5.4",
+      "group": "A",
+      "tokens": 2827,
+      "elapsed": 34.52,
+      "prompt_sha256": "8ff81966c78d024d318855d617497bda6f2c58cfbfd842f3690078591fce7d3e"
+    },
+    {
+      "unit_id": "bread-R1_gpt-5.4_B",
+      "model": "gpt-5.4",
+      "group": "B",
+      "tokens": 2677,
+      "elapsed": 29.08,
+      "prompt_sha256": "7f5ea2918a89c073e759b09cfe1837aa6e2a54ca0201c98b33050e0a48e9e199"
+    },
+    {
+      "unit_id": "bread-R1_gpt-5.4_C",
+      "model": "gpt-5.4",
+      "group": "C",
+      "tokens": 2247,
+      "elapsed": 24.57,
+      "prompt_sha256": "02aba5ef998e705970dd2769c2228804abbab0784584ffcb8e3136872ff172b2"
+    }
+  ],
+  "timestamp": "2026-03-18T04:56:46.990422+00:00"
+}

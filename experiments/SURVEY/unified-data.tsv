@@ -1,0 +1,95 @@
+repo	lang	files	test_ratio	max_nest	max_func	auth	secret	sar	source
+01-fastapi-template	py	46	15.2%	4	41	13	15	0	n17
+12-toml	py	10	30.0%	15	353	2	0	0	n17
+16-arq	py	31	19.3%	7	203	3	0	0	n17
+DB-GPT	py	1251	9.1%	12				0	n17
+FlareSolverr	py	21	0%	10	393	4	1	0	n17
+FlareSolverr/FlareSolverr	py	21	0%	10	393	4	1	0	batch
+Flowseal/tg-ws-proxy	py	2	0%	13	254	1	0	0	batch
+GH05TCREW/pentestagent	py	67	1.4%	12	741	0	0	0	batch
+GreyDGL/PentestGPT	py	116	13.7%	10	210	3	9	0	batch
+MONAI	py	1291	60.9%	11				0	fill
+Manisso/fsociety	py	1	0%	8	0	0	0		batch
+MasoniteFramework/masonite	py	511	16.8%	11	146	58	3	0	batch
+Neoteroi/BlackSheep	py	188	30.3%	11	261	25	37	0	batch
+PyImageSearch/imutils	py	43	0%	10	64	19	0	0	batch
+SolaWing/xcode-build-server	py	9	0%	8	153	1	0	0	batch
+TomasTomecek/sen	py	50	14.0%	14	92	1	0	0	batch
+aegirhall/console-menu	py	54	37.0%	25	75	3	0	0	batch
+aiohomekit	py							0	fill
+ansible/molecule	py	159	42.7%	8	133	8	0	0	batch
+arc90/git-sweep	py	15	20.0%	7	68	1	0	0	batch
+arq	py	31	19.3%	7	203	3	0	0	fill
+bokeh	py	1199	17.4%	19		34	122	0	multi
+booknlp/booknlp	py	24	0%	5	350	15	0	0	batch
+claffin/cloudproxy	py	58	55.1%	11	119	12	11	0	batch
+compose	go	284	32.7%	3		187	0	0	multi
+cvzone/cvzone	py	32	0%	16	61	1	0	0	batch
+darrenburns/ward	py	44	38.6%	7	84	1	0	0	batch
+databases	py	24	20.8%	6	102	6	0	0	fill
+django-rq	py	66	10.6%	7	73	7	3	0	fill
+explosion/spaCy	py	876	30.3%	13	656	192	0	0	batch
+fastapi-gino-arq-uvicorn	py	21	0%	4	23	3	4	0	n17
+fastapi-realworld-example-app	py	95	13.6%	6	112	28	14	0	n17
+folium	py	101	40.5%	9		4	0	0	multi
+frappe/frappe	py	1458	18.4%	10	495	126	60	0	batch
+freqtrade	py	468	20.2%	12	998	23	35	0	fill
+fsociety-team/fsociety	py	39	0%	7	64	6	0	0	batch
+galkan/crowbar	py	11	0%	9	107	1	1	0	batch
+genotrance/px	py	23	26.0%	9	174	5	10	0	batch
+geopandas	py	83	43.3%	13		7	0	0	multi
+govalidator	py	0				0	0	0	fill
+h11	py	31	29.0%	6	158	4	0	0	n17
+huey	py	63	22.2%	13	87	2	2	0	fill
+icloud-photos-downloader/icloud_photos_downloader	py	81	28.3%	11	370	16	17	0	batch
+jasonacox/tinytuya	py	70	0%	10	685	16	8	0	batch
+jc	py	543	43.4%	15	394	253	0	0	n17
+jesse	py	538	5.5%	20	305	39	112	0	fill
+kellyjonbrazil/jc	py	543	43.4%	15	394	253	0	0	batch
+kendricktan/misocoin	py	8	0%	8	96	2	0	0	batch
+knowsuchagency/mcp2cli	py	23	34.7%	11	161	9	0	0	batch
+lark	py	88	14.7%	15	1634	30	0	0	fill
+learnbyexample/TUI-apps	py	61	0%	14	73	0	0	0	batch
+letmaik/rawpy	py	18	50.0%	8	104	1	0	0	batch
+marshmallow	py	38	39.4%	8	137	6	0	0	n17
+microsoft/nlp-recipes	py	147	25.8%	16	378	49	0	0	batch
+miguelgrinberg/microdot	py	115	17.3%	14	124	17	17	0	batch
+n8n	ts	10310	28.1%	15				0	multi
+netdata	go	1663	23.8%	7				0	multi
+nickel	rs	210	15.7%	13		11	0	0	multi
+open-webui/mcpo	py	10	20.0%	9	259	4	28	0	batch
+pandera	py	272	30.5%	11	420	1	3	0	fill
+pentestagent	py	67	1.4%	12	741	0	0	0	n17
+plotly.py	py	1776	6.0%	11				0	multi
+pocketbase	go	442	40.7%	5		113	0	0	multi
+pokepetter/ursina	py	212	.9%	11	666	5	0	0	batch
+prefect	py	1754	35.2%	14				0	multi
+procrastinate	py	198	27.7%	7	111	7	2	0	fill
+pydantic	py	403	49.8%	13	226	11	4	0	n17
+pyensembl	py	51	49.0%	6		2	0	0	multi
+pyinfra	py	230	15.2%	9	258	17	14	0	n17
+pyro	py	630	30.4%	13	234	5	0	0	fill
+python-hyper/h2	py	56	44.6%	16	150	9	0	0	batch
+ramsrigouthamg/Questgen.ai	py	10	0%	9	48	5	0	0	batch
+rich-cli	py	6	16.6%	8	334	0	0	0	n17
+saq	py	43	25.5%	9	97	3	1	1	n17
+sebastianruder/NLP-progress	py	1	0%	5	124	1	0	0	batch
+spaCy	py	876	30.3%	13	656	192	0	0	n17
+streamlit-fastapi-model-serving	py	3	0%	6	41	0	0	0	n17
+superstruct	py	0				0	0	0	fill
+tacotron2	py	19	0%	11	107	0	0	0	n17
+taskiq	py	161	25.4%	8	225	2	0	0	fill
+terraform-compliance/cli	py	63	19.0%	28	199	2	0	0	batch
+textual	py	985	25.6%	10	328	29	0	0	n17
+tinytuya	py	70	0%	10	685	16	8	0	n17
+toml	py	10	30.0%	15	353	2	0	0	fill
+tortoise-orm	py	448	27.9%	12	299	34	0	0	fill
+valibot	py	0				0	0	0	fill
+validatorjs	py	0				0	0	0	fill
+vibora-io/vibora	py	139	0%	12	71	4	3	0	batch
+vine	ts	112	45.5%	13		9	0	0	multi
+wakaq	py	12	0%	10	126	3	0	1	n17
+whisper	py	20	25.0%	9	477	8	0	0	n17
+xavctn/img2table	py	130	31.5%	27	105	3	13	0	batch
+yuanming-hu/exposure	py	22	4.5%	19	263	0	0	0	batch
+zulip	py	1986	8.7%	12				0	multi

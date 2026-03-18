@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/MasoniteFramework/masonite ===
+--- Basic Stats ---
+total_py: 511
+test_py: 86
+test_ratio: 16.8%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+11 ./src/masonite/input/InputBag.py
+9 ./src/masonite/routes/HTTPRoute.py
+9 ./src/masonite/packages/providers/PackageProvider.py
+8 ./src/masonite/helpers/compact.py
+8 ./src/masonite/drivers/queue/DatabaseDriver.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 8
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 58
+
+--- B2: Secret patterns ---
+secret/key refs: 3
+
+--- B4: SQL patterns ---
+raw SQL: 10
+ORM: 26
+
+--- H3: Contract test ---
+contract/schema test: 2
+
+--- C1: Largest functions (by line count) ---
+ 146 ./src/masonite/commands/ProjectCommand.py::handle
+ 112 ./src/masonite/drivers/queue/DatabaseDriver.py::consume
+ 106 ./tests/features/validation/test_validation.py::test_strong
+  92 ./src/masonite/container/container.py::resolve
+  81 ./src/masonite/tests/TestCase.py::fetch
+  77 ./src/masonite/routes/HTTPRoute.py::compile_route_to_regex
+  74 ./src/masonite/routes/HTTPRoute.py::_find_controller
+  71 ./src/masonite/input/InputBag.py::parse
+  65 ./src/masonite/validation/Validator.py::passes
+  63 ./src/masonite/commands/TinkerCommand.py::handle
+
+--- C2: SAR (state+async+retry) candidates ---

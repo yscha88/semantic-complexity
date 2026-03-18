@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/unionai-oss/pandera ===
+--- Basic Stats ---
+total_py: 272
+test_py: 83
+test_ratio: 30.5%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+11 ./pandera/api/dataframe/container.py
+10 ./pandera/backends/pandas/array.py
+9 ./tests/pandas/test_schema_components.py
+9 ./pandera/typing/polars.py
+9 ./pandera/typing/pandas.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 16
+global keyword: 3
+
+--- B1: Auth patterns ---
+auth refs: 1
+
+--- B2: Secret patterns ---
+secret/key refs: 3
+
+--- B4: SQL patterns ---
+raw SQL: 37
+ORM: 137
+
+--- H3: Contract test ---
+contract/schema test: 88
+
+--- C1: Largest functions (by line count) ---
+ 420 ./pandera/decorators.py::check_types
+ 223 ./pandera/strategies/pandas_strategies.py::dataframe_strategy
+ 189 ./pandera/api/extensions.py::register_check_method
+ 183 ./pandera/api/checks.py::__init__
+ 179 ./pandera/api/dataframe/container.py::reset_index
+ 160 ./pandera/api/hypotheses.py::__init__
+ 157 ./pandera/backends/pandas/components.py::validate
+ 156 ./tests/pyspark/test_pyspark_container.py::test_pyspark_read
+ 151 ./tests/hypotheses/test_hypotheses.py::test_hypothesis
+ 149 ./pandera/api/dataframe/model_components.py::Field
+
+--- C2: SAR (state+async+retry) candidates ---

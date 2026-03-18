@@ -1,0 +1,12 @@
+=== Measuring: https://github.com/plotly/plotly.py ===
+primary_language: py
+total_files: 1776
+test_files: 107
+test_ratio: 6.0%
+
+--- Max Nesting Depth (top 5) ---
+11 ./tests/test_optional/test_graph_objs/test_skipped_b64_keys.py
+10 ./tests/test_core/test_graph_objs/test_to_ordered_dict.py
+10 ./plotly/figure_factory/_scatterplot.py
+10 ./plotly/basedatatypes.py
+9 ./tests/test_optional/test_tools/test_figure_factory.py

@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/python-hyper/h11 ===
+--- Basic Stats ---
+total_py: 31
+test_py: 9
+test_ratio: 29.0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+6 ./h11/tests/test_connection.py
+6 ./h11/tests/test_against_stdlib_http.py
+6 ./h11/_state.py
+6 ./h11/_connection.py
+6 ./examples/trio-server.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 4
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 2
+ORM: 0
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 158 ./h11/tests/test_io.py::test_readers_unusual
+ 123 ./h11/tests/test_connection.py::test_protocol_switch
+ 108 ./h11/tests/test_events.py::test_events
+  81 ./h11/tests/test_headers.py::test_normalize_and_validate
+  81 ./docs/source/make-state-diagrams.py::make_dot
+  76 ./h11/tests/test_receivebuffer.py::test_receivebuffer
+  74 ./h11/tests/test_connection.py::test_max_incomplete_event_size_countermeasure
+  70 ./h11/tests/test_io.py::test_ChunkedReader
+  70 ./h11/tests/test_connection.py::test_pipelining
+  68 ./h11/tests/test_connection.py::test_errors
+
+--- C2: SAR (state+async+retry) candidates ---

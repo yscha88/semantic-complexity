@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/nsidnev/fastapi-realworld-example-app ===
+--- Basic Stats ---
+total_py: 95
+test_py: 13
+test_ratio: 13.6%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+6 ./app/db/repositories/articles.py
+6 ./app/api/routes/articles/articles_common.py
+5 ./tests/test_api/test_routes/test_articles.py
+4 ./tests/test_api/test_routes/test_profiles.py
+4 ./app/db/repositories/users.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 28
+
+--- B2: Secret patterns ---
+secret/key refs: 14
+
+--- B4: SQL patterns ---
+raw SQL: 1
+ORM: 10
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 112 ./app/db/repositories/articles.py::filter_articles
+  44 ./tests/test_api/test_routes/test_articles.py::test_user_will_receive_only_following_articles
+  44 ./tests/test_api/test_routes/test_articles.py::test_filtering_by_favorited
+  43 ./tests/test_api/test_routes/test_articles.py::test_user_receiving_feed_with_limit_and_offset
+  43 ./tests/test_api/test_routes/test_articles.py::test_filtering_by_tags
+  43 ./tests/test_api/test_routes/test_articles.py::test_filtering_by_authors
+  35 ./app/api/routes/users.py::update_current_user
+  34 ./tests/test_api/test_routes/test_profiles.py::test_user_can_change_following_for_another_user
+  33 ./tests/test_api/test_routes/test_articles.py::test_article_will_contain_only_attached_tags
+  32 ./app/db/repositories/users.py::update_user
+
+--- C2: SAR (state+async+retry) candidates ---

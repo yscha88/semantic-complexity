@@ -1,0 +1,27 @@
+=== Measuring: https://github.com/openvax/pyensembl ===
+primary_language: py
+total_files: 51
+test_files: 25
+test_ratio: 49.0%
+
+--- Max Nesting Depth (top 5) ---
+6 ./pyensembl/transcript.py
+6 ./pyensembl/species.py
+6 ./pyensembl/shell.py
+6 ./pyensembl/sequence_data.py
+6 ./pyensembl/fasta.py
+
+--- Auth patterns ---
+auth refs: 2
+
+--- Secret patterns ---
+secret/key refs: 0
+
+--- Largest functions ---
+  75 ./pyensembl/genome.py::__init__
+  70 ./pyensembl/database.py::column_values_at_locus
+  65 ./pyensembl/download_cache.py::__init__
+  64 ./pyensembl/genome.py::transcript_by_id
+  59 ./pyensembl/database.py::_load_gtf_as_dataframe
+
+--- SAR candidates ---

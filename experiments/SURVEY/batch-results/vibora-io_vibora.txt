@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/vibora-io/vibora ===
+--- Basic Stats ---
+total_py: 139
+test_py: 0
+test_ratio: 0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+12 ./vibora/client/session.py
+12 ./vibora/client/__init__.py
+11 ./vibora/static.py
+10 ./vibora/server.py
+10 ./vibora/router/parser.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 3
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 4
+
+--- B2: Secret patterns ---
+secret/key refs: 3
+
+--- B4: SQL patterns ---
+raw SQL: 18
+ORM: 17
+
+--- H3: Contract test ---
+contract/schema test: 3
+
+--- C1: Largest functions (by line count) ---
+  71 ./vibora/workers/handler.py::run
+  63 ./vibora/templates/compilers/cython.py::compile
+  56 ./vibora/client/session.py::request
+  53 ./vibora/websockets/obj.py::feed
+  51 ./vibora/server.py::_add_default_routes
+  47 ./vibora/client/response.py::stream
+  44 ./vibora/server.py::run
+  44 ./vibora/router/router.py::_find_route_by_host
+  42 ./vibora/templates/compilers/python.py::compile
+  42 ./vibora/templates/cache.py::_load_template
+
+--- C2: SAR (state+async+retry) candidates ---

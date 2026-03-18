@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/booknlp/booknlp ===
+--- Basic Stats ---
+total_py: 24
+test_py: 0
+test_ratio: 0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+5 ./setup.py
+3 ./booknlp/common/crf.py
+2 ./examples/run_booknlp.py
+2 ./booknlp/english/tagger.py
+2 ./booknlp/english/name_coref.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 15
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 0
+ORM: 5
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 350 ./booknlp/common/layered_reader.py::get_batches
+ 298 ./booknlp/english/bert_coref_quote_pronouns.py::forward
+ 276 ./booknlp/english/bert_coref_quote_pronouns.py::read_conll
+ 275 ./booknlp/english/tagger.py::predict_all
+ 274 ./booknlp/english/english_booknlp.py::process
+ 216 ./booknlp/english/bert_coref_quote_pronouns.py::get_data
+ 210 ./booknlp/english/bert_qa.py::get_representation
+ 165 ./booknlp/english/english_booknlp.py::get_syntax
+ 162 ./booknlp/english/tagger.py::predict
+ 143 ./booknlp/english/name_coref.py::name_cluster
+
+--- C2: SAR (state+async+retry) candidates ---

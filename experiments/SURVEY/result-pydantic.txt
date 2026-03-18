@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/pydantic/pydantic ===
+--- Basic Stats ---
+total_py: 403
+test_py: 201
+test_ratio: 49.8%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+13 ./pydantic-core/tests/serializers/test_literal.py
+12 ./tests/test_json_schema.py
+12 ./pydantic-core/tests/validators/test_union.py
+12 ./pydantic-core/tests/benchmarks/complete_schema.py
+11 ./tests/test_discriminated_union.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 11
+global keyword: 8
+
+--- B1: Auth patterns ---
+auth refs: 11
+
+--- B2: Secret patterns ---
+secret/key refs: 4
+
+--- B4: SQL patterns ---
+raw SQL: 38
+ORM: 19
+
+--- H3: Contract test ---
+contract/schema test: 101
+
+--- C1: Largest functions (by line count) ---
+ 226 ./pydantic/fields.py::Field
+ 221 ./pydantic-core/tests/benchmarks/complete_schema.py::schema
+ 215 ./pydantic/dataclasses.py::dataclass
+ 210 ./pydantic/_internal/_fields.py::collect_model_fields
+ 200 ./pydantic/experimental/pipeline.py::_apply_constraint
+ 198 ./pydantic/fields.py::computed_field
+ 197 ./pydantic/_internal/_model_construction.py::__new__
+ 196 ./pydantic/v1/main.py::__new__
+ 179 ./tests/test_json_schema.py::test_discriminated_annotated_union_literal_enum
+ 176 ./pydantic/v1/fields.py::_type_analysis
+
+--- C2: SAR (state+async+retry) candidates ---

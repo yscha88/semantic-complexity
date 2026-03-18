@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/jesse-ai/jesse ===
+--- Basic Stats ---
+total_py: 538
+test_py: 30
+test_ratio: 5.5%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+20 ./jesse/indicators/pivot.py
+12 ./jesse/modes/backtest_mode.py
+11 ./tests/test_utils.py
+11 ./jesse/strategies/Strategy.py
+11 ./jesse/services/candle_service.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 3
+global keyword: 15
+
+--- B1: Auth patterns ---
+auth refs: 39
+
+--- B2: Secret patterns ---
+secret/key refs: 112
+
+--- B4: SQL patterns ---
+raw SQL: 81
+ORM: 257
+
+--- H3: Contract test ---
+contract/schema test: 10
+
+--- C1: Largest functions (by line count) ---
+ 305 ./jesse/modes/import_candles_mode/drivers/Apex/omni_files/zklink_sdk-pc.py::_uniffi_check_api_checksums
+ 297 ./jesse/modes/import_candles_mode/drivers/Apex/omni_files/zklink_sdk.py::_uniffi_check_api_checksums
+ 297 ./jesse/modes/import_candles_mode/drivers/Apex/omni_files/zklink_sdk-arm.py::_uniffi_check_api_checksums
+ 194 ./jesse/modes/import_candles_mode/__init__.py::run
+ 188 ./jesse/modes/backtest_mode.py::_execute_backtest
+ 175 ./jesse/indicators/ma.py::ma
+ 158 ./jesse/modes/optimize_mode/Optimize.py::run
+ 140 ./jesse/services/metrics.py::trades
+ 139 ./jesse/modes/backtest_mode.py::_step_simulator
+ 137 ./jesse/strategies/Strategy.py::_detect_and_handle_entry_and_exit_modifications
+
+--- C2: SAR (state+async+retry) candidates ---

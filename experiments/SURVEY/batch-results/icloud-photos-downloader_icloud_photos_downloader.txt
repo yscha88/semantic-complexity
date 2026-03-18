@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/icloud-photos-downloader/icloud_photos_downloader ===
+--- Basic Stats ---
+total_py: 81
+test_py: 23
+test_ratio: 28.3%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+11 ./src/icloudpd/base.py
+8 ./tests/test_download_photos_id.py
+8 ./tests/test_download_photos.py
+8 ./tests/helpers/__init__.py
+7 ./tests/test_cli.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 3
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 16
+
+--- B2: Secret patterns ---
+secret/key refs: 17
+
+--- B4: SQL patterns ---
+raw SQL: 9
+ORM: 36
+
+--- H3: Contract test ---
+contract/schema test: 1
+
+--- C1: Largest functions (by line count) ---
+ 370 ./src/icloudpd/base.py::core_single_run
+ 320 ./tests/test_cli.py::test_cli_parser
+ 242 ./src/icloudpd/base.py::download_builder
+ 223 ./src/icloudpd/cli.py::add_options_for_user
+ 203 ./src/pyicloud_ipd/base.py::__init__
+ 174 ./src/pyicloud_ipd/cmdline.py::main
+ 149 ./src/icloudpd/base.py::_process_all_users_once
+ 141 ./src/pyicloud_ipd/base.py::_authenticate_srp
+ 130 ./tests/helpers/__init__.py::run_main_env
+ 130 ./src/pyicloud_ipd/services/photos.py::_list_query_gen
+
+--- C2: SAR (state+async+retry) candidates ---

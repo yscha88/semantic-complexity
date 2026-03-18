@@ -1,0 +1,50 @@
+{
+  "experiment_id": "bread-R3",
+  "input_file": "experiments/inputs/bread_R3.json",
+  "code_sha256": "d85f066430ecd2e745dac5b5408a4fb6216f2570346ce695e5b68c5e0db6da5f",
+  "models": [
+    "gpt-5.4",
+    "sonnet-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "total_units": 4,
+  "completed": 4,
+  "results": [
+    {
+      "unit_id": "bread-R3_gpt-5.4_B",
+      "model": "gpt-5.4",
+      "group": "B",
+      "tokens": 4728,
+      "elapsed": 40.39,
+      "prompt_sha256": "fc882a304e08d5105fecd548d54b430c9bfcc3d8942d7ebefd709f6de20c2606"
+    },
+    {
+      "unit_id": "bread-R3_gpt-5.4_D",
+      "model": "gpt-5.4",
+      "group": "D",
+      "tokens": 4570,
+      "elapsed": 32.78,
+      "prompt_sha256": "09bcf3a663e47b43f22d7af285392bbe2e46e2272552cf00a208ff215922cc2d"
+    },
+    {
+      "unit_id": "bread-R3_sonnet-4.6_B",
+      "model": "sonnet-4.6",
+      "group": "B",
+      "tokens": 4212,
+      "elapsed": 27.34,
+      "prompt_sha256": "fc882a304e08d5105fecd548d54b430c9bfcc3d8942d7ebefd709f6de20c2606"
+    },
+    {
+      "unit_id": "bread-R3_sonnet-4.6_D",
+      "model": "sonnet-4.6",
+      "group": "D",
+      "tokens": 4130,
+      "elapsed": 23.76,
+      "prompt_sha256": "09bcf3a663e47b43f22d7af285392bbe2e46e2272552cf00a208ff215922cc2d"
+    }
+  ],
+  "timestamp": "2026-03-18T08:26:32.446567+00:00"
+}

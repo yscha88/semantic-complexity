@@ -1,0 +1,27 @@
+=== Measuring: https://github.com/bokeh/bokeh ===
+primary_language: py
+total_files: 1199
+test_files: 209
+test_ratio: 17.4%
+
+--- Max Nesting Depth (top 5) ---
+19 ./examples/server/app/dash/main.py
+17 ./tests/unit/bokeh/application/handlers/test_directory.py
+15 ./src/bokeh/command/subcommands/serve.py
+14 ./src/bokeh/server/contexts.py
+12 ./tests/unit/bokeh/models/test_sources.py
+
+--- Auth patterns ---
+auth refs: 34
+
+--- Secret patterns ---
+secret/key refs: 122
+
+--- Largest functions ---
+ 300 ./tests/unit/bokeh/command/subcommands/test_serve.py::test_args
+ 207 ./src/bokeh/server/tornado.py::__init__
+ 189 ./src/bokeh/command/subcommands/serve.py::invoke
+ 180 ./src/bokeh/layouts.py::grid
+ 178 ./src/bokeh/layouts.py::gridplot
+
+--- SAR candidates ---

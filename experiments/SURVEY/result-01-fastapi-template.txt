@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/tiangolo/full-stack-fastapi-template ===
+--- Basic Stats ---
+total_py: 46
+test_py: 7
+test_ratio: 15.2%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+4 ./backend/app/core/config.py
+4 ./backend/app/api/routes/users.py
+4 ./.copier/update_dotenv.py
+3 ./backend/tests/utils/user.py
+3 ./backend/tests/scripts/test_test_pre_start.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 13
+
+--- B2: Secret patterns ---
+secret/key refs: 15
+
+--- B4: SQL patterns ---
+raw SQL: 17
+ORM: 75
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+  41 ./backend/tests/api/routes/test_users.py::test_update_password_me
+  35 ./backend/tests/crud/test_user.py::test_authenticate_user_with_bcrypt_upgrades_to_argon2
+  35 ./backend/app/alembic/versions/d98dd8ec85a3_edit_replace_id_integers_in_all_models_.py::upgrade
+  34 ./backend/tests/api/routes/test_login.py::test_login_with_bcrypt_password_upgrades_to_argon2
+  34 ./backend/app/alembic/versions/d98dd8ec85a3_edit_replace_id_integers_in_all_models_.py::downgrade
+  31 ./backend/app/api/routes/items.py::read_items
+  29 ./backend/tests/api/routes/test_users.py::test_delete_user_me
+  29 ./backend/tests/api/routes/test_login.py::test_reset_password
+  27 ./backend/tests/api/routes/test_login.py::test_login_with_argon2_password_keeps_hash
+  27 ./backend/app/alembic/versions/e2412789c190_initialize_models.py::upgrade
+
+--- C2: SAR (state+async+retry) candidates ---

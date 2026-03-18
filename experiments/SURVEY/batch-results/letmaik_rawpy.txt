@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/letmaik/rawpy ===
+--- Basic Stats ---
+total_py: 18
+test_py: 9
+test_ratio: 50.0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+8 ./rawpy/enhance.py
+7 ./logo/generate.py
+6 ./test/test_basic.py
+6 ./rawpy/__init__.py
+5 ./setup.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 10
+global keyword: 1
+
+--- B1: Auth patterns ---
+auth refs: 1
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 1
+ORM: 0
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 104 ./setup.py::windows_libraw_compile
+  84 ./setup.py::unix_libraw_compile
+  66 ./rawpy/enhance.py::find_bad_pixels
+  57 ./test/test_stubtest.py::test_stub_matches_runtime
+  54 ./logo/generate.py::render_as_isometric_voxels
+  51 ./test/test_mypy.py::test_mypy_all
+  48 ./rawpy/enhance.py::_find_bad_pixel_candidates_bayer2x2
+  47 ./rawpy/enhance.py::_repair_bad_pixels_bayer2x2
+  46 ./test/test_feature_flags.py::test_wheel_feature_flags
+  46 ./rawpy/__init__.py::_check_multiprocessing_fork
+
+--- C2: SAR (state+async+retry) candidates ---

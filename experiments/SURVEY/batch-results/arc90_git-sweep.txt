@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/arc90/git-sweep ===
+--- Basic Stats ---
+total_py: 15
+test_py: 3
+test_ratio: 20.0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+7 ./src/gitsweep/cli.py
+7 ./bootstrap.py
+4 ./src/gitsweep/tests/testcases.py
+4 ./src/gitsweep/tests/test_cli.py
+4 ./src/gitsweep/inspector.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 2
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 1
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 1
+ORM: 0
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+  68 ./src/gitsweep/cli.py::_sweep
+  43 ./src/gitsweep/tests/test_inspector.py::test_large_set_of_changes
+  37 ./src/gitsweep/tests/test_cli.py::test_will_cleanup
+  34 ./src/gitsweep/tests/testcases.py::setUp
+  34 ./src/gitsweep/tests/test_cli.py::test_will_force_clean
+  32 ./src/gitsweep/inspector.py::merged_refs
+  29 ./src/gitsweep/tests/test_deleter.py::test_will_delete_merged_on_remote
+  28 ./src/gitsweep/tests/test_deleter.py::test_will_delete_merged_from_clone
+  28 ./src/gitsweep/tests/test_cli.py::test_will_preserve_arguments
+  28 ./src/gitsweep/tests/test_cli.py::test_will_abort_cleanup
+
+--- C2: SAR (state+async+retry) candidates ---

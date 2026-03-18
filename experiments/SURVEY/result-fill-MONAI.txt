@@ -1,0 +1,12 @@
+=== Measuring: https://github.com/Project-MONAI/MONAI ===
+--- Basic Stats ---
+total_py: 1291
+test_py: 787
+test_ratio: 60.9%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+11 ./versioneer.py
+11 ./monai/apps/auto3dseg/ensemble_builder.py
+11 ./monai/_version.py
+10 ./tests/transforms/test_resampler.py
+10 ./monai/data/grid_dataset.py
