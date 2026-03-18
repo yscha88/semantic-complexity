@@ -1,0 +1,50 @@
+{
+  "experiment_id": "ham-R3",
+  "input_file": "experiments/inputs/ham_R3.json",
+  "code_sha256": "d85f066430ecd2e745dac5b5408a4fb6216f2570346ce695e5b68c5e0db6da5f",
+  "models": [
+    "gpt-5.4",
+    "sonnet-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "total_units": 4,
+  "completed": 4,
+  "results": [
+    {
+      "unit_id": "ham-R3_gpt-5.4_B",
+      "model": "gpt-5.4",
+      "group": "B",
+      "tokens": 5413,
+      "elapsed": 48.21,
+      "prompt_sha256": "220945ecc76f424ea03e6c6c89124d313f7befebc12b2d607d9fb86c1a346d81"
+    },
+    {
+      "unit_id": "ham-R3_gpt-5.4_D",
+      "model": "gpt-5.4",
+      "group": "D",
+      "tokens": 5589,
+      "elapsed": 45.78,
+      "prompt_sha256": "59a7c9032c4007a0af705d004c4229b0c86321d966a63340a7114fba9f56d07a"
+    },
+    {
+      "unit_id": "ham-R3_sonnet-4.6_B",
+      "model": "sonnet-4.6",
+      "group": "B",
+      "tokens": 4085,
+      "elapsed": 22.93,
+      "prompt_sha256": "220945ecc76f424ea03e6c6c89124d313f7befebc12b2d607d9fb86c1a346d81"
+    },
+    {
+      "unit_id": "ham-R3_sonnet-4.6_D",
+      "model": "sonnet-4.6",
+      "group": "D",
+      "tokens": 4369,
+      "elapsed": 29.89,
+      "prompt_sha256": "59a7c9032c4007a0af705d004c4229b0c86321d966a63340a7114fba9f56d07a"
+    }
+  ],
+  "timestamp": "2026-03-18T12:19:47.221763+00:00"
+}

@@ -1,0 +1,50 @@
+{
+  "experiment_id": "cheese-R3",
+  "input_file": "experiments/inputs/cheese_R3.json",
+  "code_sha256": "d85f066430ecd2e745dac5b5408a4fb6216f2570346ce695e5b68c5e0db6da5f",
+  "models": [
+    "gpt-5.4",
+    "sonnet-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "total_units": 4,
+  "completed": 4,
+  "results": [
+    {
+      "unit_id": "cheese-R3_gpt-5.4_B",
+      "model": "gpt-5.4",
+      "group": "B",
+      "tokens": 5903,
+      "elapsed": 43.77,
+      "prompt_sha256": "e0df98702d3425edf3b38713037c8437ed7ebe29fea1ab3751722d965951a228"
+    },
+    {
+      "unit_id": "cheese-R3_gpt-5.4_D",
+      "model": "gpt-5.4",
+      "group": "D",
+      "tokens": 6569,
+      "elapsed": 53.23,
+      "prompt_sha256": "e9fe5245b3a93728bbcfa3af3d6daeece84bfcd49bd4731cc29606d8547e8d0e"
+    },
+    {
+      "unit_id": "cheese-R3_sonnet-4.6_B",
+      "model": "sonnet-4.6",
+      "group": "B",
+      "tokens": 4186,
+      "elapsed": 23.62,
+      "prompt_sha256": "e0df98702d3425edf3b38713037c8437ed7ebe29fea1ab3751722d965951a228"
+    },
+    {
+      "unit_id": "cheese-R3_sonnet-4.6_D",
+      "model": "sonnet-4.6",
+      "group": "D",
+      "tokens": 4583,
+      "elapsed": 27.81,
+      "prompt_sha256": "e9fe5245b3a93728bbcfa3af3d6daeece84bfcd49bd4731cc29606d8547e8d0e"
+    }
+  ],
+  "timestamp": "2026-03-18T11:06:53.518863+00:00"
+}
