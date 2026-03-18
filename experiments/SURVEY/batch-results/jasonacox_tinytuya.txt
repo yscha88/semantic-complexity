@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/jasonacox/tinytuya ===
+--- Basic Stats ---
+total_py: 70
+test_py: 0
+test_ratio: 0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+10 ./server/server.py
+9 ./tinytuya/wizard.py
+9 ./tinytuya/scanner.py
+8 ./tools/pcap_parse.py
+8 ./tinytuya/core/XenonDevice.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 30
+global keyword: 12
+
+--- B1: Auth patterns ---
+auth refs: 16
+
+--- B2: Secret patterns ---
+secret/key refs: 8
+
+--- B4: SQL patterns ---
+raw SQL: 1
+ORM: 11
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 685 ./tinytuya/scanner.py::devices
+ 372 ./tinytuya/Contrib/IRRemoteControlDevice.py::pulses_to_head_key
+ 259 ./server/server.py::do_GET
+ 254 ./tinytuya/wizard.py::wizard
+ 162 ./tinytuya/scanner.py::read_data
+ 156 ./tools/pcap_parse.py::process_data
+ 148 ./tinytuya/core/XenonDevice.py::_send_receive
+ 140 ./tinytuya/core/XenonDevice.py::generate_payload
+ 135 ./tools/pcap_parse.py::process_pcap
+ 130 ./tinytuya/__main__.py::_run_device_command
+
+--- C2: SAR (state+async+retry) candidates ---

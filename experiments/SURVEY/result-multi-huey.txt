@@ -1,0 +1,27 @@
+=== Measuring: https://github.com/coleifer/huey ===
+primary_language: py
+total_files: 63
+test_files: 14
+test_ratio: 22.2%
+
+--- Max Nesting Depth (top 5) ---
+13 ./huey/contrib/sql_huey.py
+10 ./huey/tests/test_kt_huey.py
+10 ./huey/serializer.py
+10 ./huey/contrib/valkey_glide.py
+10 ./huey/contrib/helpers.py
+
+--- Auth patterns ---
+auth refs: 2
+
+--- Secret patterns ---
+secret/key refs: 2
+
+--- Largest functions ---
+  87 ./huey/api.py::crontab
+  84 ./huey/api.py::_execute
+  66 ./huey/consumer.py::__init__
+  65 ./huey/tests/test_api.py::test_expires
+  49 ./huey/tests/test_storage.py::test_fs_multithreaded
+
+--- SAR candidates ---

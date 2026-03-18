@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/taskiq-python/taskiq ===
+--- Basic Stats ---
+total_py: 161
+test_py: 41
+test_ratio: 25.4%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+8 ./taskiq/cli/scheduler/run.py
+7 ./taskiq/receiver/receiver.py
+7 ./taskiq/cli/worker/process_manager.py
+7 ./taskiq/cli/utils.py
+7 ./taskiq/abc/broker.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 1
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 2
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 28
+ORM: 4
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 225 ./taskiq/cli/worker/args.py::from_cli
+ 149 ./taskiq/receiver/receiver.py::run_task
+ 105 ./taskiq/cli/worker/run.py::start_listen
+  98 ./taskiq/receiver/receiver.py::callback
+  98 ./taskiq/cli/scheduler/args.py::from_cli
+  91 ./taskiq/receiver/params_parser.py::parse_params
+  85 ./taskiq/api/receiver.py::run_receiver_task
+  85 ./taskiq/abc/broker.py::task
+  71 ./taskiq/cli/worker/process_manager.py::start
+  70 ./taskiq/serialization.py::exception_to_python
+
+--- C2: SAR (state+async+retry) candidates ---

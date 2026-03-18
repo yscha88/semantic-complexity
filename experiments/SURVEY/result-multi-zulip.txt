@@ -1,0 +1,12 @@
+=== Measuring: https://github.com/zulip/zulip ===
+primary_language: py
+total_files: 1986
+test_files: 173
+test_ratio: 8.7%
+
+--- Max Nesting Depth (top 5) ---
+12 ./zerver/migrations/0516_fix_confirmation_preregistrationusers.py
+11 ./zerver/tests/test_slack_importer.py
+11 ./zerver/migrations/0001_squashed_0569.py
+11 ./zerver/migrations/0001_initial.py
+10 ./zerver/tests/test_openapi.py

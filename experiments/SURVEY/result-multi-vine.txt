@@ -1,0 +1,27 @@
+=== Measuring: https://github.com/vinejs/vine ===
+primary_language: ts
+total_files: 112
+test_files: 51
+test_ratio: 45.5%
+
+--- Max Nesting Depth (top 5) ---
+13 ./tests/unit/schema/object.spec.ts
+10 ./tests/unit/schema/union.spec.ts
+10 ./tests/types/types.spec.ts
+10 ./tests/integration/validator.spec.ts
+9 ./tests/unit/json_schema.spec.ts
+
+--- Auth patterns ---
+auth refs: 9
+
+--- Secret patterns ---
+secret/key refs: 0
+
+--- Largest functions ---
+1069 ./tests/unit/schema/object.spec.ts::    function failOtherwise() {}
+1068 ./tests/unit/schema/object.spec.ts::    function failOtherwise() {}
+554 ./src/schema/string/main.ts::export class VineString extends BaseLiteralType<string, string, string> {
+381 ./src/schema/object/main.ts::export class VineObject<
+318 ./src/schema/date/main.ts::export class VineDate extends BaseLiteralType<
+
+--- SAR candidates ---

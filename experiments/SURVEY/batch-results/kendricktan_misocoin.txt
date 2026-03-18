@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/kendricktan/misocoin ===
+--- Basic Stats ---
+total_py: 8
+test_py: 0
+test_ratio: 0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+8 ./misocoind.py
+6 ./misocoin/utils.py
+6 ./misocoin/hashing.py
+5 ./misocoin/struct.py
+2 ./misocoin/sync.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 9
+
+--- B1: Auth patterns ---
+auth refs: 2
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 0
+ORM: 5
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+  96 ./misocoind.py::add_to_blockchain
+  82 ./misocoin/utils.py::add_tx_to_block
+  50 ./misocoin/hashing.py::get_hash
+  46 ./misocoind.py::sync_with_nodes
+  46 ./misocoind.py::send_misocoin
+  39 ./misocoind.py::mine_block
+  34 ./misocoind.py::block_management
+  33 ./misocoin/utils.py::sign_tx
+  32 ./misocoind.py::send_raw_tx
+  26 ./misocoin/struct.py::fromJSON
+
+--- C2: SAR (state+async+retry) candidates ---

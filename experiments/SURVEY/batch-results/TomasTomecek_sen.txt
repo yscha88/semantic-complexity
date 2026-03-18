@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/TomasTomecek/sen ===
+--- Basic Stats ---
+total_py: 50
+test_py: 7
+test_ratio: 14.0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+14 ./sen/tui/views/container_info.py
+13 ./sen/tui/widgets/list/util.py
+13 ./sen/tui/widgets/list/common.py
+13 ./sen/tui/commands/base.py
+12 ./sen/docker_backend.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 1
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 1
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 10
+ORM: 9
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+  92 ./sen/tui/views/main.py::query
+  89 ./sen/tui/views/container_info.py::_resources
+  84 ./sen/tui/views/disk_usage.py::refresh
+  53 ./tests/test_concurrency.py::test_main_frame
+  53 ./sen/tui/widgets/list/common.py::__init__
+  49 ./sen/cli.py::main
+  48 ./tests/test_container_info.py::test_short_id
+  46 ./sen/tui/widgets/table.py::assemble_rows
+  44 ./sen/tui/views/main.py::status_bar
+  44 ./sen/tui/views/container_info.py::realtime_updates
+
+--- C2: SAR (state+async+retry) candidates ---

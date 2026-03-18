@@ -1,0 +1,12 @@
+=== Measuring: https://github.com/n8n-io/n8n ===
+primary_language: ts
+total_files: 10310
+test_files: 2905
+test_ratio: 28.1%
+
+--- Max Nesting Depth (top 5) ---
+15 ./packages/workflow/src/extensions/string-extensions.ts
+13 ./packages/@n8n/nodes-langchain/nodes/output_parser/OutputParserStructured/test/OutputParserStructured.node.test.ts
+12 ./packages/cli/src/modules/sso-saml/schema/saml-schema-protocol-2.0.xsd.ts
+12 ./packages/cli/src/modules/sso-saml/schema/saml-schema-assertion-2.0.xsd.ts
+11 ./packages/nodes-base/nodes/Google/BigQuery/test/v2/utils/utils.test.ts

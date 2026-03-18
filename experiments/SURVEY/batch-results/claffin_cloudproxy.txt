@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/claffin/cloudproxy ===
+--- Basic Stats ---
+total_py: 58
+test_py: 32
+test_ratio: 55.1%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+11 ./tests/test_providers_vultr_main.py
+11 ./tests/test_providers_aws_main.py
+10 ./cloudproxy/providers/settings.py
+9 ./tests/test_providers_vultr_functions.py
+7 ./tests/test_api_providers.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 81
+global keyword: 3
+
+--- B1: Auth patterns ---
+auth refs: 12
+
+--- B2: Secret patterns ---
+secret/key refs: 11
+
+--- B4: SQL patterns ---
+raw SQL: 6
+ORM: 6
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 119 ./cloudproxy/providers/aws/main.py::aws_check_alive
+ 114 ./tests/test_api_providers.py::mock_providers_config
+ 108 ./cloudproxy/providers/gcp/main.py::gcp_check_alive
+ 107 ./cloudproxy/providers/vultr/main.py::vultr_check_alive
+ 107 ./cloudproxy/providers/aws/functions.py::create_proxy
+ 101 ./cloudproxy/providers/digitalocean/main.py::do_check_alive
+  79 ./cloudproxy/providers/hetzner/main.py::hetzner_check_alive
+  73 ./cloudproxy/providers/vultr/functions.py::create_firewall
+  71 ./cloudproxy/providers/rolling.py::can_recycle_proxy
+  69 ./cloudproxy/main.py::configure
+
+--- C2: SAR (state+async+retry) candidates ---

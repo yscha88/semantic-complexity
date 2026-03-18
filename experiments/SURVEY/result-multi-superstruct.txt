@@ -1,0 +1,27 @@
+=== Measuring: https://github.com/ianstormtaylor/superstruct ===
+primary_language: ts
+total_files: 249
+test_files: 7
+test_ratio: 2.8%
+
+--- Max Nesting Depth (top 5) ---
+9 ./test/index.test.ts
+7 ./src/utils.ts
+7 ./src/structs/types.ts
+6 ./src/structs/refinements.ts
+5 ./src/structs/coercions.ts
+
+--- Auth patterns ---
+auth refs: 0
+
+--- Secret patterns ---
+secret/key refs: 0
+
+--- Largest functions ---
+108 ./src/struct.ts::export class Struct<T = unknown, S = unknown> {
+48 ./src/structs/types.ts::export function object<S extends ObjectSchema>(schema?: S): any {
+47 ./src/structs/types.ts::export function union<A extends AnyStruct, B extends AnyStruct[]>(
+34 ./src/utils.ts::export function toFailure<T, S>(
+33 ./src/structs/coercions.ts::export function defaulted<T, S>(
+
+--- SAR candidates ---

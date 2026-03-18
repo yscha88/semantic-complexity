@@ -1,0 +1,12 @@
+=== Measuring: https://github.com/eosphoros-ai/DB-GPT ===
+--- Basic Stats ---
+total_py: 1251
+test_py: 115
+test_ratio: 9.1%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+12 ./packages/dbgpt-core/src/dbgpt/agent/util/mcp_utils.py
+11 ./skills/csv-data-analysis/scripts/csv_analyzer.py
+11 ./packages/dbgpt-core/src/dbgpt/agent/resource/tool/pack.py
+11 ./packages/dbgpt-app/src/dbgpt_app/scene/chat_dashboard/data_loader.py
+11 ./packages/dbgpt-app/src/dbgpt_app/openapi/api_v1/agentic_data_api.py

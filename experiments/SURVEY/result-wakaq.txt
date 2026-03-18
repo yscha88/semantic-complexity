@@ -1,0 +1,46 @@
+=== Measuring: https://github.com/wakatime/wakaq ===
+--- Basic Stats ---
+total_py: 12
+test_py: 0
+test_ratio: 0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+10 ./wakaq/worker.py
+5 ./wakaq/serializer.py
+5 ./wakaq/scheduler.py
+5 ./wakaq/queue.py
+4 ./wakaq/task.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 3
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 1
+ORM: 0
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 126 ./wakaq/worker.py::_event_loop
+  82 ./wakaq/__init__.py::__init__
+  71 ./wakaq/worker.py::_child
+  54 ./wakaq/worker.py::_read_child_logs
+  45 ./wakaq/serializer.py::default
+  42 ./wakaq/worker.py::_execute_broadcast_tasks
+  39 ./wakaq/utils.py::pending_eta_tasks_in_queue
+  37 ./wakaq/worker.py::_parent
+  34 ./wakaq/worker.py::_execute_task
+  31 ./wakaq/scheduler.py::_run
+
+--- C2: SAR (state+async+retry) candidates ---
+SAR candidate: ./wakaq/worker.py
+
+=== Done: https://github.com/wakatime/wakaq ===

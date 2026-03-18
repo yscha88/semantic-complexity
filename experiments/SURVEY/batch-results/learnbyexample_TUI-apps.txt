@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/learnbyexample/TUI-apps ===
+--- Basic Stats ---
+total_py: 61
+test_py: 0
+test_ratio: 0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+14 ./AwkTutorial/awk_tutorial.py
+10 ./SquareTicTacToe/square_tictactoe.py
+10 ./PyRegexExercises/pyregex_exercises.py
+10 ./ConnectSquare/connect_square.py
+9 ./SedExercises/sed_exercises.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 0
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 4
+ORM: 0
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+  73 ./PythonExercises/python_exercises.py::__init__
+  72 ./ConnectSquare/connect_square.py::generate_winning_moves
+  65 ./PyRegexExercises/pyregex_exercises.py::set_question
+  60 ./PyRegexExercises/pyregex_exercises.py::__init__
+  49 ./PyRegexPlayground/pyregex_playground.py::__init__
+  48 ./GrepExercises/grep_exercises.py::__init__
+  45 ./ConnectSquare/connect_square.py::__init__
+  42 ./AwkTutorial/awk_tutorial.py::setup_tutorial
+  39 ./SedExercises/sed_exercises.py::set_quest_ip_op
+  39 ./PyRegexPlayground/pyregex_playground.py::load_examples
+
+--- C2: SAR (state+async+retry) candidates ---

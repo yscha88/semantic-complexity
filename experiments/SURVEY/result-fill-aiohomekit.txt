@@ -1,0 +1,1 @@
+=== Measuring: https://github.com/home-assistant-libs/aiohomekit ===

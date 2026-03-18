@@ -1,0 +1,12 @@
+=== Measuring: https://github.com/netdata/netdata ===
+primary_language: go
+total_files: 1663
+test_files: 397
+test_ratio: 23.8%
+
+--- Max Nesting Depth (top 5) ---
+7 ./src/go/plugin/go.d/collector/postgres/queries.go
+5 ./src/go/plugin/ibm.d/docgen/main.go
+5 ./src/go/plugin/go.d/collector/monit/collector_test.go
+4 ./src/go/plugin/go.d/collector/oracledb/collect_tablespace.go
+3 ./src/go/plugin/go.d/pkg/collecttest/collecttest_test.go

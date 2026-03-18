@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/marshmallow-code/marshmallow ===
+--- Basic Stats ---
+total_py: 38
+test_py: 15
+test_ratio: 39.4%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+8 ./src/marshmallow/schema.py
+6 ./tests/test_decorators.py
+6 ./src/marshmallow/validate.py
+6 ./src/marshmallow/fields.py
+5 ./tests/test_schema.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 6
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 4
+ORM: 9
+
+--- H3: Contract test ---
+contract/schema test: 5
+
+--- C1: Largest functions (by line count) ---
+ 137 ./tests/test_deserialization.py::test_timedelta_field_deserialization
+ 127 ./tests/test_serialization.py::test_timedelta_field
+ 110 ./src/marshmallow/schema.py::_deserialize
+ 103 ./src/marshmallow/schema.py::_do_load
+  84 ./tests/test_decorators.py::test_decorator_error_handling
+  73 ./tests/test_decorators.py::test_decorated_processors
+  72 ./src/marshmallow/schema.py::_init_fields
+  59 ./tests/test_serialization.py::test_decimal_field_special_values
+  54 ./src/marshmallow/fields.py::__init__
+  53 ./src/marshmallow/validate.py::_regex_generator
+
+--- C2: SAR (state+async+retry) candidates ---

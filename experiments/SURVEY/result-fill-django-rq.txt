@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/rq/django-rq ===
+--- Basic Stats ---
+total_py: 66
+test_py: 7
+test_ratio: 10.6%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+7 ./django_rq/management/commands/rqscheduler.py
+7 ./django_rq/contrib/prometheus.py
+6 ./tests/utils.py
+5 ./tests/tests.py
+5 ./tests/test_prometheus_metrics.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 1
+
+--- B1: Auth patterns ---
+auth refs: 7
+
+--- B2: Secret patterns ---
+secret/key refs: 3
+
+--- B4: SQL patterns ---
+raw SQL: 21
+ORM: 1
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+  73 ./django_rq/cron.py::register
+  66 ./tests/test_prometheus_metrics.py::test_metrics_with_jobs
+  66 ./django_rq/connection_utils.py::get_redis_connection
+  57 ./tests/test_cron.py::test_cron_scheduler_detail_view
+  56 ./django_rq/views.py::job_detail
+  55 ./django_rq/utils.py::get_statistics
+  51 ./tests/test_connections.py::test_get_unique_connection_configs_deterministic_order
+  50 ./django_rq/management/commands/rqworker.py::add_arguments
+  48 ./django_rq/urls.py::get_admin_urlpatterns
+  48 ./django_rq/contrib/prometheus.py::collect
+
+--- C2: SAR (state+async+retry) candidates ---

@@ -1,0 +1,84 @@
+{
+  "experiment_id": "bread-R2",
+  "input_file": "experiments/inputs/bread_R2.json",
+  "code_sha256": "4694892bd4b22c6dc03253d522374cff392f63b93eb393ed0ec78870261c48fa",
+  "models": [
+    "gpt-5.4",
+    "sonnet-4.6"
+  ],
+  "groups": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "total_units": 8,
+  "completed": 8,
+  "results": [
+    {
+      "unit_id": "bread-R2_gpt-5.4_A",
+      "model": "gpt-5.4",
+      "group": "A",
+      "tokens": 3862,
+      "elapsed": 36.39,
+      "prompt_sha256": "cf19932e88f8d33b49e2448f985fda6e0c6c45bbc7561c75cd0034259b09a6c6"
+    },
+    {
+      "unit_id": "bread-R2_gpt-5.4_B",
+      "model": "gpt-5.4",
+      "group": "B",
+      "tokens": 3811,
+      "elapsed": 37.86,
+      "prompt_sha256": "b4813c4108d7684889acc3553b3fe3755d9b1a471cc6ee0d01c24f9daf259e83"
+    },
+    {
+      "unit_id": "bread-R2_gpt-5.4_C",
+      "model": "gpt-5.4",
+      "group": "C",
+      "tokens": 3489,
+      "elapsed": 25.45,
+      "prompt_sha256": "c9261f505cc6298ad98e32007bf959ad694a3b2dd1e431c97bc87581dd43b2a2"
+    },
+    {
+      "unit_id": "bread-R2_gpt-5.4_D",
+      "model": "gpt-5.4",
+      "group": "D",
+      "tokens": 3687,
+      "elapsed": 29.25,
+      "prompt_sha256": "3baca024853eab13d28659b37d9c4216567f71492bc8ccb2182adc175410780c"
+    },
+    {
+      "unit_id": "bread-R2_sonnet-4.6_A",
+      "model": "sonnet-4.6",
+      "group": "A",
+      "tokens": 3201,
+      "elapsed": 22.52,
+      "prompt_sha256": "cf19932e88f8d33b49e2448f985fda6e0c6c45bbc7561c75cd0034259b09a6c6"
+    },
+    {
+      "unit_id": "bread-R2_sonnet-4.6_B",
+      "model": "sonnet-4.6",
+      "group": "B",
+      "tokens": 3320,
+      "elapsed": 23.96,
+      "prompt_sha256": "b4813c4108d7684889acc3553b3fe3755d9b1a471cc6ee0d01c24f9daf259e83"
+    },
+    {
+      "unit_id": "bread-R2_sonnet-4.6_C",
+      "model": "sonnet-4.6",
+      "group": "C",
+      "tokens": 2989,
+      "elapsed": 19.35,
+      "prompt_sha256": "c9261f505cc6298ad98e32007bf959ad694a3b2dd1e431c97bc87581dd43b2a2"
+    },
+    {
+      "unit_id": "bread-R2_sonnet-4.6_D",
+      "model": "sonnet-4.6",
+      "group": "D",
+      "tokens": 3321,
+      "elapsed": 24.81,
+      "prompt_sha256": "3baca024853eab13d28659b37d9c4216567f71492bc8ccb2182adc175410780c"
+    }
+  ],
+  "timestamp": "2026-03-18T08:01:15.831577+00:00"
+}

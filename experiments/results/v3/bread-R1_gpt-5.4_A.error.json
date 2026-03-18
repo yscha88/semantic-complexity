@@ -1,0 +1,5 @@
+{
+  "unit_id": "bread-R1_gpt-5.4_A",
+  "error": "Error code: 400 - {'error': {'message': \"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead.\", 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': 'unsupported_parameter'}}",
+  "timestamp": "2026-03-18T04:53:48.621964+00:00"
+}

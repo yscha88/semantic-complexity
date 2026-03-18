@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/python-arq/arq ===
+--- Basic Stats ---
+total_py: 31
+test_py: 6
+test_ratio: 19.3%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+7 ./arq/worker.py
+5 ./arq/utils.py
+5 ./arq/jobs.py
+5 ./arq/cron.py
+5 ./arq/connections.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 2
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 3
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 11
+ORM: 2
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 203 ./arq/worker.py::run_job
+ 115 ./arq/worker.py::__init__
+  80 ./arq/connections.py::create_pool
+  73 ./arq/cron.py::cron
+  63 ./arq/connections.py::enqueue_job
+  45 ./tests/test_jobs.py::test_enqueue_job
+  43 ./arq/jobs.py::serialize_result
+  41 ./arq/worker.py::start_jobs
+  41 ./arq/jobs.py::result
+  40 ./tests/test_utils.py::redis_settings_validation
+
+--- C2: SAR (state+async+retry) candidates ---

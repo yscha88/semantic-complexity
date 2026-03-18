@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/open-webui/mcpo ===
+--- Basic Stats ---
+total_py: 10
+test_py: 2
+test_ratio: 20.0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+9 ./src/mcpo/main.py
+7 ./src/mcpo/utils/auth.py
+6 ./src/mcpo/utils/main.py
+6 ./src/mcpo/tests/test_main.py
+5 ./src/mcpo/utils/oauth.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 8
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 4
+
+--- B2: Secret patterns ---
+secret/key refs: 28
+
+--- B4: SQL patterns ---
+raw SQL: 4
+ORM: 8
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 259 ./src/mcpo/main.py::run
+ 171 ./src/mcpo/utils/main.py::get_tool_handler
+ 162 ./src/mcpo/main.py::lifespan
+ 153 ./src/mcpo/utils/main.py::_process_schema_property
+ 143 ./src/mcpo/__init__.py::main
+ 111 ./src/mcpo/main.py::reload_config_handler
+  79 ./src/mcpo/utils/oauth.py::create_oauth_provider
+  79 ./src/mcpo/main.py::create_dynamic_endpoints
+  76 ./src/mcpo/main.py::create_sub_app
+  61 ./src/mcpo/utils/main.py::tool
+
+--- C2: SAR (state+async+retry) candidates ---

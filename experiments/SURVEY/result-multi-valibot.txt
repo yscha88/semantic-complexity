@@ -1,0 +1,12 @@
+=== Measuring: https://github.com/open-circle/valibot ===
+primary_language: ts
+total_files: 2228
+test_files: 268
+test_ratio: 12.0%
+
+--- Max Nesting Depth (top 5) ---
+28 ./library/src/types/issue.ts
+16 ./website/src/routes/api/(types)/DefaultValue/properties.ts
+14 ./website/src/routes/api/(methods)/getTitle/properties.ts
+14 ./website/src/routes/api/(methods)/getMetadata/properties.ts
+14 ./website/src/routes/api/(methods)/getDescription/properties.ts

@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/pyro-ppl/pyro ===
+--- Basic Stats ---
+total_py: 630
+test_py: 192
+test_ratio: 30.4%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+13 ./pyro/nn/module.py
+13 ./pyro/infer/predictive.py
+11 ./pyro/distributions/sine_skewed.py
+10 ./tests/contrib/mue/test_statearrangers.py
+10 ./pyro/infer/importance.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 4
+global keyword: 14
+
+--- B1: Auth patterns ---
+auth refs: 5
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 36
+ORM: 69
+
+--- H3: Contract test ---
+contract/schema test: 24
+
+--- C1: Largest functions (by line count) ---
+ 234 ./examples/dmm.py::main
+ 217 ./pyro/distributions/transforms/spline.py::_monotonic_rational_spline
+ 203 ./examples/mixed_hmm/model.py::model_generic
+ 201 ./tests/infer/test_compute_downstream_costs.py::test_compute_downstream_costs_big_model_guide_pair
+ 188 ./examples/contrib/mue/FactorMuE.py::main
+ 180 ./pyro/contrib/forecast/evaluate.py::backtest
+ 176 ./pyro/infer/inspect.py::get_dependencies
+ 170 ./tests/contrib/mue/test_statearrangers.py::test_profile_alternate_imp
+ 163 ./examples/contrib/timeseries/gp_models.py::main
+ 156 ./pyro/infer/mcmc/nuts.py::sample
+
+--- C2: SAR (state+async+retry) candidates ---

@@ -1,0 +1,42 @@
+cli-tool	mid	DocNow/twarc	1392	A command line tool (and Python library) for archiving Twitter JSON
+network-proxy	upper	FlareSolverr/FlareSolverr	13079	Proxy server to bypass Cloudflare protection
+network-proxy	mid	Flowseal/tg-ws-proxy	1565	Local SOCKS5 proxy server for partial bypassing of Telegram loading
+security-pentest	mid	GH05TCREW/pentestagent	1749	PentestAgent is an AI agent framework for black-box security testing, supporting bug bounty, red-team, and penetration testing workflows.
+security-pentest	upper	GreyDGL/PentestGPT	12089	Automated Penetration Testing Agentic Framework Powered by Large Language Models
+security-pentest	upper	Manisso/fsociety	11924	fsociety Hacking Tools Pack – A Penetration Testing Framework
+web-framework	mid	MasoniteFramework/masonite	2365	The Modern And Developer Centric Python Web Framework. Be sure to read the documentation and join the Discord channel for questions: https://discord.gg/TwKeFahmPZ
+web-framework	mid	Neoteroi/BlackSheep	2318	Fast ASGI web framework for Python
+media-image	mid	PyImageSearch/imutils	4592	A series of convenience functions to make basic image processing operations such as translation, rotation, resizing, skeletonization, and displaying Matplotlib images easier with OpenCV and Python.
+network-protocol	lower	SolaWing/xcode-build-server	925	a build server protocol implementation for integrate xcode with sourcekit-lsp
+tui	mid	TomasTomecek/sen	1047	Terminal User Interface for containers.
+tui	lower	aegirhall/console-menu	376	A simple Python menu system for building terminal user interfaces.
+testing	mid	ansible/molecule	4085	An ansible-native testing framework for collections, playbooks, and roles with configurable workflows for testing any system or service
+cli-tool	mid	arc90/git-sweep	2657	A command-line tool that helps you clean up Git branches that have been merged into master.
+nlp	lower	booknlp/booknlp	895	BookNLP, a natural language processing pipeline for books
+network-proxy	mid	claffin/cloudproxy	1684	Hide your scrapers IP behind the cloud. Provision proxy servers across different cloud providers to improve your scraping success.
+media-image	mid	cvzone/cvzone	1313	This is a Computer vision package that makes its easy to run Image processing and AI functions. At the core it uses OpenCV and Mediapipe libraries.
+testing	mid	darrenburns/ward	1211	Ward is a modern test framework for Python with a focus on productivity and readability.
+nlp	upper	explosion/spaCy	33335	💫 Industrial-strength Natural Language Processing (NLP) in Python
+web-framework	mid	frappe/frappe	9814	Low code web framework for real world applications, in Python and Javascript
+security-pentest	mid	fsociety-team/fsociety	1694	A Modular Penetration Testing Framework
+security-pentest	mid	galkan/crowbar	1500	Crowbar is brute forcing tool that can be used during penetration tests. It is developed to support protocols that are not currently supported by thc-hydra and other popular brute forcing tools. 
+network-proxy	mid	genotrance/px	1073	An HTTP proxy server to automatically authenticate through an NTLM proxy
+cli-tool	upper	icloud-photos-downloader/icloud_photos_downloader	11708	A command-line tool to download photos from iCloud
+cli-tool	mid	jasonacox/tinytuya	1528	Python API and command line tool for Tuya WiFi smart devices using a direct local area network (LAN) connection or the cloud (TuyaCloud API).
+cli-tool	mid	kellyjonbrazil/jc	8560	CLI tool and python library that converts the output of popular command-line tools, file-types, and common strings to JSON, YAML, or Dictionaries. This allows piping of output to tools like jq and simplifying automation scripts.
+network-protocol	lower	kendricktan/misocoin	393	Barebones bitcoin-like protocol implemented in Python 3.6
+graphql	mid	knowsuchagency/mcp2cli	1168	Turn any MCP, OpenAPI, or GraphQL server into a CLI — at runtime, with zero codegen
+tui	lower	learnbyexample/TUI-apps	970	Terminal User Interface (TUI) apps
+media-image	lower	letmaik/rawpy	786	📷 RAW image processing for Python, a wrapper for libraw
+nlp	mid	microsoft/nlp-recipes	6447	Natural Language Processing Best Practices & Examples
+web-framework	mid	miguelgrinberg/microdot	2093	The impossibly small web framework for Python and MicroPython.
+network-proxy	mid	open-webui/mcpo	4060	A simple, secure MCP-to-OpenAPI proxy server
+game	mid	pokepetter/ursina	2522	A game engine powered by python and panda3d.
+network-protocol	mid	python-hyper/h2	1032	Pure-Python HTTP/2 protocol implementation
+nlp	lower	ramsrigouthamg/Questgen.ai	946	Question generation using state-of-the-art Natural Language Processing algorithms
+domain	tier	repo	stars	description
+nlp	upper	sebastianruder/NLP-progress	22978	Repository to track the progress in Natural Language Processing (NLP), including the datasets and the current state-of-the-art for the most common NLP tasks.
+testing	mid	terraform-compliance/cli	1440	a lightweight, security focused, BDD test framework against terraform.
+web-framework	mid	vibora-io/vibora	5607	Fast, asynchronous and elegant Python web framework.
+media-image	lower	xavctn/img2table	859	img2table is a table identification and extraction Python Library for PDF and images, based on OpenCV image processing
+media-image	lower	yuanming-hu/exposure	780	Learning infinite-resolution image processing with GAN and RL from unpaired image datasets, using a differentiable photo editing model.

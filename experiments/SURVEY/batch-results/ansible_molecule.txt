@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/ansible/molecule ===
+--- Basic Stats ---
+total_py: 159
+test_py: 68
+test_ratio: 42.7%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+8 ./community.molecule/plugins/filter/molecule_core.py
+7 ./tests/unit/command/test_reset.py
+7 ./src/molecule/scenario.py
+7 ./src/molecule/ansi_output.py
+6 ./tests/unit/test_migration_logic.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 37
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 8
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 46
+ORM: 1
+
+--- H3: Contract test ---
+contract/schema test: 11
+
+--- C1: Largest functions (by line count) ---
+ 133 ./src/molecule/worker.py::run_scenarios_parallel
+ 121 ./tests/unit/test_migration_logic.py::test_multiple_keys_migration
+  98 ./tests/unit/test_migration_logic.py::test_config_options_migration
+  98 ./src/molecule/command/base.py::_run_scenarios
+  93 ./tests/unit/test_migration_logic.py::test_env_migration
+  93 ./tests/unit/test_migration_logic.py::test_ansible_args_migration
+  90 ./tests/unit/test_migration_logic.py::test_playbooks_migration
+  87 ./src/molecule/ansi_output.py::write
+  86 ./tests/integration/test_command.py::test_full_output
+  81 ./tests/unit/test_migration_logic.py::test_negative_conflicting_multiple_keys
+
+--- C2: SAR (state+async+retry) candidates ---

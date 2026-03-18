@@ -40,7 +40,7 @@
 | **언어** | Python, TypeScript, Go, C/C++, Rust, Ruby, Java, Kotlin (최소 8개) | 메모리 모델(GC/ARC/수동/소유권), 타입 시스템(동적/정적), 패러다임(OOP/함수형/구조체) 교차 |
 | **도메인** | 웹 API, ML/데이터, CLI, 라이브러리, 인프라, 정보보안, 연구/과학, 데브옵스 (최소 8개) | 도메인 특화 편향 배제 |
 | **레포 수** | 언어×도메인 조합당 최소 2개 = **128+ 레포** (빈 셀 감안 100+) | 개별 레포 특성 흡수 |
-| **모델** | **필수**: openai/gpt-5.3-codex, anthropic/claude-opus-4-6 (최소 2개). 확장: GPT-5.4, Gemini 3 Pro 등 | 벤더별 편향 배제, 모델 ID+버전 고정 기록 필수 |
+| **모델** | **필수**: openai/gpt-5.4, anthropic/claude-sonnet-4-6 (최소 2개). 교차 검증: google/gemini-3-pro. 총괄: anthropic/claude-opus-4-6 | 벤더별 편향 배제, 모델 ID+버전 고정 기록 필수 |
 | **반복** | 동일 조건 3회 | 비결정성 흡수 |
 | **라이선스** | MIT/BSD만 | 제3자 재현 가능 |
 
@@ -101,41 +101,51 @@ Phase 1 — 레포 수집 (2주)
 
 Phase 2 — 베이스라인 측정 (3주)
   각 레포에서 대표 모듈 1개 선정
-  5-그룹 실험 설계:
+  3-그룹 실험 설계 — 가이드 구체성의 단계별 효과 측정:
 
-  | 그룹 | 조건 | 측정 대상 |
-  |------|------|----------|
-  | A | LLM만 (아무 지시 없음) | LLM 기본 추론 능력 |
-  | B | 일반 지시 (SKILL과 동일 길이, 모호한 지시) | 프롬프트 길이/주의 환기 효과 |
-  | C | SKILL만 (정량 도구 없음) | 가이드 실효성 단독 효과 |
-  | D | MCP/보조 도구만 (SKILL 없음) | 정량 측정 단독 효과 |
-  | E | SKILL + MCP/보조 도구 조합 | 조합 시너지 효과 |
+  | 그룹 | 조건 | 구체성 수준 | 예시 (보안 축) |
+  |------|------|-----------|-------------|
+  | A | 간략한 가이드 | 낮음 | "이 코드의 보안을 분석하라. 취약점, 인증, 시크릿 문제를 찾아라." |
+  | B | 체크리스트 | 중간 | A + "다음을 확인하라: 입력 검증, 인증 흐름, 시크릿 관리, 민감 데이터 노출" |
+  | C | SKILL (상세 가이드) | 높음 | A + B1~B4 규칙별 판정 기준, 출력 형식, pass/warning/fail 판정 요구 |
+
+  구체성 단계:
+  ```
+  A (간략) ⊂ B (체크리스트) ⊂ C (상세 가이드)
+  
+  A: "보안을 분석하라"
+  B: A + "입력 검증, 인증, 시크릿, 민감 데이터를 확인하라"
+  C: A + B + "B1: Trust boundary — 진입점마다 검증 존재?
+               B2: Auth flow — 인증 정확? AUTH_FLOW 선언?
+               B3: Secret — 하드코딩? 외부화?
+               B4: 민감 데이터 — 로그/응답에 노출?
+               각 규칙마다: 위치, pass/warning/fail, 수정 권고"
+  ```
 
   핵심 비교:
 
-  | 비교 | 분리하는 변인 |
-  |------|------------|
-  | A vs B | 프롬프트 길이/주의 환기 효과 |
-  | B vs C | 가이드의 구체성(실효성) |
-  | A vs D | 정량 도구 단독 효과 |
-  | C vs E | SKILL에 도구를 더했을 때의 추가 효과 |
-  | D vs E | 도구에 SKILL을 더했을 때의 추가 효과 |
-  | **C+D vs E** | **조합이 단순 합산 이상인가 (시너지 여부)** |
+  | 비교 | 분리하는 변인 | 질문 |
+  |------|------------|------|
+  | A vs B | 체크리스트 항목 나열 효과 | "뭘 봐야 하는지" 알려주면 달라지는가? |
+  | B vs C | 판정 기준/형식의 상세화 효과 | "어떻게 판정하는지"까지 알려주면 달라지는가? |
+  | A vs C | 전체 효과 (구체성 낮음 → 높음) | 간략 가이드 대비 상세 SKILL의 총 효과 |
 
   가능한 결론:
-  - C ≈ E, D ≈ A → SKILL만으로 충분, 도구는 불필요
-  - D ≈ E, C ≈ A → 도구만으로 충분, SKILL은 불필요
-  - E > C, E > D, E > C+D 기대값 → 조합 시너지 존재
-  - E ≈ C ≈ D ≈ A → SKILL도 도구도 효과 없음 (폐기)
+  - A < B < C → 구체성이 높을수록 분석 품질 향상 (SKILL 효용성 지지)
+  - A < B ≈ C → 체크리스트만으로 충분, 상세 가이드는 추가 효과 없음
+  - A ≈ B < C → 체크리스트 나열은 효과 없고, 판정 기준이 핵심
+  - A ≈ B ≈ C → 가이드 구체성과 무관 (폐기)
+
+  MCP/도구 조합 실험은 SKILL 효용성이 확인된 후 별도 단계로 진행.
 
   ### 점진적 확장 전략 (모수를 줄여서 시작, 유의미하면 확장)
 
   | 단계 | 언어 | 도메인 | 레포 | 모델 | 그룹 | 반복 | 실험 단위 | 목적 |
   |------|------|--------|------|------|------|------|----------|------|
-  | **α (파일럿)** | 2 (Python, TS) | 2 (웹, 라이브러리) | 8 | 2 | A, C, E | 1 | **48** | 방향성 확인, 실험 파이프라인 검증 |
-  | **β (소규모)** | 4 (+Go, Java) | 4 (+CLI, 인프라) | 24 | 3 | A, C, E | 2 | **432** | 효과 유의성 초기 검증 |
-  | **γ (중규모)** | 8 (전체) | 6 (+보안, 과학) | 60 | 5 | A, B, C, D, E | 3 | **4,500** | 교차 분석, 시너지 분리 |
-  | **δ (전체)** | 8 | 8 (전체) | 100+ | 5+ | A, B, C, D, E | 3 | **7,500+** | Tier 2 승격 판정 |
+  | **α (파일럿)** | 1 (Python) | 1 (웹 API) | 2 | 2 (gpt-5.4, sonnet-4.6) | A, C | 1 | **8** | 파이프라인 검증, 재현성 확인 |
+  | **β (소규모)** | 4 (+Go, Java) | 4 (+CLI, 인프라) | 24 | 2 | A, B, C | 2 | **288** | 형식 vs 내용 분리, 유의성 초기 검증 |
+  | **γ (중규모)** | 8 (전체) | 6 (+보안, 과학) | 60 | 3 (+gemini) | A, B, C | 3 | **1,620** | 교차 분석, 3벤더 재현 |
+  | **δ (전체)** | 8 | 8 (전체) | 100+ | 3+ | A, B, C | 3 | **2,700+** | Tier 2 승격 판정 |
 
   진행 규칙:
   - α에서 A vs C vs E 간 방향성이 보이면 → β로 확장
@@ -160,7 +170,7 @@ Phase 2 — 베이스라인 측정 (3주)
 Phase 3 — 데이터 분석 (1주)
   도수분포표 작성 (언어별, 도메인별, 모델별, 그룹별)
   3-그룹 비교: A vs B vs C (Kruskal-Wallis 또는 χ²)
-  쌍별 비교: A-C (SKILL 전체 효과), B-C (가이드 실효성 효과)
+  쌍별 비교: A-C (SKILL 전체 효과), A-B (형식 효과), B-C (내용 실효성)
   효과 크기 계산 (Cohen's h, odds ratio)
   교차 분석: 언어×도메인, 언어×모델, 도메인×모델, 벤더×축
 
@@ -814,3 +824,196 @@ Tier 2 승격 근거로 인정 불가 (EXPERIMENT_PROTOCOL.md §4).
 
 > 폐기된 이론의 전체 내용은 git history에 보존되어 있습니다.
 > `git log --all -- docs/` 로 확인 가능합니다.
+
+---
+
+## META-01: 3축(🍞🧀🥓) 분해의 학술적 근거 조사
+
+> **상태: 조사 완료 — 결론: 3축은 자의적 선택이며 학술적 선행 근거 없음**
+> **조사일: 2026-03-18**
+> **목적: 3축 분해에 대한 반론 근거 수집 및 대안 프레임워크 비교**
+
+---
+
+### 1. 누락된 차원: 3축으로 커버되지 않는 코드 품질 측면
+
+| 누락 차원 | 설명 | 커버 여부 |
+|----------|------|----------|
+| **성능/효율** | 실행 시간, 메모리 사용, 처리량 | ❌ 미커버 |
+| **접근성(Accessibility)** | 장애인 포함 사용자 접근성 | ❌ 미커버 (UI 레이어 문제이나 코드 수준에서도 존재) |
+| **문서화** | 주석, docstring, API 문서 품질 | ❌ 미커버 |
+| **API 설계** | 인터페이스 일관성, 명명 규칙, 버전 호환성 | ❌ 미커버 |
+| **동시성 정확성** | race condition, deadlock, thread safety | ⚠️ 부분 커버 (🍞 trust boundary에 일부 포함 가능하나 명시 없음) |
+| **데이터 무결성** | 트랜잭션 일관성, 불변식 보존 | ⚠️ 부분 커버 (🥓 behavioral preservation에 일부 포함) |
+| **운영(Observability)** | 로깅, 모니터링, 추적 가능성 | ❌ 미커버 |
+| **법적 준수** | 라이선스, GDPR, 규제 준수 | ❌ 미커버 |
+| **유지보수성** | 결합도, 응집도, 모듈화 | ⚠️ 부분 커버 (🧀 cognitive complexity에 간접 포함) |
+| **이식성/유연성** | 환경 독립성, 설정 가능성 | ❌ 미커버 |
+| **신뢰성** | 장애 허용, 복구 가능성 | ❌ 미커버 |
+| **안전성(Safety)** | 기능 안전, 치명적 오류 방지 | ❌ 미커버 |
+
+**결론**: 3축은 코드 품질의 **일부 단면**만 커버한다. 특히 성능, 운영, 법적 준수, 동시성은 완전히 누락되어 있다.
+
+---
+
+### 2. 중복 가능성: 3축 중 합칠 수 있는가?
+
+| 비교 쌍 | 중복 가능성 | 근거 |
+|---------|-----------|------|
+| 🍞 Security ↔ 🥓 Behavioral Preservation | **낮음** | 보안은 "외부 공격자로부터의 보호", 행동 보존은 "리팩토링 후 동일 동작 유지" — 목적이 다름 |
+| 🧀 Cognitive Complexity ↔ 🍞 Security | **낮음** | 복잡한 코드가 보안 취약점을 유발하는 상관관계는 있으나 [미검증], 측정 대상이 다름 |
+| 🧀 Cognitive Complexity ↔ 🥓 Behavioral Preservation | **중간** | 복잡한 코드는 리팩토링 시 행동 변경 위험이 높음 — 간접 연관. 그러나 측정 방법이 다름 |
+
+**결론**: 3축 간 완전한 중복은 없으나, 🧀와 🥓 사이에 **간접 상관**이 존재할 수 있다. [미검증]
+
+---
+
+### 3. 기존 대안 프레임워크
+
+#### 3-1. ISO/IEC 25010:2023 — 9개 특성
+
+> **출처**: ISO/IEC 25010:2023, "Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model", 2023-11-15.
+
+ISO/IEC 25010:2023은 소프트웨어 제품 품질을 **9개 최상위 특성**으로 정의한다 (2011년 버전의 8개에서 Safety 추가):
+
+| # | 특성 | 설명 |
+|---|------|------|
+| 1 | **Functional Suitability** | 기능 완전성, 정확성, 적절성 |
+| 2 | **Performance Efficiency** | 시간 동작, 자원 활용, 용량 |
+| 3 | **Compatibility** | 공존성, 상호운용성 |
+| 4 | **Interaction Capability** | (구 Usability) 접근성, 자기기술성, 사용 용이성 |
+| 5 | **Reliability** | 성숙도, 가용성, 장애 허용, 복구 가능성 |
+| 6 | **Security** | 기밀성, 무결성, 부인 방지, 책임 추적성, 진위성, 저항성 |
+| 7 | **Maintainability** | 모듈성, 재사용성, 분석 가능성, 수정 가능성, 테스트 가능성 |
+| 8 | **Flexibility** | (구 Portability) 적응성, 설치 가능성, 대체 가능성, 확장성 |
+| 9 | **Safety** | 운영 제약, 위험 식별, 안전 실패, 경고, 안전 구성 |
+
+**3축과의 매핑**:
+- 🍞 Security → ISO Security (6번) 의 일부만 커버
+- 🧀 Cognitive Complexity → ISO Maintainability (7번) 의 일부 (분석 가능성)
+- 🥓 Behavioral Preservation → ISO Reliability (5번) + Functional Suitability (1번) 의 일부
+
+**결론**: ISO 25010은 3축보다 **3배 더 많은 차원**을 정의하며, 3축은 ISO 25010의 부분집합에 해당한다. 3축이 ISO 25010을 근거로 선택되었다는 증거는 없다.
+
+---
+
+#### 3-2. DORA 4 Key Metrics
+
+> **출처**: Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The Science of Lean Software and DevOps*. IT Revolution Press. / DORA State of DevOps Report 2024 (Google Cloud, 39,000+ 응답자).
+
+DORA는 소프트웨어 **전달 성능**을 4개 지표로 측정한다:
+
+| 지표 | 측정 대상 | 분류 |
+|------|----------|------|
+| **Deployment Frequency** | 배포 빈도 | 처리량(Throughput) |
+| **Lead Time for Changes** | 코드 커밋→배포 소요 시간 | 처리량(Throughput) |
+| **Change Failure Rate** | 배포 후 장애 발생률 | 안정성(Stability) |
+| **Failed Deployment Recovery Time** | 장애 복구 시간 | 안정성(Stability) |
+
+**3축과의 관계**: DORA는 **프로세스/운영 지표**이며, 코드 품질 자체를 측정하지 않는다. 3축(코드 수준 품질)과 DORA(배포 프로세스 성능)는 **측정 레이어가 다르다**. 직접 비교 불가.
+
+---
+
+#### 3-3. SPACE Framework — 5개 차원
+
+> **출처**: Forsgren, N., Storey, M.-A., Maddila, C., Zimmermann, T., Houck, B., & Butler, J. (2021). "The SPACE of Developer Productivity: There's more to it than you think." *ACM Queue*, 19(1), 20–48.
+
+SPACE는 **개발자 생산성**을 5개 차원으로 측정한다:
+
+| 차원 | 설명 |
+|------|------|
+| **S**atisfaction | 개발자 만족도, 웰빙 |
+| **P**erformance | 결과물의 품질과 신뢰성 |
+| **A**ctivity | 활동량 (커밋, PR, 코드 리뷰 수) |
+| **C**ommunication | 팀 협업, 지식 공유 |
+| **E**fficiency | 흐름 상태, 방해 요소 최소화 |
+
+**3축과의 관계**: SPACE는 **개발자 경험/생산성** 프레임이며, 코드 품질 자체를 측정하지 않는다. 3축과 측정 대상이 다르다.
+
+---
+
+#### 3-4. CK Metrics Suite — 6개 OO 설계 지표
+
+> **출처**: Chidamber, S. R., & Kemerer, C. F. (1994). "A Metrics Suite for Object Oriented Design." *IEEE Transactions on Software Engineering*, 20(6), 476–493.
+
+CK 메트릭은 **객체지향 설계 복잡도**를 6개 지표로 측정한다:
+
+| 지표 | 설명 |
+|------|------|
+| **WMC** | Weighted Methods per Class — 클래스 복잡도 |
+| **DIT** | Depth of Inheritance Tree — 상속 깊이 |
+| **NOC** | Number of Children — 자식 클래스 수 |
+| **CBO** | Coupling Between Object classes — 결합도 |
+| **RFC** | Response For a Class — 응답 집합 크기 |
+| **LCOM** | Lack of Cohesion in Methods — 응집도 부족 |
+
+CK 메트릭은 결함 발생률, 유지보수 노력, 재사용성과 상관관계가 있음이 실증되었다.
+
+**3축과의 관계**: 🧀 Cognitive Complexity는 CK의 WMC(메서드 복잡도)와 개념적으로 유사하나, CK는 클래스 수준 설계 지표이고 Cognitive Complexity는 함수 수준 제어 흐름 지표다. 3축이 CK를 근거로 선택되었다는 증거는 없다.
+
+---
+
+### 4. "3축"을 뒷받침하는 실증 연구가 있는가?
+
+**없다.**
+
+현재까지 조사한 결과, "Security + Cognitive Complexity + Behavioral Preservation"의 조합이 코드 품질의 최적 분해임을 주장하는 학술 연구는 발견되지 않았다.
+
+관련 개별 연구는 존재한다:
+
+| 연구 | 내용 | 3축과의 관련성 |
+|------|------|--------------|
+| Campbell, G. A. (2018). "Cognitive Complexity: A new way of measuring understandability." SonarSource White Paper. | Cognitive Complexity 지표 제안 — McCabe 대비 유지보수성 예측력 개선 주장 | 🧀 축의 측정 도구 근거 |
+| Lavazza, L. et al. (2022). "An empirical evaluation of the 'Cognitive Complexity' measure as a predictor of code understandability." *Journal of Systems and Software*, 197, 111561. | Cognitive Complexity가 코드 이해도의 예측 변수로서 전통 지표보다 **약간** 우수함 — 그러나 "명확하고 검증된 측정 기준이 아직 없다"고 결론 | 🧀 축의 측정 도구 근거 (부분적) |
+| Lenarduzzi, V. et al. (2023). "Does Cyclomatic or Cognitive Complexity Better Represents Code Understandability?" arXiv:2303.07722. | 216명 주니어 개발자 대상 실험 — Cognitive Complexity가 Cyclomatic보다 **약간** 우수하나, 둘 다 코드 이해도의 좋은 예측 변수가 아님 | 🧀 축의 측정 도구에 대한 **반론** |
+| AlOmar, E. A. et al. (2021). "On Preserving the Behavior in Software Refactoring: A Systematic Mapping Study." arXiv:2106.13900. | 행동 보존이 리팩토링의 핵심 개념임을 확인 — 다양한 접근법 분류 | 🥓 축의 개념적 근거 |
+| Sun, X. et al. (2025). "Quality Assurance of LLM-generated Code: Addressing Non-Functional Quality Characteristics." arXiv:2511.10271. | ISO 25010 기반 109편 논문 리뷰 — 학계는 Security, Performance, Maintainability를 주요 코드 품질 속성으로 강조; 실무자는 Maintainability와 가독성을 최우선시 | 3축 선택의 **부분적 지지** (Security, Maintainability는 일치) |
+
+**결론**: 3축의 조합 자체를 정당화하는 실증 연구는 없다. 각 축의 개별 측정 도구에 대한 연구는 존재하나, "이 3개가 최적 분해"라는 주장은 [미검증]이다.
+
+---
+
+### 5. 차원 수 선택의 트레이드오프
+
+> 이 섹션의 내용은 소프트웨어 측정 이론의 일반 원칙에서 도출된 것이며, 3축에 특화된 실증 연구는 없다. [미검증]
+
+| 차원 수 | 장점 | 단점 |
+|---------|------|------|
+| **적음 (1-3개)** | 측정 비용 낮음, 해석 용이, 도구 구현 단순 | 중요한 품질 속성 누락 위험, 과도한 단순화 |
+| **많음 (9개+)** | 포괄적 커버리지, 표준화 가능 | 측정 비용 높음, 차원 간 상관관계 처리 복잡, 실무 적용 어려움 |
+| **중간 (4-6개)** | 균형점 — 그러나 "몇 개가 최적인가"에 대한 실증 근거 없음 | 여전히 자의적 선택 |
+
+**Fenton & Bieman (2014)의 관점**: 소프트웨어 메트릭은 측정하려는 속성과 측정 도구 사이의 **표현 조건(representation condition)**을 충족해야 한다. 차원 수 자체보다 각 차원이 독립적이고 측정 가능한지가 더 중요하다.
+
+> **출처**: Fenton, N., & Bieman, J. (2014). *Software Metrics: A Rigorous and Practical Approach* (3rd ed.). CRC Press.
+
+**ISO 25010의 교훈**: 2011년 8개 → 2023년 9개로 Safety가 추가되었다. 이는 "차원 수는 고정이 아니며, 도메인 요구에 따라 진화한다"는 것을 보여준다.
+
+---
+
+### 6. 종합 판단
+
+| 질문 | 판단 |
+|------|------|
+| 3축은 학술적으로 정당화된 선택인가? | **아니다** — 선행 연구에서 이 조합을 최적으로 제안한 사례 없음 |
+| 3축은 자의적 선택인가? | **그렇다** — 프로젝트 목적(LLM 기반 코드 분석)에 맞게 실용적으로 선택된 것으로 보임 |
+| 3축이 틀렸는가? | **판단 불가** — 자의적이라는 것이 틀렸다는 의미는 아님. 실용적 목적에 부합할 수 있음 |
+| 더 나은 대안이 있는가? | ISO 25010(9개)이 더 포괄적이나, 모든 차원을 LLM으로 측정하는 것이 실용적인지는 [미검증] |
+| 3축을 유지해야 하는가? | 현재 실험(EXP-02, EXP-03)은 🍞🧀 축의 유용성을 부분 확인. 🥓 축은 미검증. 3축의 **조합**이 최적인지는 미검증 |
+
+**권고**: RESEARCH.md에 "3축은 실용적 선택이며 학술적 최적성은 미검증"임을 명시하고, 향후 실험에서 누락 차원(특히 성능, 동시성)의 포함 여부를 검토할 것.
+
+---
+
+### 참고문헌 (이 섹션)
+
+1. ISO/IEC 25010:2023. *Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — Product quality model*. ISO, 2023-11-15.
+2. Chidamber, S. R., & Kemerer, C. F. (1994). "A Metrics Suite for Object Oriented Design." *IEEE Transactions on Software Engineering*, 20(6), 476–493.
+3. Forsgren, N., Humble, J., & Kim, G. (2018). *Accelerate: The Science of Lean Software and DevOps*. IT Revolution Press.
+4. Forsgren, N., Storey, M.-A., Maddila, C., Zimmermann, T., Houck, B., & Butler, J. (2021). "The SPACE of Developer Productivity: There's more to it than you think." *ACM Queue*, 19(1), 20–48.
+5. Campbell, G. A. (2018). *Cognitive Complexity: A new way of measuring understandability*. SonarSource White Paper. https://www.sonarsource.com/resources/cognitive-complexity/
+6. Lavazza, L., Abualkishik, A. Z., Liu, G., & Morasca, S. (2022). "An empirical evaluation of the 'Cognitive Complexity' measure as a predictor of code understandability." *Journal of Systems and Software*, 197, 111561. DOI: 10.1016/j.jss.2022.111561
+7. Lenarduzzi, V., Kilamo, T., & Janes, A. (2023). "Does Cyclomatic or Cognitive Complexity Better Represents Code Understandability? An Empirical Investigation on the Developers Perception." arXiv:2303.07722.
+8. AlOmar, E. A., Mkaouer, M. W., Newman, C., & Ouni, A. (2021). "On Preserving the Behavior in Software Refactoring: A Systematic Mapping Study." arXiv:2106.13900.
+9. Sun, X., Ståhl, D., Sandahl, K., & Kessler, C. (2025). "Quality Assurance of LLM-generated Code: Addressing Non-Functional Quality Characteristics." arXiv:2511.10271.
+10. Fenton, N., & Bieman, J. (2014). *Software Metrics: A Rigorous and Practical Approach* (3rd ed.). CRC Press.

@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/xavctn/img2table ===
+--- Basic Stats ---
+total_py: 130
+test_py: 41
+test_ratio: 31.5%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+27 ./src/img2table/tables/metrics.py
+20 ./src/img2table/document/base/__init__.py
+18 ./tests/tables/processing/bordered_tables/tables/test_semi_bordered.py
+18 ./src/img2table/tables/processing/bordered_tables/tables/semi_bordered.py
+17 ./tests/tables/processing/borderless_tables/layout/test_table_segments.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 4
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 3
+
+--- B2: Secret patterns ---
+secret/key refs: 13
+
+--- B4: SQL patterns ---
+raw SQL: 2
+ORM: 33
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 105 ./src/img2table/tables/processing/borderless_tables/whitespaces.py::compute_whitespaces
+  90 ./src/img2table/tables/processing/borderless_tables/layout/table_segments.py::get_table_areas
+  90 ./src/img2table/tables/metrics.py::remove_dotted_lines
+  81 ./src/img2table/tables/processing/bordered_tables/cells/identification.py::identify_cells
+  77 ./src/img2table/tables/processing/borderless_tables/layout/rlsa.py::get_text_mask
+  75 ./src/img2table/tables/processing/bordered_tables/lines.py::identify_straight_lines
+  70 ./src/img2table/ocr/google_vision.py::map_response
+  69 ./src/img2table/ocr/pdf.py::content
+  67 ./src/img2table/tables/processing/borderless_tables/layout/rlsa.py::identify_text_mask
+  66 ./src/img2table/tables/processing/borderless_tables/columns.py::get_columns_delimiters
+
+--- C2: SAR (state+async+retry) candidates ---

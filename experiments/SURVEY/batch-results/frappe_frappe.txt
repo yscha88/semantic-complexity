@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/frappe/frappe ===
+--- Basic Stats ---
+total_py: 1458
+test_py: 269
+test_ratio: 18.4%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+10 ./frappe/model/base_document.py
+8 ./frappe/website/path_resolver.py
+8 ./frappe/utils/global_search.py
+8 ./frappe/permissions.py
+7 ./frappe/core/doctype/error_log/test_error_log.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 59
+global keyword: 14
+
+--- B1: Auth patterns ---
+auth refs: 126
+
+--- B2: Secret patterns ---
+secret/key refs: 60
+
+--- B4: SQL patterns ---
+raw SQL: 428
+ORM: 806
+
+--- H3: Contract test ---
+contract/schema test: 4
+
+--- C1: Largest functions (by line count) ---
+ 495 ./frappe/core/doctype/doctype/doctype.py::validate_fields
+ 280 ./frappe/deprecation_dumpster.py::get_tests_CompatFrappeTestCase
+ 236 ./frappe/model/db_query.py::prepare_filter_condition
+ 204 ./frappe/tests/test_db_query.py::test_query_fields_sanitizer
+ 202 ./frappe/model/qb_query.py::execute
+ 200 ./frappe/model/delete_doc.py::delete_doc
+ 191 ./frappe/database/postgres/schema.py::alter
+ 185 ./frappe/desk/search.py::search_widget
+ 176 ./frappe/desk/doctype/event/event.py::get_events
+ 174 ./frappe/core/doctype/data_import/importer.py::import_data
+
+--- C2: SAR (state+async+retry) candidates ---

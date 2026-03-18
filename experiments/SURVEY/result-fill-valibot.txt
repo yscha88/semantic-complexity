@@ -1,0 +1,27 @@
+=== Measuring: https://github.com/open-circle/valibot ===
+--- Basic Stats ---
+total_py: 0
+test_py: 0
+
+--- C3: Max Nesting Depth (top 5 files) ---
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 0
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 0
+ORM: 0
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+
+--- C2: SAR (state+async+retry) candidates ---

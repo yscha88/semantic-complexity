@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/NVIDIA/tacotron2 ===
+--- Basic Stats ---
+total_py: 19
+test_py: 0
+test_ratio: 0%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+11 ./model.py
+9 ./train.py
+9 ./multiproc.py
+9 ./layers.py
+8 ./stft.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 0
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 0
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 8
+ORM: 1
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 107 ./train.py::train
+  91 ./hparams.py::create_hparams
+  50 ./audio_processing.py::window_sumsquare
+  48 ./distributed.py::apply_gradient_allreduce
+  46 ./distributed.py::__init__
+  40 ./model.py::decode
+  39 ./data_utils.py::__call__
+  37 ./model.py::inference
+  37 ./model.py::__init__
+  36 ./model.py::forward
+
+--- C2: SAR (state+async+retry) candidates ---

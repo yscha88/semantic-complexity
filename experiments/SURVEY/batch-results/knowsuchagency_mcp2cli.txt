@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/knowsuchagency/mcp2cli ===
+--- Basic Stats ---
+total_py: 23
+test_py: 8
+test_ratio: 34.7%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+11 ./tests/conftest.py
+9 ./src/mcp2cli/_sessions.py
+6 ./tests/test_token_savings.py
+6 ./tests/test_helpers.py
+6 ./src/mcp2cli/_openapi.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 7
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 9
+
+--- B2: Secret patterns ---
+secret/key refs: 0
+
+--- B4: SQL patterns ---
+raw SQL: 15
+ORM: 25
+
+--- H3: Contract test ---
+contract/schema test: 1
+
+--- C1: Largest functions (by line count) ---
+ 161 ./src/mcp2cli/_sessions.py::_run_session_daemon
+ 143 ./src/mcp2cli/_cli.py::_handle_session_operations
+ 139 ./src/mcp2cli/_sessions.py::_daemon
+ 124 ./src/mcp2cli/_cli.py::_build_main_parser
+ 111 ./tests/test_mcp.py::test_session_lifecycle
+ 106 ./src/mcp2cli/_mcp.py::handle_mcp
+  96 ./src/mcp2cli/_sessions.py::_run_with_session
+  91 ./src/mcp2cli/_mcp.py::run_mcp_http
+  85 ./src/mcp2cli/_openapi.py::extract_openapi_commands
+  85 ./src/mcp2cli/_cli.py::_main_impl
+
+--- C2: SAR (state+async+retry) candidates ---

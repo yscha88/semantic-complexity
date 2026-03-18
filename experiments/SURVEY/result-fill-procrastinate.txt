@@ -1,0 +1,43 @@
+=== Measuring: https://github.com/procrastinate-org/procrastinate ===
+--- Basic Stats ---
+total_py: 198
+test_py: 55
+test_ratio: 27.7%
+
+--- C3: Max Nesting Depth (top 5 files) ---
+7 ./procrastinate/worker.py
+7 ./procrastinate/psycopg_connector.py
+7 ./procrastinate/contrib/django/migrations/0025_add_models.py
+7 ./procrastinate/contrib/aiopg/aiopg_connector.py
+6 ./tests/integration/test_psycopg_connector.py
+
+--- C4: Hidden Dependencies (global/environ) ---
+os.environ refs: 8
+global keyword: 0
+
+--- B1: Auth patterns ---
+auth refs: 7
+
+--- B2: Secret patterns ---
+secret/key refs: 2
+
+--- B4: SQL patterns ---
+raw SQL: 46
+ORM: 22
+
+--- H3: Contract test ---
+contract/schema test: 0
+
+--- C1: Largest functions (by line count) ---
+ 111 ./procrastinate/worker.py::_process_job
+  99 ./procrastinate/cli.py::configure_defer_parser
+  88 ./procrastinate/cli.py::configure_worker_parser
+  81 ./procrastinate/app.py::run_worker_async
+  80 ./tests/unit/test_testing.py::test_fetch_job_one
+  68 ./procrastinate/tasks.py::configure
+  66 ./tests/unit/test_testing.py::test_select_stalled_jobs_by_heartbeat_all
+  65 ./procrastinate/contrib/aiopg/aiopg_connector.py::__init__
+  64 ./procrastinate/testing.py::defer_jobs_all
+  64 ./procrastinate/periodic.py::defer_jobs
+
+--- C2: SAR (state+async+retry) candidates ---
