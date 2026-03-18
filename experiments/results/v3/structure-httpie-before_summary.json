@@ -1,0 +1,33 @@
+{
+  "experiment_id": "structure-httpie-before",
+  "input_file": "experiments/inputs/structure_httpie_before.json",
+  "code_sha256": "339bdc0e110e0586392bfd55d3a73dfd52fcfad99cfa0223d68d1ba1179f217f",
+  "models": [
+    "gpt-5.4",
+    "sonnet-4.6"
+  ],
+  "groups": [
+    "D"
+  ],
+  "total_units": 2,
+  "completed": 2,
+  "results": [
+    {
+      "unit_id": "structure-httpie-before_gpt-5.4_D",
+      "model": "gpt-5.4",
+      "group": "D",
+      "tokens": 4277,
+      "elapsed": 25.52,
+      "prompt_sha256": "a01b25220af4e9a3a5f2dc34f92e8824ab6c16864afb3bd69c40069973165611"
+    },
+    {
+      "unit_id": "structure-httpie-before_sonnet-4.6_D",
+      "model": "sonnet-4.6",
+      "group": "D",
+      "tokens": 4516,
+      "elapsed": 24.77,
+      "prompt_sha256": "a01b25220af4e9a3a5f2dc34f92e8824ab6c16864afb3bd69c40069973165611"
+    }
+  ],
+  "timestamp": "2026-03-18T09:05:48.496422+00:00"
+}
