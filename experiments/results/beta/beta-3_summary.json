@@ -1,0 +1,50 @@
+{
+  "experiment_id": "beta-3",
+  "input_file": "experiments/inputs/beta-3.json",
+  "code_sha256": "482ed6a65f9ef56261a90f01d474601a4615569d9c9a233cc15859adff09803c",
+  "models": [
+    "gpt-5.4",
+    "sonnet-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "total_units": 4,
+  "completed": 4,
+  "results": [
+    {
+      "unit_id": "beta-3_gpt-5.4_B",
+      "model": "gpt-5.4",
+      "group": "B",
+      "tokens": 5234,
+      "elapsed": 37.12,
+      "prompt_sha256": "5d43e38254d44fcf4003a60d2709b3b6e50bfacc438169e4e4f17e6ee799eadc"
+    },
+    {
+      "unit_id": "beta-3_gpt-5.4_D",
+      "model": "gpt-5.4",
+      "group": "D",
+      "tokens": 5520,
+      "elapsed": 43.92,
+      "prompt_sha256": "5167dfc873c569faa00f270174433de477c8e077e80d74570c5d2d0170048ec7"
+    },
+    {
+      "unit_id": "beta-3_sonnet-4.6_B",
+      "model": "sonnet-4.6",
+      "group": "B",
+      "tokens": 4691,
+      "elapsed": 25.2,
+      "prompt_sha256": "5d43e38254d44fcf4003a60d2709b3b6e50bfacc438169e4e4f17e6ee799eadc"
+    },
+    {
+      "unit_id": "beta-3_sonnet-4.6_D",
+      "model": "sonnet-4.6",
+      "group": "D",
+      "tokens": 4627,
+      "elapsed": 29.72,
+      "prompt_sha256": "5167dfc873c569faa00f270174433de477c8e077e80d74570c5d2d0170048ec7"
+    }
+  ],
+  "timestamp": "2026-03-19T05:22:44.794089+00:00"
+}

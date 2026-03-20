@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-19T05:40:35.497716+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "86df80fb0e9bfef6250d62dab10055f8bf8a572104c61690109a86811cbe688a",
+  "prompt_token_count": 7843,
+  "config": {
+    "model_id": "claude-sonnet-4-20250514",
+    "provider": "anthropic",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": 4096
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-20250514",
+    "model_id_actual": "claude-sonnet-4-20250514",
+    "content": "I'll analyze this code systematically for security, quality, correctness, and design issues.\n\n## Security Issues\n\n### HIGH SEVERITY\n1. **Signal Handler Race Conditions**\n   - Lines 185-188: Signal handlers modify shared state without proper synchronization\n   - Could lead to inconsistent state or crashes in multi-threaded scenarios\n   - Signal handlers should be minimal and async-signal-safe\n\n2. **Process Management Vulnerabilities**\n   - Lines 140-150: `os.fork()` without proper error handling for resource exhaustion\n   - Could lead to fork bombs or denial of service\n   - No validation of PID values before using them in system calls\n\n### MEDIUM SEVERITY\n3. **File Descriptor Leaks**\n   - Lines 45-48: File descriptors set to non-blocking but no validation they're valid\n   - Missing error handling in `close_fd()` calls throughout\n   - Could exhaust system file descriptor limits\n\n4. **Deserialization Without Validation**\n   - Lines 280, 445, 500: `deserialize()` called on external data without validation\n   - Could lead to code execution if deserializer is unsafe (pickle, etc.)\n   - No size limits or type checking on deserialized data\n\n## Input Validation and Trust Boundaries\n\n### HIGH SEVERITY\n5. **Missing Task Name Validation**\n   - Line 280: `payload[\"name\"]` used as dictionary key without validation\n   - Line 445: Same issue in broadcast tasks\n   - Could cause KeyError or allow access to unintended tasks\n\n### MEDIUM SEVERITY\n6. **Queue Key Validation Missing**\n   - Line 278: `queue_broker_key` used without validation\n   - Line 590: `self.wakaq.broker_keys` assumed to be valid\n   - Could lead to Redis injection or unexpected behavior\n\n7. **Memory Percentage Bounds**\n   - Lines 120, 470: No validation that `max_mem_percent` is within 0-100 range\n   - Could cause logic errors or infinite loops\n\n## Error Handling and Edge Cases\n\n### HIGH SEVERITY\n8. **Broad Exception Catching**\n   - Lines 210-220, 330-340: Catching all exceptions masks critical errors\n   - `except:` catches `SystemExit`, `KeyboardInterrupt` which should propagate\n   - Makes debugging extremely difficult\n\n9. **Resource Cleanup on Exception**\n   - Lines 220-230: File descriptors may not be closed if exceptions occur before `finally`\n   - Event loop cleanup may fail silently\n   - Could lead to resource exhaustion\n\n### MEDIUM SEVERITY\n10. **Redis Connection Failures**\n    - Lines 570-580: Redis pubsub failures handled but could cause infinite retry loops\n    - No exponential backoff or circuit breaker pattern\n    - Could overwhelm Redis server\n\n11. **Process State Inconsistency**\n    - Lines 410-420: Child process state updates without atomic operations\n    - Race conditions between parent and child process state\n    - Could lead to zombie processes or incorrect process tracking\n\n## Resource Management\n\n### HIGH SEVERITY\n12. **Memory Usage Calculation**\n    - Line 67: `psutil.Process(self.pid).memory_percent()` can raise exceptions\n    - No bounds checking on memory calculations\n    - Could cause crashes when processes exit unexpectedly\n\n13. **Asyncio Task Management**\n    - Lines 350-380: Active async tasks tracked but cancellation may not clean up properly\n    - Task context dictionary could grow unbounded\n    - Memory leaks possible with long-running tasks\n\n### MEDIUM SEVERITY\n14. **Buffer Management**\n    - Lines 520-560: Log buffers can grow unbounded\n    - No maximum size limits on `ping_buffer` or `log_buffer`\n    - Could cause memory exhaustion\n\n15. **File Handle Management**\n    - Lines 530-550: Complex file descriptor juggling without proper error recovery\n    - Stream objects may become invalid without detection\n    - Could cause data loss or corruption\n\n## Design Issues\n\n### MEDIUM SEVERITY\n16. **Tight Coupling**\n    - Worker class directly accesses many `wakaq` attributes\n    - Hard to test individual components\n    - Changes to `wakaq` structure break worker functionality\n\n17. **Complex State Management**\n    - Child process state spread across multiple attributes\n    - No clear state machine or validation of state transitions\n    - Difficult to reason about correctness\n\n### LOW SEVERITY\n18. **Magic Numbers**\n    - Line 295: Hardcoded `0.01` timeout\n    - Line 200: Hardcoded `0.05` sleep interval\n    - Line 365: Hardcoded `0.1` runtime buffer\n    - Should be configurable constants\n\n19. **Long Methods**\n    - `_event_loop()` method is 100+ lines\n    - `_parent()` method handles too many responsibilities\n    - Violates single responsibility principle\n\n## Recommendations\n\n### Immediate (High Priority)\n1. Add input validation for all external data\n2. Replace broad exception handlers with specific ones\n3. Implement proper signal handler synchronization\n4. Add bounds checking for all numeric inputs\n5. Validate deserialized data structure and types\n\n### Short Term (Medium Priority)\n1. Implement resource limits and cleanup guarantees\n2. Add exponential backoff for Redis reconnections\n3. Refactor large methods into smaller, focused functions\n4. Add comprehensive error recovery mechanisms\n5. Implement proper logging levels and structured logging\n\n### Long Term (Low Priority)\n1. Decouple worker from wakaq implementation details\n2. Implement formal state machines for process management\n3. Add comprehensive unit tests with mocking\n4. Consider using higher-level process management libraries\n5. Add metrics and monitoring capabilities\n\nThe code shows signs of organic growth with complex inter-process communication patterns. While functional, it needs significant hardening for production use, especially around error handling, resource management, and security validation.",
+    "finish_reason": "end_turn",
+    "usage": {
+      "prompt_tokens": 7843,
+      "completion_tokens": 1358,
+      "total_tokens": 9201
+    },
+    "response_id": "msg_01Gn4viKr1w4BKEPFGjyktpA",
+    "elapsed_seconds": 29.63
+  },
+  "experiment_id": "beta-11",
+  "unit_id": "beta-11_sonnet-4.6_B",
+  "input": {
+    "repo": "wakatime/wakaq",
+    "commit": "b4d070fa19c2",
+    "file": "wakaq/worker.py",
+    "lines": "1-744",
+    "code_sha256": "75ccbe8b118a13ad05de8e42b8c25bfa5678e5009618024a79f9a485dbee4fee"
+  }
+}

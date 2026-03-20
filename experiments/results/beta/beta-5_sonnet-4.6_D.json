@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-19T05:27:07.540228+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "872e1142c729b2cb6c18618958b6e03ff19e82de54f9ae6621f48fa5a3425af8",
+  "prompt_token_count": 3318,
+  "config": {
+    "model_id": "claude-sonnet-4-20250514",
+    "provider": "anthropic",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": 4096
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-20250514",
+    "model_id_actual": "claude-sonnet-4-20250514",
+    "content": "## Checklist Analysis\n\n### R1: Input validation — is every external input validated before use?\n\n**Finding**: Multiple locations lack proper input validation:\n1. Line 73: `function` parameter not validated for None or callable type\n2. Line 73: `config` parameter not validated for expected types\n3. Line 158: `args` and `kwargs` parameters not validated before processing\n4. Line 162: `args` and `kwargs` parameters not validated before processing\n\n**Rating**: **warning**\n\n**Fix recommendation**: Add type checks and None validation:\n```python\ndef __init__(self, function: 'AnyCallable', config: 'ConfigType'):\n    if function is None or not callable(function):\n        raise PydanticUserError(\"function must be a callable\", code=None)\n    if config is not None and not isinstance(config, (type, dict)):\n        raise PydanticUserError(\"config must be None, a type, or a dict\", code=None)\n    # ... rest of implementation\n```\n\n### R2: Error handling — are all error paths handled? Can errors leak sensitive info?\n\n**Finding**: Several error handling issues:\n1. Lines 77-81: Parameter name collision check could raise KeyError if parameters.keys() fails\n2. Line 95: `type_hints[name]` could raise KeyError if type hint missing\n3. Line 244: Dictionary access `m.__pydantic_fields__[k]` could raise KeyError\n4. Lines 290-310: Field validator methods could expose internal state in error messages\n\n**Rating**: **warning**\n\n**Fix recommendation**: Add proper exception handling:\n```python\ntry:\n    type_hints = _typing_extra.get_type_hints(function, include_extras=True)\nexcept (NameError, AttributeError) as e:\n    raise PydanticUserError(f\"Failed to get type hints: {e}\", code=None)\n\n# For dictionary access:\nfield_info = m.__pydantic_fields__.get(k)\nif field_info is None:\n    continue  # or handle appropriately\n```\n\n### R3: Resource management — are resources properly acquired and released?\n\n**Finding**: No explicit resource management issues found. The code doesn't directly manage files, connections, or locks.\n\n**Rating**: **pass**\n\n### R4: Design correctness — does the logic handle all edge cases?\n\n**Finding**: Several design issues:\n1. Lines 170-178: Race condition potential - `arg_iter` state could be inconsistent if modified during iteration\n2. Lines 248-268: Complex argument reconstruction logic has potential ordering issues\n3. Line 95: Off-by-one potential in parameter enumeration with missing type hints\n4. Lines 183-200: Logic for handling positional vs keyword arguments has edge cases with empty collections\n\n**Rating**: **fail**\n\n**Fix recommendation**: \n```python\n# Fix argument iteration to be atomic\ndef build_values(self, args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:\n    values: dict[str, Any] = {}\n    args_list = list(args)  # Create immutable snapshot\n    \n    # Process positional arguments first, completely\n    for i, arg in enumerate(args_list):\n        arg_name = self.arg_mapping.get(i)\n        if arg_name is not None:\n            values[arg_name] = arg\n        else:\n            # Handle remaining args as varargs\n            values[self.v_args_name] = args_list[i:]\n            break\n```\n\n## Free-form Analysis\n\n### Additional Issues Not Covered by R1-R4:\n\n1. **Security Concern - Code Injection Risk** (HIGH severity):\n   - Line 322: `create_model(to_pascal(self.raw_function.__name__), ...)` uses function name directly in model creation\n   - Malicious function names could potentially cause issues\n   - **Fix**: Sanitize function names: `model_name = re.sub(r'[^a-zA-Z0-9_]', '_', function.__name__)`\n\n2. **Performance Issue** (MEDIUM severity):\n   - Lines 95-96: `get_type_hints()` called for every function decoration, expensive operation\n   - **Fix**: Consider caching type hints or lazy evaluation\n\n3. **Memory Leak Potential** (MEDIUM severity):\n   - Lines 46-50: Wrapper function stores references to `vd`, `validate`, `raw_function`, `model` which could prevent garbage collection\n   - **Fix**: Use weak references where appropriate\n\n4. **Inconsistent State Management** (MEDIUM severity):\n   - Lines 130-135: Field name collision resolution logic could create inconsistent internal state\n   - Alternative names might conflict with user fields\n   - **Fix**: Use a more robust naming scheme with guaranteed unique prefixes\n\n5. **Type Safety Violation** (LOW severity):\n   - Line 46: `wrapper_function.vd = vd  # type: ignore` bypasses type checking\n   - Multiple similar type ignores indicate design issues\n   - **Fix**: Use proper typing with protocols or typed dictionaries\n\n6. **Deprecated Code Usage** (LOW severity):\n   - Lines 12-15: Conditional DeprecationWarning assignment is a code smell\n   - **Fix**: Handle deprecation warnings through proper warning system\n\n7. **Logic Complexity** (MEDIUM severity):\n   - `build_values()` method (lines 166-200) is overly complex with multiple responsibilities\n   - **Fix**: Split into smaller, focused methods for better maintainability\n\nThe most critical issue is the potential code injection risk from unsanitized function names, followed by the design correctness failures in argument handling logic.",
+    "finish_reason": "end_turn",
+    "usage": {
+      "prompt_tokens": 3318,
+      "completion_tokens": 1327,
+      "total_tokens": 4645
+    },
+    "response_id": "msg_01ENbkZmKRzhxR5SLKWwGj5j",
+    "elapsed_seconds": 25.42
+  },
+  "experiment_id": "beta-5",
+  "unit_id": "beta-5_sonnet-4.6_D",
+  "input": {
+    "repo": "pydantic/pydantic",
+    "commit": "0e4be5e64777",
+    "file": "pydantic/deprecated/decorator.py",
+    "lines": "1-285",
+    "code_sha256": "4c19ba6c9ef026c36287ff16ab92330dcc0fdf69bdfef7f1b3de9d7ac2ee934d"
+  }
+}

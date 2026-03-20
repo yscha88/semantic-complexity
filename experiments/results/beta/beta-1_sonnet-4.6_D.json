@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-19T05:18:28.072934+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "812ed9454a6589db9f5f01e8253594f5af2dcc332ab1459edda3d55d38d934d7",
+  "prompt_token_count": 3830,
+  "config": {
+    "model_id": "claude-sonnet-4-20250514",
+    "provider": "anthropic",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": 4096
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-20250514",
+    "model_id_actual": "claude-sonnet-4-20250514",
+    "content": "## Checklist Analysis\n\n### R1: Input validation — is every external input validated before use?\n\n**Finding**: The `_validate_setting` function validates setting values, but has incomplete coverage.\n\n**Rating**: warning\n\n**Issues**:\n1. Line 367: `HEADER_TABLE_SIZE` has no validation (should be non-negative and within reasonable bounds)\n2. Line 367: `MAX_CONCURRENT_STREAMS` has no validation (should be within 0 to 2^32-1 range per HTTP/2 spec)\n3. Line 158: `initial_values` parameter accepts any `dict[SettingCodes, int]` but doesn't validate the dictionary structure itself\n4. Line 158: No validation that `initial_values` keys are valid setting codes\n\n**Fix recommendation**: \n- Add validation for `HEADER_TABLE_SIZE` (non-negative, reasonable upper bound)\n- Add validation for `MAX_CONCURRENT_STREAMS` (0 ≤ value ≤ 2^32-1)\n- Add type checking for `initial_values` parameter\n\n### R2: Error handling — are all error paths handled? Can errors leak sensitive info?\n\n**Finding**: Error handling is generally good with appropriate custom exceptions.\n\n**Rating**: pass\n\n**Observations**:\n- Line 161-167: Proper validation and exception raising in `__init__`\n- Line 324-330: Proper validation and exception raising in `__setitem__`\n- Line 295: Appropriate KeyError handling in `__getitem__`\n- Error messages don't leak sensitive information, only setting codes and values\n\n### R3: Resource management — are resources properly acquired and released?\n\n**Finding**: No explicit resource management issues.\n\n**Rating**: pass\n\n**Observations**:\n- Uses standard Python collections (deque, dict) with automatic memory management\n- No file handles, network connections, or locks that need explicit cleanup\n- Collections.deque operations are memory-efficient for the use case\n\n### R4: Design correctness — does the logic handle all edge cases?\n\n**Finding**: Several edge cases and logical issues present.\n\n**Rating**: fail\n\n**Issues**:\n1. Line 219: `max_concurrent_streams` property returns `2**32+1` as default, but this exceeds the HTTP/2 spec maximum of `2^32-1`\n2. Line 333-336: In `__setitem__`, when a new setting is created, it initializes with `[None]` but the validation logic doesn't account for this None value properly\n3. Line 295: `__getitem__` checks `if val is None: raise KeyError` but this creates inconsistent behavior - some settings might have None values in their deque\n4. Line 180-188: `acknowledge()` method doesn't handle the case where a deque might be empty after `popleft()`\n5. Line 158: Type hint allows `dict[SettingCodes, int]` but the actual implementation accepts `SettingCodes | int` as keys\n\n**Fix recommendations**:\n- Change `max_concurrent_streams` default to `2**32-1` or a more reasonable default\n- Revise the None-handling logic in `__setitem__` and `__getitem__` for consistency\n- Add bounds checking in `acknowledge()` method\n- Fix type hints to match actual implementation\n\n## Additional Free-form Analysis\n\n### A1: Type Safety Issues\n**Severity**: Medium\n- Line 158: Type annotation mismatch - `initial_values: dict[SettingCodes, int]` but implementation supports `SettingCodes | int` keys\n- Line 333: Type ignore comment suggests type checker issues with None initialization\n\n### A2: HTTP/2 Specification Compliance\n**Severity**: High  \n- Line 219: Default value `2**32+1` for `max_concurrent_streams` violates HTTP/2 RFC 7540 which specifies maximum value of 2^31-1\n- Missing validation for `HEADER_TABLE_SIZE` could allow values that violate the HTTP/2 specification\n\n### A3: API Design Inconsistency\n**Severity**: Low\n- The `get()` method behavior differs between properties: `max_concurrent_streams` returns a large integer while `max_header_list_size` returns `None` for unset values\n- This inconsistency could confuse API users\n\n### A4: Performance Consideration\n**Severity**: Low\n- Line 180-188: The `acknowledge()` method iterates through all settings even when no changes are pending\n- Could be optimized to track which settings have pending changes\n\n### A5: Documentation/Usability\n**Severity**: Low\n- The `ChangedSetting` class stores both `SettingCodes` enum values and raw integers, but the distinction and handling isn't clearly documented\n- The relationship between \"current\" and \"pending\" values could be better explained in the class docstring\n\n### Summary\nThe code is generally well-structured but has some significant correctness issues, particularly around HTTP/2 specification compliance and edge case handling. The input validation is incomplete, and there are some design inconsistencies that could lead to confusion or protocol violations.",
+    "finish_reason": "end_turn",
+    "usage": {
+      "prompt_tokens": 3830,
+      "completion_tokens": 1189,
+      "total_tokens": 5019
+    },
+    "response_id": "msg_01J8CG432yQiv7xizc8yDJaW",
+    "elapsed_seconds": 24.49
+  },
+  "experiment_id": "beta-1",
+  "unit_id": "beta-1_sonnet-4.6_D",
+  "input": {
+    "repo": "python-hyper/h2",
+    "commit": "18fa3480a7a9",
+    "file": "h2/settings.py",
+    "lines": "1-335",
+    "code_sha256": "d7fadf02b7b82baaa64479962000242eb25587719fd05533409eedecc64097bc"
+  }
+}
