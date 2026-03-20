@@ -1,0 +1,67 @@
+{
+  "experiment_id": "gamma-auth",
+  "input_file": "experiments/inputs/gamma-auth.json",
+  "code_sha256": "f8712fe91435653c8cc35c66e0249277e8eb9db8cba33149a9af546d05938aad",
+  "models": [
+    "gpt-5.4-mini",
+    "gpt-5.4-nano",
+    "gemini-flash"
+  ],
+  "groups": [
+    "D-general",
+    "D-specific"
+  ],
+  "total_units": 6,
+  "completed": 6,
+  "results": [
+    {
+      "unit_id": "gamma-auth_gpt-5.4-mini_D-general",
+      "model": "gpt-5.4-mini",
+      "group": "D-general",
+      "tokens": 2141,
+      "elapsed": 7.43,
+      "prompt_sha256": "6423da56ac1409cc4d3da33ea2c8203cdc8065b4bdb0fc80c59a2a392bd3f629"
+    },
+    {
+      "unit_id": "gamma-auth_gpt-5.4-mini_D-specific",
+      "model": "gpt-5.4-mini",
+      "group": "D-specific",
+      "tokens": 2129,
+      "elapsed": 6.68,
+      "prompt_sha256": "fe511f5b8881986f2296b292c00b2ef04c1904b5e381f97698029fd6a049a42a"
+    },
+    {
+      "unit_id": "gamma-auth_gpt-5.4-nano_D-general",
+      "model": "gpt-5.4-nano",
+      "group": "D-general",
+      "tokens": 2006,
+      "elapsed": 6.21,
+      "prompt_sha256": "6423da56ac1409cc4d3da33ea2c8203cdc8065b4bdb0fc80c59a2a392bd3f629"
+    },
+    {
+      "unit_id": "gamma-auth_gpt-5.4-nano_D-specific",
+      "model": "gpt-5.4-nano",
+      "group": "D-specific",
+      "tokens": 2037,
+      "elapsed": 11.3,
+      "prompt_sha256": "fe511f5b8881986f2296b292c00b2ef04c1904b5e381f97698029fd6a049a42a"
+    },
+    {
+      "unit_id": "gamma-auth_gemini-flash_D-general",
+      "model": "gemini-flash",
+      "group": "D-general",
+      "tokens": 3188,
+      "elapsed": 12.63,
+      "prompt_sha256": "6423da56ac1409cc4d3da33ea2c8203cdc8065b4bdb0fc80c59a2a392bd3f629"
+    },
+    {
+      "unit_id": "gamma-auth_gemini-flash_D-specific",
+      "model": "gemini-flash",
+      "group": "D-specific",
+      "tokens": 3115,
+      "elapsed": 12.14,
+      "prompt_sha256": "fe511f5b8881986f2296b292c00b2ef04c1904b5e381f97698029fd6a049a42a"
+    }
+  ],
+  "timestamp": "2026-03-20T04:19:47.728372+00:00"
+}

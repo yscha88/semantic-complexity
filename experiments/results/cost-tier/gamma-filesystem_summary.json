@@ -1,0 +1,67 @@
+{
+  "experiment_id": "gamma-filesystem",
+  "input_file": "experiments/inputs/gamma-filesystem.json",
+  "code_sha256": "70e552bb57a2bb6632ba6fe7e09fde4c2ba7deafe4a5944793b442ba7c4f2e8c",
+  "models": [
+    "gpt-5.4-mini",
+    "gpt-5.4-nano",
+    "gemini-flash"
+  ],
+  "groups": [
+    "D-general",
+    "D-specific"
+  ],
+  "total_units": 6,
+  "completed": 6,
+  "results": [
+    {
+      "unit_id": "gamma-filesystem_gpt-5.4-mini_D-general",
+      "model": "gpt-5.4-mini",
+      "group": "D-general",
+      "tokens": 4228,
+      "elapsed": 9.06,
+      "prompt_sha256": "d6d8a374f54960949e25d944aedb79d381d9e7f01b7230e92b6ef8296b819ecc"
+    },
+    {
+      "unit_id": "gamma-filesystem_gpt-5.4-mini_D-specific",
+      "model": "gpt-5.4-mini",
+      "group": "D-specific",
+      "tokens": 3799,
+      "elapsed": 6.94,
+      "prompt_sha256": "5b1198fc6edc042732986346eecc6fc8a6a0b21d99ef574c069153476dac35e9"
+    },
+    {
+      "unit_id": "gamma-filesystem_gpt-5.4-nano_D-general",
+      "model": "gpt-5.4-nano",
+      "group": "D-general",
+      "tokens": 3982,
+      "elapsed": 8.32,
+      "prompt_sha256": "d6d8a374f54960949e25d944aedb79d381d9e7f01b7230e92b6ef8296b819ecc"
+    },
+    {
+      "unit_id": "gamma-filesystem_gpt-5.4-nano_D-specific",
+      "model": "gpt-5.4-nano",
+      "group": "D-specific",
+      "tokens": 3865,
+      "elapsed": 6.2,
+      "prompt_sha256": "5b1198fc6edc042732986346eecc6fc8a6a0b21d99ef574c069153476dac35e9"
+    },
+    {
+      "unit_id": "gamma-filesystem_gemini-flash_D-general",
+      "model": "gemini-flash",
+      "group": "D-general",
+      "tokens": 5246,
+      "elapsed": 14.01,
+      "prompt_sha256": "d6d8a374f54960949e25d944aedb79d381d9e7f01b7230e92b6ef8296b819ecc"
+    },
+    {
+      "unit_id": "gamma-filesystem_gemini-flash_D-specific",
+      "model": "gemini-flash",
+      "group": "D-specific",
+      "tokens": 5556,
+      "elapsed": 16.27,
+      "prompt_sha256": "5b1198fc6edc042732986346eecc6fc8a6a0b21d99ef574c069153476dac35e9"
+    }
+  ],
+  "timestamp": "2026-03-20T04:20:49.279323+00:00"
+}

@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-03-20T04:18:25.189483+00:00",
+  "model_name": "gpt-5.4-nano",
+  "prompt_group": "D-general",
+  "prompt_sha256": "6beb8cdd5cadd21dd3e5117bfefdc2bc002f24f42e19da6ea17ac6da495cf861",
+  "prompt_token_count": 2799,
+  "config": {
+    "model_id": "gpt-5.4-nano",
+    "provider": "openai",
+    "temperature": 0,
+    "seed": 42,
+    "max_tokens": 4096
+  },
+  "response": {
+    "model_id_requested": "gpt-5.4-nano",
+    "model_id_actual": "gpt-5.4-nano-2026-03-17",
+    "content": "## Checklist findings\n\n### R1: Input validation\n**Finding 1 (warning):** `process()` assumes `clause` has `__visit_name__` and that `clause.operator` exists for certain clause types. If a caller passes an unexpected/foreign clause object, `getattr(self, f\"visit_{clause.__visit_name__}\", None)` may fail later or raise confusing errors.  \n**Rating:** warning  \n**Fix recommendation:** Validate that `clause` is an expected SQLAlchemy clause type (or at least that required attributes exist) before dispatching; otherwise raise a clear `UnevaluatableError` early.\n\n**Finding 2 (warning):** `visit_column()` uses `parentmapper._columntoproperty[clause]` and then `parentmapper.class_manager[key].impl` without validating that `key`/`impl` are present and compatible. It catches `UnmappedColumnError` but not other potential `KeyError`/attribute issues.  \n**Rating:** warning  \n**Fix recommendation:** Broaden error handling around mapper internals (e.g., catch `KeyError`/`AttributeError`) and re-raise as `UnevaluatableError` with a non-sensitive message.\n\n---\n\n### R2: Error handling\n**Finding 3 (warning):** `_straight_evaluate()` calls `operator(eval_left(obj), eval_right(obj))` but does not catch runtime exceptions from user-defined callables (e.g., custom operators, `startswith`, `in`, etc.). This can leak stack traces and may break evaluation unexpectedly.  \n**Rating:** warning  \n**Fix recommendation:** Catch exceptions around the operator application and re-raise as `UnevaluatableError` (or return `None/_EXPIRED_OBJECT` depending on semantics), optionally preserving the original exception as `__cause__` only if appropriate.\n\n**Finding 4 (warning):** Error messages include `clause` and `err` objects (e.g., `f\"Cannot evaluate expression: {err}\"`, `f\"Cannot evaluate column: {clause}\"`). Depending on SQLAlchemy object `__repr__`, this could include internal details.  \n**Rating:** warning  \n**Fix recommendation:** Ensure messages are sanitized/minimal (avoid full object reprs) or rely on stable, non-sensitive representations.\n\n---\n\n### R3: Resource management\n**Finding 5 (pass):** No external resources are acquired (no files, sockets, DB connections). `inspect(obj)` and mapper checks are in-memory operations.  \n**Rating:** pass  \n**Fix recommendation:** None.\n\n---\n\n### R4: Design correctness\n**Finding 6 (warning):** `_straight_evaluate()` calls `eval_left(obj)` and `eval_right(obj)` multiple times (once for `_EXPIRED_OBJECT`/`None` checks, then again inside `operator(eval_left(obj), eval_right(obj))`). If `eval_left`/`eval_right` are not pure (e.g., they trigger lazy loading or have side effects), results can differ or incur extra work.  \n**Rating:** warning  \n**Fix recommendation:** Compute `left_val` and `right_val` once and pass those to `operator`, e.g. `return operator(left_val, right_val)`.\n\n**Finding 7 (warning):** `visit_in_op_binary_op()` / `visit_not_in_op_binary_op()` uses `lambda a, b: a in b ...` but does not handle cases where `b` is not an iterable/container (or where membership raises). This can raise at runtime.  \n**Rating:** warning  \n**Fix recommendation:** Catch `TypeError`/`Exception` around membership evaluation and convert to `None` or raise `UnevaluatableError` consistently.\n\n**Finding 8 (warning):** `visit_or_clauselist_op()` and `visit_and_clauselist_op()` implement SQL three-valued logic-ish behavior, but the handling of `_NO_OBJECT` vs `None` is subtle. For example, in `visit_or_clauselist_op()`, if a sub-evaluator returns `_NO_OBJECT`, it sets `has_null = has_null or value is None` (so `_NO_OBJECT` does not count as null), and then returns `False` if no `True` and no `None`. That may or may not match SQL semantics for “unknown due to no fetch”.  \n**Rating:** warning  \n**Fix recommendation:** Confirm intended semantics for `_NO_OBJECT` (missing/unfetched) vs `None` (SQL NULL). Add tests for combinations like `[None, _NO_OBJECT]`, `[_NO_OBJECT, False]`, etc.\n\n**Finding 9 (pass):** `visit_null/true/false` and `_EXPIRED_OBJECT` propagation are handled consistently across many operators.  \n**Rating:** pass  \n**Fix recommendation:** None.\n\n---\n\n## Issues NOT covered above\n\n**Finding 10 (warning):** Potential performance/design concern: `process()` repeatedly does dynamic dispatch via `getattr(self, f\"visit_{...}\")` and recursively builds lambdas. For complex expressions, this can be expensive.  \n**Rating:** warning  \n**Fix recommendation:** Consider caching dispatch lookups per visit name/operator, or precompiling evaluators more efficiently (if not already done elsewhere in SQLAlchemy).\n\n**Finding 11 (warning):** `visit_bindparam()` returns `lambda obj: val` where `val` is computed once at compile time (`clause.callable()` or `clause.value`). If `clause.callable()` is expected to be evaluated per-row (or per-evaluation), this design may be incorrect.  \n**Rating:** warning  \n**Fix recommendation:** Verify SQLAlchemy’s intended semantics for bindparam callables in this internal evaluator context; if per-row evaluation is required, move callable invocation into the returned lambda.\n\n---\n\n## Summary table (by rule)\n\n- **R1 Input validation**\n  - Finding 1: warning — validate clause shape/attributes before dispatch.\n  - Finding 2: warning — catch broader mapper/internal lookup errors and re-raise cleanly.\n\n- **R2 Error handling**\n  - Finding 3: warning — catch runtime exceptions from operator/member functions and re-raise consistently.\n  - Finding 4: warning — avoid leaking sensitive/internal details in error messages.\n\n- **R3 Resource management**\n  - Finding 5: pass — no resource acquisition.\n\n- **R4 Design correctness**\n  - Finding 6: warning — avoid repeated `eval_left(obj)` / `eval_right(obj)` calls.\n  - Finding 7: warning — handle non-iterable membership / membership exceptions.\n  - Finding 8: warning — verify three-valued logic semantics for `_NO_OBJECT` vs `None`.\n  - Finding 9: pass — general propagation logic seems consistent.\n\n- **Not covered above**\n  - Finding 10: warning — performance/caching of dispatch.\n  - Finding 11: warning — bindparam callable evaluation timing.\n\nIf you want, I can also propose concrete code changes for the highest-impact items (notably the repeated evaluation in `_straight_evaluate()` and exception handling around operator application).",
+    "finish_reason": "stop",
+    "usage": {
+      "prompt_tokens": 2799,
+      "completion_tokens": 1469,
+      "total_tokens": 4268
+    },
+    "system_fingerprint": null,
+    "response_id": "chatcmpl-DLLbOIwrvhQrzHk0eMiCkOgkovups",
+    "elapsed_seconds": 7.29
+  },
+  "experiment_id": "gamma-orm",
+  "unit_id": "gamma-orm_gpt-5.4-nano_D-general",
+  "input": {
+    "repo": "sqlalchemy/sqlalchemy",
+    "commit": "HEAD",
+    "file": "orm/evaluator.py",
+    "lines": "1-380",
+    "code_sha256": "61fcb6dbc1b2bef8eabc42fcf246b56b3beaeee822733e8dc38f0fc3488bd1d0"
+  }
+}
