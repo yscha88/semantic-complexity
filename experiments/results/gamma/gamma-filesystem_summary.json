@@ -1,0 +1,50 @@
+{
+  "experiment_id": "gamma-filesystem",
+  "input_file": "experiments/inputs/gamma-filesystem.json",
+  "code_sha256": "70e552bb57a2bb6632ba6fe7e09fde4c2ba7deafe4a5944793b442ba7c4f2e8c",
+  "models": [
+    "gpt-5.4",
+    "sonnet-4.6"
+  ],
+  "groups": [
+    "D-general",
+    "D-specific"
+  ],
+  "total_units": 4,
+  "completed": 4,
+  "results": [
+    {
+      "unit_id": "gamma-filesystem_gpt-5.4_D-general",
+      "model": "gpt-5.4",
+      "group": "D-general",
+      "tokens": 4160,
+      "elapsed": 30.19,
+      "prompt_sha256": "d6d8a374f54960949e25d944aedb79d381d9e7f01b7230e92b6ef8296b819ecc"
+    },
+    {
+      "unit_id": "gamma-filesystem_gpt-5.4_D-specific",
+      "model": "gpt-5.4",
+      "group": "D-specific",
+      "tokens": 4232,
+      "elapsed": 24.19,
+      "prompt_sha256": "5b1198fc6edc042732986346eecc6fc8a6a0b21d99ef574c069153476dac35e9"
+    },
+    {
+      "unit_id": "gamma-filesystem_sonnet-4.6_D-general",
+      "model": "sonnet-4.6",
+      "group": "D-general",
+      "tokens": 4133,
+      "elapsed": 23.96,
+      "prompt_sha256": "d6d8a374f54960949e25d944aedb79d381d9e7f01b7230e92b6ef8296b819ecc"
+    },
+    {
+      "unit_id": "gamma-filesystem_sonnet-4.6_D-specific",
+      "model": "sonnet-4.6",
+      "group": "D-specific",
+      "tokens": 4052,
+      "elapsed": 22.27,
+      "prompt_sha256": "5b1198fc6edc042732986346eecc6fc8a6a0b21d99ef574c069153476dac35e9"
+    }
+  ],
+  "timestamp": "2026-03-20T03:43:29.217290+00:00"
+}
