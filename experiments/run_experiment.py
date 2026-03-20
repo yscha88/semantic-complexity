@@ -61,6 +61,36 @@ MODEL_REGISTRY = {
         "temperature": 0,
         "max_tokens": 4096,
     },
+    "gpt-5.4-mini": {
+        "provider": "openai",
+        "model_id": "gpt-5.4-mini",
+        "env_key": "OPENAI_API_KEY",
+        "temperature": 0,
+        "seed": 42,
+        "max_tokens": 4096,
+    },
+    "gpt-5.4-nano": {
+        "provider": "openai",
+        "model_id": "gpt-5.4-nano",
+        "env_key": "OPENAI_API_KEY",
+        "temperature": 0,
+        "seed": 42,
+        "max_tokens": 4096,
+    },
+    "haiku-3.5": {
+        "provider": "anthropic",
+        "model_id": "claude-3-5-haiku-20241022",
+        "env_key": "ANTHROPIC_API_KEY",
+        "temperature": 0,
+        "max_tokens": 4096,
+    },
+    "gemini-flash": {
+        "provider": "google",
+        "model_id": "gemini-3-flash-preview",
+        "env_key": "GOOGLE_API_KEY",
+        "temperature": 0,
+        "max_tokens": 4096,
+    },
 }
 
 
