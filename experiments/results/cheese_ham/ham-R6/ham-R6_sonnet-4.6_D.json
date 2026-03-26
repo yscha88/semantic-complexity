@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.742101+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "d809b45019eb6fb5a2db94dbc730c02b2ae44e49b52c0c6233b004ce5cda4d16",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# ham-R6_sonnet-4.6_D\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: procrastinate/worker.py — Behavioral Preservation (SKILL)\n\n---\n\n### H1: Golden Tests\n\n**`_process_job()` — ❌ fail**\nContract:\n- Input: `JobContext` with a valid task\n- Success: `context.job` executed, status → `SUCCEEDED`, logged at INFO\n- `JobRetry` raised: job re-queued, status → `ABORTED`, logged at INFO\n- `JobError` raised: status → `FAILED`, logged at ERROR with traceback\n- `TaskNotFound`: propagates as exception (no status update?)\n\nNo golden tests observed. The distinction between `JobRetry` (controlled retry) and `Exception` (failure) is a critical behavioral contract.\n\n**`_log_job_outcome()` log level contract — ❌ fail**\n```python\nlog_level = (\n    logging.ERROR if status == jobs.Status.FAILED and not job_retry\n    else logging.INFO\n)\n```\nThis is an observable behavioral contract: `FAILED` without retry → ERROR. Anything else → INFO. Changing this breaks all monitoring setups that alert on ERROR log entries from this worker.\n\n---\n\n### H2: Contract Tests\n\n**Worker ↔ App.tasks contract — ❌ fail**\n```python\ntask = self.app.tasks.get(context.job.task_name)\n```\nThe contract: `app.tasks` is a dict-like with task name → callable. If `task` is None, `TaskNotFound` is raised. No contract test verifies this interface.\n\n**Worker ↔ PostgreSQL connector contract — ❌ fail**\nAfter job execution, the worker updates job status via the connector. The connector interface (what method is called, with what arguments) is a consumer-provider contract that needs tests.\n\n---\n\n### H3: Structural vs Behavioral Separation\n\n**`_process_job()` — ❌ fail**\nThe exception handling, logging, and status update are all in one method. Extracting logging would require preserving the `exc_info` and `job_retry` flag semantics exactly:\n```python\nself._log_job_outcome(\n    status=status,\n    context=context,\n    job_result=job_result,\n    job_retry=job_retry,\n    exc_info=exc_info,    # ← stateful: set True for FAILED, False otherwise\n)\n```\nThese flags must be correctly set in every exception path.\n\n---\n\n### H4: Critical Path Coverage\n\n| Path | Behavior | Coverage |\n|---|---|---|\n| `_process_job()` success | SUCCEEDED + INFO log | ❌ |\n| `_process_job()` → JobRetry | re-queue + INFO log | ❌ |\n| `_process_job()` → JobError | FAILED + ERROR log + exc_info | ❌ |\n| `_process_job()` → TaskNotFound | exception propagates | ❌ |\n| `_log_job_outcome()` log level | ERROR for FAILED only | ❌ |\n| `_fetch_and_process_jobs()` | batch fetch + process | ❌ |\n\nEstimated coverage: **<10%**.\n\n---\n\n### Free-form analysis\n\n**1. `exc_info` flag management is implicit and error-prone**\n`exc_info` starts as `False` and is set to `True` in the exception handler:\n```python\nexc_info = False\n...\nexcept Exception:\n    exc_info = True\n    status = jobs.Status.FAILED\n```\nIf a future developer adds a new exception type that should NOT include traceback (e.g., a user-facing validation error), they must remember to either not set `exc_info = True` or explicitly set it back. This mutable flag pattern is fragile.\n\n**2. `_log_job_outcome()` duration calculation depends on timestamps being set**\n```python\nif job_result and job_result.start_timestamp and job_result.end_timestamp:\n    duration = job_result.end_timestamp - job_result.start_timestamp\n```\nThe comment says \"in practice we should always have start and end timestamp\" but the guard allows them to be missing. If they're missing, the log message lacks duration — a silent data loss in observability. No test verifies that timestamps are always set.\n\n**3. `_fetch_and_process_jobs()` batch size is not tested**\nIf `batch_size` is changed, jobs might be over-fetched (memory pressure) or under-fetched (throughput degradation). The behavioral contract of the batch size is not pinned.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R6",
+  "unit_id": "ham-R6_sonnet-4.6_D",
+  "input": {
+    "repo": "procrastinate-org/procrastinate",
+    "commit": "b75bd5b1d622",
+    "file": "procrastinate/worker.py",
+    "lines": "1-251",
+    "code_sha256": "7cdbb24ba2355acbcc26627607ebd712e7bdb769698647b20c6d2b57bb34c99b"
+  }
+}

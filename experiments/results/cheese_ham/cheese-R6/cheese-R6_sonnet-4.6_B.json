@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.564587+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "7a0b217bbc62b83f1f31cc356efcf344e3bbe2d0c986a170cd1aafcb32659af5",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# cheese-R6_sonnet-4.6_B\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: h2/connection.py — Cognitive Complexity\n\n### Function complexity estimates\n\n**`send_headers` (~CC 8, grade B) — moderate**\nThe main complexity comes from validating headers against stream state, handling continuation frames, and managing flow control state. The precondition checks (stream state, authority pseudo-header, TE header validation) add branches but each is independently understandable.\n\n**`send_data` (~CC 8, grade B) — moderate**\nFlow control logic is the primary complexity driver. The function must check both connection-level and stream-level flow control windows, handle zero-length DATA frames specially, and manage padding. The window size checks with min() operations are concise but require understanding of HTTP/2 flow control semantics.\n\n**`acknowledge_received_data` (~CC 7, grade B) — moderate**\nUpdates flow control windows and generates WINDOW_UPDATE frames when thresholds are crossed. The threshold logic (only send update when window drops below half) involves state comparisons that require HTTP/2 RFC knowledge.\n\n**`_receive_headers_frame` (~CC 7, grade B) — moderate**\nDispatches to client/server-specific handling based on stream state. The branching over IDLE, OPEN, HALF_CLOSED states requires understanding the HTTP/2 stream state machine.\n\n**`__init__` (~CC 1, grade A) — simple (H2ConnectionStateMachine)**\nTrivial state initialization.\n\n**`__init__` (~CC 1, grade A) — complex to read but CC is low (H2Connection)**\nThe H2Connection `__init__` has many attribute assignments but minimal branching. Cognitively dense due to the volume of settings objects and comments explaining CVE mitigations, but CC is low.\n\n### Nesting depth\nAll functions stay within 3-4 levels. No violations detected.\n\n### Single Responsibility\n`send_headers` mixes precondition validation with the actual header encoding and frame emission. The authority pseudo-header check and TE header validation could be extracted as `_validate_request_headers(headers)`.\n\n### Code placement\nThe CVE-2016-6581 mitigation comment in `__init__` is appropriate — it explains a security decision that would otherwise look arbitrary. This is good practice.\n\nThe `_receive_headers_frame` dispatch logic (client vs server side, stream state) is placed correctly — this is inherently HTTP/2 protocol logic.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R6",
+  "unit_id": "cheese-R6_sonnet-4.6_B",
+  "input": {
+    "repo": "python-hyper/h2",
+    "commit": "latest-master",
+    "file": "src/h2/connection.py",
+    "lines": "1-418",
+    "code_sha256": "85f9fa277984ad081386a89ad3b10d24dbfb244be88eb1362f1fd8e6d204efb2"
+  }
+}

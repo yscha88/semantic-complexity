@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.565220+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "7a0b217bbc62b83f1f31cc356efcf344e3bbe2d0c986a170cd1aafcb32659af5",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# cheese-R6_opus-4.6_B\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: h2/connection.py — Cognitive Complexity\n\n### Overall assessment\nThis is a mature HTTP/2 protocol implementation with well-controlled complexity. All analyzed functions fall in the B grade range — acceptable for protocol-level code where branching is driven by RFC state machines rather than accidental complexity.\n\n### Function analysis\n\n**`send_headers` (~CC 8, grade B)**\nComplexity is driven by protocol requirements: stream state validation, pseudo-header presence checking (authority required for requests), TE header restriction (only `trailers` allowed), and HPACK encoding with potential CONTINUATION frame generation. Each branch corresponds to a specific RFC 7540 requirement.\n\n**`send_data` (~CC 8, grade B)**\nHTTP/2 flow control requires checking both connection-level and stream-level windows. The logic for determining `flow_controlled_length = min(connection_window, stream_window, len(data))` and handling zero-length frames as a special case (used for flow control probing) is RFC-mandated complexity.\n\n**`acknowledge_received_data` (~CC 7, grade B)**\nWINDOW_UPDATE generation uses hysteresis (only send when window drops below half of max). This threshold logic is correct RFC behavior but requires knowing why the threshold exists (to reduce WINDOW_UPDATE frame frequency).\n\n**`_receive_headers_frame` (~CC 7, grade B)**\nDispatches over stream states (IDLE creates new stream, OPEN handles trailers, HALF_CLOSED handles push promises). Each state transition is RFC 7540 §5.1 behavior.\n\n**`__init__` (H2Connection) — CC 1, but cognitively dense**\n~50 attribute initializations. Low CC but high cognitive load. The comments explaining CVE mitigations (CVE-2016-6581 for MAX_HEADER_LIST_SIZE, MAX_CONCURRENT_STREAMS: 100 default) are valuable documentation.\n\n### Issues worth noting\n\n1. **`send_headers` mixes validation and encoding** — the authority pseudo-header check and TE restriction validation are preconditions that could be extracted as `_validate_request_headers(headers)`\n\n2. **`_receive_headers_frame` has implicit client/server branching** — `if self.config.client_side` creates two separate execution paths that differ significantly. Consider `_receive_headers_as_client()` and `_receive_headers_as_server()` virtual dispatch.\n\n3. **`__init__` attribute grouping** — adding section comments (`# Flow control`, `# Frame buffers`, `# Stream tracking`) would significantly reduce the cognitive load without changing behavior.\n\n### Verdict\nComplexity here is RFC-driven, not accidental. The appropriate question is not \"reduce complexity\" but \"ensure each branch is tested against the RFC requirement it implements.\"\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R6",
+  "unit_id": "cheese-R6_opus-4.6_B",
+  "input": {
+    "repo": "python-hyper/h2",
+    "commit": "latest-master",
+    "file": "src/h2/connection.py",
+    "lines": "1-418",
+    "code_sha256": "85f9fa277984ad081386a89ad3b10d24dbfb244be88eb1362f1fd8e6d204efb2"
+  }
+}

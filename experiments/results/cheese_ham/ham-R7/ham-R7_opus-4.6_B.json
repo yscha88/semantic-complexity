@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.778283+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "718a26f38c6adc28f245769b5e865dfbc99db337e2ab4e216550730478c1356d",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# ham-R7_opus-4.6_B\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: marshmallow/schema.py — Behavioral Preservation\n\n### Summary\nmarshmallow's schema deserialization pipeline is a well-established behavioral contract. The five phases of `_do_load()` represent the core observable behavior that all marshmallow users depend on.\n\n### Critical behavioral contracts\n\n**`_do_load()` pipeline (critical)**\nFive phases with strict ordering:\n1. Pre-load processors (may transform input)\n2. `_deserialize()` (per-field deserialization)  \n3. Field-level validators (`@validates` decorated methods)\n4. Schema-level validators (×2 for collection and per-item) \n5. Post-load processors (only if no errors)\n\nThe invariant \"post-load does not run when there are errors\" is behavioral and must not change. The double schema validator call is equally critical — it handles both `@validates_schema(pass_many=True)` and standard validators.\n\n**`_deserialize()` unknown field handling**\nThree distinct behaviors (RAISE/INCLUDE/EXCLUDE) are the most commonly exercised public API contracts. Users rely on exact error message keys when catching `ValidationError`.\n\n**`_init_fields()` field set computation**\nThe interaction of `Meta.fields`, `Meta.exclude`, `only`, and `exclude` parameters determines which fields are active. This is the schema instantiation contract.\n\n### Testing priorities (if no tests exist)\n\n1. **`_do_load()` with all three `unknown` modes** — most commonly broken behavior\n2. **`_do_load()` error accumulation** — validate that all field errors are collected, not just the first\n3. **Schema validator ×2 invariant** — ensure both `pass_collection=True` and `False` validators run\n4. **Post-load skipped on error** — verify post-load hook does NOT run when field validation fails\n5. **`partial` with dot-notation** — nested partial field exclusion\n\n### Key fragility\nThe `getter` closure in `_deserialize()` (loop variable capture via default args) is the highest refactoring risk. Any \"simplification\" of this pattern could silently change which field object is used for deserialization.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R7",
+  "unit_id": "ham-R7_opus-4.6_B",
+  "input": {
+    "repo": "marshmallow-code/marshmallow",
+    "commit": "dd20a8092a8b",
+    "file": "src/marshmallow/schema.py",
+    "lines": "1-396",
+    "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0"
+  }
+}

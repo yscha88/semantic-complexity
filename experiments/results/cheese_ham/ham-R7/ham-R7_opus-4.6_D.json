@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.778479+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "5323730aaae543c3c0860e9d1eb474fc93977eff8c53a1d8d1837cd0b383e403",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# ham-R7_opus-4.6_D\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: marshmallow/schema.py — Behavioral Preservation (SKILL)\n\n---\n\n### H1: Golden Tests\n\n**`_do_load()` pipeline phases — ❌ fail (critical)**\nEach phase transition is an observable checkpoint:\n\n| Phase transition | Observable output | Golden test needed |\n|---|---|---|\n| Input → pre-load | transformed data | mock pre-load processor, verify transformed data passed to `_deserialize` |\n| `_deserialize` → field validate | deserialized result | verify field validator receives deserialized (not raw) value |\n| Field validate → schema validate ×2 | error_store state | verify both pass_collection=True and False validators are invoked |\n| Schema validate → post-load | only if no errors | verify post-load does NOT run when field errors exist |\n| Post-load → return | final result | verify return value matches post-load output |\n\n**`_deserialize()` unknown modes — ❌ fail**\nThree separate golden tests:\n```python\n# RAISE: unknown field → ValidationError with key name in errors\n# INCLUDE: unknown field → passed through in result dict\n# EXCLUDE: unknown field → silently dropped from result dict\n```\n\n**`_init_fields()` field selection — ⚠️ warning**\nGolden tests for all option combinations:\n- `Meta.fields = ('a', 'b')` → only a, b in `self.fields`\n- `Meta.exclude = ('c',)` → c not in `self.fields`\n- `only=('a',)` on instance → only a\n- Conflict: `only` contains field not in `Meta.fields` → `ValueError`\n\n---\n\n### H2: Contract Tests\n\n**Schema ↔ Field deserialization contract — ❌ fail**\n`field_obj.deserialize(val, field_name, data, **d_kwargs)` is called for every field. The contract: Field receives raw value and returns deserialized value OR raises `ValidationError`. No contract test verifies this.\n\n**`@validates_schema` calling convention — ❌ fail**\nSchema validators receive `(output, original_data, partial, many, unknown)` with `pass_original=True`, or `(output, partial, many, unknown)` without. Two different calling conventions based on decorator parameter. No contract test verifies which variant is called when.\n\n**`@pre_load` / `@post_load` contract — ❌ fail**\nProcessors must accept `(data, **kwargs)` and return transformed data (or None to use original). The contract that returning None uses original data is not documented or tested.\n\n---\n\n### H3: Structural vs Behavioral Separation\n\n**`_do_load()` 5-phase orchestration — ❌ fail**\nThe phases cannot be structurally separated because they share mutable state (`error_store`, `errors` dict, `result` variable). Specifically:\n\n```python\nresult = self._deserialize(...)     # result may be partial if errors\nself._invoke_field_validators(...)  # reads result, writes to error_store\n...\nerrors = error_store.errors         # converts error_store to dict\nif not errors and postprocess:      # post-load gated on errors\n    result = self._invoke_load_processors(POST_LOAD, result, ...)\n```\n\nThe `result` variable is mutated across phases. Extracting phases into separate methods requires passing `result` and `error_store` as mutable arguments, which doesn't reduce behavioral coupling.\n\n**`_deserialize()` `many` dispatch — ⚠️ warning**\nThe `many=True` path (recursive call) and `many=False` path (field iteration) could be separated structurally (`_deserialize_many` / `_deserialize_one`) only after golden tests confirm the recursive call is equivalent.\n\n---\n\n### H4: Critical Path Coverage\n\n| Path | Coverage | Behavioral risk |\n|---|---|---|\n| `_do_load()` success | ❌ | Critical |\n| `_do_load()` field error accumulated | ❌ | Critical |\n| `_do_load()` post-load gated on errors | ❌ | Critical |\n| Schema validator ×2 invocation | ❌ | Critical |\n| `_deserialize()` RAISE | ❌ | High |\n| `_deserialize()` INCLUDE | ❌ | High |\n| `_deserialize()` EXCLUDE | ❌ | High |\n| `_deserialize()` partial dot-notation | ❌ | High |\n| `_init_fields()` only+exclude conflict | ❌ | Medium |\n\n**Estimated critical path coverage: <5%** (in isolation, without external test suite).\n\n---\n\n### Free-form analysis\n\n**1. Double schema validator call is the highest behavioral fragility**\n```python\nself._invoke_schema_validators(..., pass_collection=True, ...)\nself._invoke_schema_validators(..., pass_collection=False, ...)\n```\nThis is the most likely line to be \"simplified\" in a refactoring. The behavioral invariant:\n> Both calls are always made, regardless of whether any validators use `pass_many=True`.\n\nRemoving one call silently disables a class of validators. A golden test that registers both `@validates_schema(pass_many=True)` and `@validates_schema` and verifies both are called is essential.\n\n**2. `getter` closure variable capture is fragile under Python version changes**\n```python\ndef getter(val, field_obj=field_obj, field_name=field_name, d_kwargs=d_kwargs):\n    ...\n```\nDefault-argument capture is required here because Python closures capture by reference. If someone \"modernizes\" this to a lambda or removes the default args, the last `field_obj` value in the loop is used for all fields. This behavioral regression would affect all multi-field schemas and might not be caught without integration tests.\n\n**3. `ValidationError(errors, data=data, valid_data=result)` carries partial result**\nWhen validation fails, the `ValidationError` contains `valid_data=result` — the partially deserialized result up to the point of failure. Callers who access `exc.valid_data` depend on this including only the successfully deserialized fields. If `_deserialize` changes when it populates `ret_d`, the `valid_data` contract changes.\n\n**4. Error message format is a behavioral contract**\n```python\nerror_store.store_error([self.error_messages[\"unknown\"]], key, ...)\n```\nThe error messages use list-wrapped strings: `[\"Unknown field.\"]`. Code that catches `ValidationError` and inspects `exc.messages[\"field_name\"][0]` depends on this format. Changing to non-list format would break all error message inspectors.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R7",
+  "unit_id": "ham-R7_opus-4.6_D",
+  "input": {
+    "repo": "marshmallow-code/marshmallow",
+    "commit": "dd20a8092a8b",
+    "file": "src/marshmallow/schema.py",
+    "lines": "1-396",
+    "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0"
+  }
+}

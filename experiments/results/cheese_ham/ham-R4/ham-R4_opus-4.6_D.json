@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.671527+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "eb4dfad1bb23f70392f2866f29330507b5a2c9675a9cc100853c01874e83e74e",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# ham-R4_opus-4.6_D\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: saq/worker.py — Behavioral Preservation (SKILL)\n\n---\n\n### H1: Golden Tests\n\n**`process()` — ❌ fail (critical)**\n`process()` is the most important function in the entire worker. Its contract:\n- Input: a job dequeued from `queue`\n- Expected behavior: `before_process` hooks run, job executes, `after_process` hooks run, status is updated to `complete` or `failed`\n- Exception contract: if job raises, status → `failed`, after_process still runs, semaphore still released\n\nNo golden tests pin this contract. A refactoring that changes hook ordering or exception propagation could silently break all applications using this worker.\n\n**`abort()` — ❌ fail**\nThe shutdown sequence (cancel tasks, wait for grace period, force kill) has observable output (which jobs complete vs which are aborted) but no golden test characterizes it.\n\n**`__init__` default values — ⚠️ warning**\n`concurrency=10`, `timers` defaults, `cancellation_hard_deadline_s=1.0` are behavioral defaults. They're not pinned by tests.\n\n---\n\n### H2: Contract Tests\n\n**Worker ↔ Queue contract — ❌ fail**\nThe implicit contract between `Worker` and `Queue`:\n- `queue.dequeue(timeout)` returns a job or None\n- `queue.finish(ctx, status, result, ...)` persists job result\n- `queue.abort(ctx, error)` marks job as aborted\n\nNo contract tests verify this interface. If `Queue.finish()` changes its signature or semantics, `Worker.process()` fails at runtime.\n\n**Lifecycle hook contract — ❌ fail**\n`before_process` and `after_process` are callable contracts: they receive `(ctx, job)` and may return None or a modified context. No contract test verifies the calling convention.\n\n---\n\n### H3: Structural vs Behavioral Change Separation\n\n**`process()` entanglement — ❌ fail**\n`process()` cannot be structurally decomposed without affecting behavioral contracts. Specifically:\n- Exception handling, semaphore release, and status update are interleaved\n- Extracting `_run_hooks()` would require carefully preserving exception propagation behavior\n- No existing tests would catch regressions from such extraction\n\n**`__init__` parameter accumulation — ⚠️ warning**\nWith 20+ parameters, any structural change (adding a parameter, changing a default) is a behavioral change from the caller's perspective. The parameters need grouping into configuration objects to enable safe structural changes.\n\n---\n\n### H4: Critical Path Coverage\n\n| Path | Coverage | Risk if missing |\n|---|---|---|\n| `process()` → success → status=complete | ❌ none | High — core contract |\n| `process()` → exception → status=failed, after_process runs | ❌ none | High — error contract |\n| `process()` → semaphore released on exception | ❌ none | Critical — resource leak |\n| Concurrency limit: >N jobs rejected | ❌ none | High — core SLA |\n| `abort()` → jobs finish within grace period | ❌ none | High — shutdown contract |\n| Cron job fires at correct time | ❌ none | Medium — scheduling |\n| `abort()` → force cancel after grace period | ❌ none | High — shutdown contract |\n\nEstimated critical path coverage: **0-5%**.\n\n---\n\n### Free-form analysis\n\n**1. Semaphore leak on exception (critical behavioral risk)**\n```python\n# In process():\nawait self.sem.acquire()   # ← acquired\n# ... hooks, execution, status update ...\nself.sem.release()         # ← must always execute\n```\nIf any code between `acquire()` and `release()` raises and is not caught, the semaphore is permanently decremented. Over time (`concurrency` such leaks), the worker stops accepting new jobs. A `try/finally` block must guarantee `release()`:\n```python\nawait self.sem.acquire()\ntry:\n    ...\nfinally:\n    self.sem.release()\n```\nNo test would catch this without injecting a hook that raises.\n\n**2. `job_task_contexts` mutation during `abort()` iteration**\n`abort()` iterates `self.job_task_contexts` and awaits task cancellation. During each `await`, `process()` can run and mutate `job_task_contexts` (adding new entries or deleting completed ones). This causes `RuntimeError: dictionary changed size during iteration` in Python ≥ 3.9 strict dict mode. Fix: `list(self.job_task_contexts.items())` snapshot before iteration.\n\n**3. `burst_condition_met` threading lock with async code**\n```python\nself.burst_condition_met = False\nself.burst_jobs_processed_lock = threading.Lock()\n```\nA `threading.Lock()` in async code is an antipattern. If `burst_jobs_processed_lock` is acquired in a sync context during an async event loop tick, it can deadlock. Should use `asyncio.Lock()`.\n\n**4. No clock injection for cron testing**\nAll cron scheduling depends on `datetime.now(tz)`. Without injecting the clock as a dependency, cron scheduling is effectively untestable without real time passage or global monkeypatching.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R4",
+  "unit_id": "ham-R4_opus-4.6_D",
+  "input": {
+    "repo": "tobymao/saq",
+    "commit": "fe86758c5063",
+    "file": "saq/worker.py",
+    "lines": "1-281",
+    "code_sha256": "ecb9a2d7e7d762c9e11ee128f3659d41f1631a863e0e9b6b8bc9ca174b170d43"
+  }
+}

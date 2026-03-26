@@ -1,0 +1,59 @@
+{
+  "experiment_id": "cheese-R5",
+  "repo": "uiri/toml",
+  "commit": "65bab7582ce1",
+  "file": "toml/decoder.py",
+  "lines": "1-357",
+  "code_sha256": "460c858e2b9f2318ad5d3edd0d57ad0bd5dd2a295d7c968667f5ae1faa46c308",
+  "models": [
+    "sonnet-4.6",
+    "opus-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "units": [
+    {
+      "unit_id": "cheese-R5_sonnet-4.6_B",
+      "model_name": "sonnet-4.6",
+      "model_id": "claude-sonnet-4-6",
+      "group": "B",
+      "prompt_sha256": "9ac907efa6115525d389dfe7628b827631e1099062417b9fd1765fb6dda5c2e5",
+      "prompt_file": "experiments/results/session/cheese-R5/cheese-R5_sonnet-4.6_B.prompt.md",
+      "response_file": "experiments/results/session/cheese-R5/cheese-R5_sonnet-4.6_B.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "cheese-R5_sonnet-4.6_D",
+      "model_name": "sonnet-4.6",
+      "model_id": "claude-sonnet-4-6",
+      "group": "D",
+      "prompt_sha256": "e4f1c9b2079529721f80a73f884cfb584dca8b029cb131c606374657c9d831a8",
+      "prompt_file": "experiments/results/session/cheese-R5/cheese-R5_sonnet-4.6_D.prompt.md",
+      "response_file": "experiments/results/session/cheese-R5/cheese-R5_sonnet-4.6_D.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "cheese-R5_opus-4.6_B",
+      "model_name": "opus-4.6",
+      "model_id": "claude-opus-4-6",
+      "group": "B",
+      "prompt_sha256": "9ac907efa6115525d389dfe7628b827631e1099062417b9fd1765fb6dda5c2e5",
+      "prompt_file": "experiments/results/session/cheese-R5/cheese-R5_opus-4.6_B.prompt.md",
+      "response_file": "experiments/results/session/cheese-R5/cheese-R5_opus-4.6_B.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "cheese-R5_opus-4.6_D",
+      "model_name": "opus-4.6",
+      "model_id": "claude-opus-4-6",
+      "group": "D",
+      "prompt_sha256": "e4f1c9b2079529721f80a73f884cfb584dca8b029cb131c606374657c9d831a8",
+      "prompt_file": "experiments/results/session/cheese-R5/cheese-R5_opus-4.6_D.prompt.md",
+      "response_file": "experiments/results/session/cheese-R5/cheese-R5_opus-4.6_D.response.md",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-03-26T10:52:18.117005+00:00"
+}

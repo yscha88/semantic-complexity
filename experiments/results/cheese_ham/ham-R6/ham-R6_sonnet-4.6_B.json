@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.741715+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "5a105ef475d760ccb1f79fcf3dd4fcb59c977d13fefe92c7499dd051321fd476",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# ham-R6_sonnet-4.6_B\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: procrastinate/worker.py — Behavioral Preservation\n\n### Critical paths\n\n**`_process_job()` — highest risk**\nCore job execution method. Critical behaviors:\n- Task lookup in `self.app.tasks` — if task not found, raises `TaskNotFound`\n- Job execution with PostgreSQL-backed result persistence\n- `JobRetry` exception handling: job is re-queued via `connector`\n- Status update: `SUCCEEDED`, `FAILED`, or `ABORTED`\n- Log emission for every outcome\n\nThe ordering of status update vs log emission is behavioral — logging before updating status means the log and actual state could temporarily diverge.\n\n**`_fetch_and_process_jobs()` — medium risk**\nThe polling loop: fetch batch of jobs → process each. The batch size and polling interval are behavioral parameters. If refactored to use a push model, the batch semantics must be preserved.\n\n**`_log_job_outcome()` — medium risk**\nThis function determines log level (ERROR for FAILED, INFO for others) and constructs structured log output. The `exc_info` parameter controls traceback inclusion. Any change to log format or level breaks observability integrations.\n\n### Behavioral contracts (implicit)\n\n1. `FAILED` status → log at ERROR level with `exc_info=True`\n2. `ABORTED` + `job_retry` → re-queue, log at INFO\n3. `SUCCEEDED` → log at INFO, no exc_info\n4. Task not found → `TaskNotFound` exception (not `FAILED` status)\n\n### Test coverage gaps\n\nNo test files in this code. Critical gaps:\n- No golden test for `_process_job()` normal flow\n- No test for `JobRetry` re-queue behavior\n- No test for `TaskNotFound` exception path\n- No test for log level correctness per status\n\n### Refactoring risks\n`_process_job()` exception handling chain (`JobRetry`, `exceptions.JobError`, generic) must be preserved. The `job_retry` vs `exc_info` flag interaction in `_log_job_outcome` is stateful and subtle.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R6",
+  "unit_id": "ham-R6_sonnet-4.6_B",
+  "input": {
+    "repo": "procrastinate-org/procrastinate",
+    "commit": "b75bd5b1d622",
+    "file": "procrastinate/worker.py",
+    "lines": "1-251",
+    "code_sha256": "7cdbb24ba2355acbcc26627607ebd712e7bdb769698647b20c6d2b57bb34c99b"
+  }
+}

@@ -341,6 +341,21 @@ D가 B와 차이 없는 실험의 규칙 후보는 폐기.
 
 ---
 
+## 현재 미비 실험 현황 (2026-03-26 기준)
+
+| 실험 | 현황 | 언제 |
+|------|------|------|
+| 🧀 Cheese 추가 레포 | R3(icloud) 1개만 확인 | ⚠️ 주요 작업 |
+| 🥓 Ham 추가 레포 | R3(icloud) 1개만 확인 | ⚠️ 주요 작업 |
+| β 2회 반복 | 미이행 (1회만 실행) | 확인 필요 |
+| Sonnet filesystem 재실험 | γ에서 GPT만 효과, Sonnet 미확인 | 실행 가능 |
+| SAR LLM 탐지 | 미설계 | 미래 작업 |
+| TS/Go 언어 확장 | 미설계 | 마일스톤 |
+
+상세 확장 계획: `experiments/CHEESE_HAM_EXPANSION.md`
+
+---
+
 ## 실행 도구
 
 | 도구 | 위치 | 용도 |
@@ -349,3 +364,4 @@ D가 B와 차이 없는 실험의 규칙 후보는 폐기.
 | `experiments/inputs/*.json` | 실험 입력 | 레포+코드+프롬프트 A/B/C |
 | `experiments/results/` | 결과 저장 | .json (메타) + .response.md (raw) |
 | `.env` | API 키 | OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY |
+| `experiments/CHEESE_HAM_EXPANSION.md` | 확장 계획 | 레포 선정 근거 + input JSON 생성 절차 |

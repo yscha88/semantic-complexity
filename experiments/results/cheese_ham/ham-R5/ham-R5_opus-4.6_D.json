@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.707590+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "086e76a6f444eef94a34aeff88b2bd76001cf2e5e47772bd94ce5981f42e99ab",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# ham-R5_opus-4.6_D\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: arq/worker.py — Behavioral Preservation (SKILL)\n\n---\n\n### H1: Golden Tests\n\n**`run_job()` — ❌ fail (highest priority)**\nObservable behaviors that need golden tests:\n- **Happy path**: `job_func(*args, **kwargs)` executes, result serialized to Redis, in-progress key deleted\n- **Retry path**: exception raised, attempt < max_tries → `zadd(queue, score=now+delay, job_id)`, in-progress key deleted\n- **Abort path**: abort key present in Redis → job not retried, marked as aborted\n- **Failure path**: exception raised, attempt = max_tries → marked failed, no re-enqueue\n- **Timeout path**: `asyncio.TimeoutError` → treated as retry if retries remaining\n\nAll five observable outcomes require separate golden tests.\n\n**`start_jobs()` distributed lock — ❌ fail**\nThe exactly-once guarantee under concurrent workers is the core correctness property of the queue. No golden test pins it.\n\n---\n\n### H2: Contract Tests\n\n**arq job serialization contract — ❌ fail**\nThe job data format stored in Redis (`serialize_result`, `deserialize_result`) is an implicit contract between worker versions. No contract test verifies forward/backward compatibility.\n\n**`retry_error.retry()` calling convention — ❌ fail**\n`run_job` calls `job.retry()` or inspects `RetryError.retries_remaining`. The interface between the worker and the retry mechanism is undocumented by tests.\n\n**`CancelledError` propagation contract — ❌ fail (critical)**\nThe behavioral contract:\n> \"A `CancelledError` during job execution MUST propagate out of `run_job()` — it MUST NOT be swallowed.\"\n\nThis enables graceful worker shutdown. It is the single most important behavioral invariant in this codebase, and it has no test.\n\n---\n\n### H3: Structural vs Behavioral Separation\n\n**`run_job()` — ❌ fail**\nThe three-way exception dispatch is structurally inseparable from its behavioral consequences:\n```python\nexcept asyncio.CancelledError:\n    raise                   # behavioral: shutdown contract\nexcept asyncio.TimeoutError:\n    ...                     # behavioral: timeout = retry if configured\nexcept Exception as e:\n    ...                     # behavioral: error = retry if attempts remain\n```\nExtracting any of these paths risks the behavioral guarantees. The only safe extraction is after comprehensive golden tests exist.\n\n---\n\n### H4: Critical Path Coverage\n\n| Path | Behavior | Coverage |\n|---|---|---|\n| `run_job()` happy path | result → Redis | ❌ |\n| `run_job()` retry path | re-enqueue with delay | ❌ |\n| `run_job()` abort path | no retry, abort status | ❌ |\n| `run_job()` max retries | mark failed | ❌ |\n| `run_job()` CancelledError | propagates | ❌ |\n| in-progress key cleanup | always deleted | ❌ |\n| `start_jobs()` concurrent | exactly once | ❌ |\n| `run_cron()` overlap | at-most-once | ❌ |\n\n**Estimated coverage: 0%** of named critical paths.\n\n---\n\n### Free-form analysis\n\n**1. `CancelledError` swallowing risk is latent (critical)**\n```python\nexcept asyncio.CancelledError:\n    raise\n```\nThis is correct. But there is no test that verifies it. In Python 3.7 and earlier, `CancelledError` was a subclass of `Exception` — in that version, a `except Exception` clause above would catch it first. The current ordering (CancelledError before Exception) is correct for Python 3.8+, but without a test, a version regression or code reorder could silently break graceful shutdown.\n\n**2. In-progress key TTL creates a recovery window**\n```python\npipe.psetex(in_progress_key, int(self.in_progress_timeout_s * 1000), b'1')\n```\nIf the worker process is killed (SIGKILL, OOM) mid-execution, the in-progress key persists for `in_progress_timeout_s` seconds. During this window, the job is invisible to all workers. The default TTL is a behavioral contract — changing it changes recovery time. No test pins this value.\n\n**3. Retry score calculation creates a time-dependency**\n```python\nnext_score = timestamp_ms() + int(1000 * backoff * (2 ** (job_try - 2)))\n```\n`timestamp_ms()` is called at the moment of failure. This means two workers failing the same job at slightly different times would produce different retry scores. The test for retry behavior must account for this time dependency, making it impossible to write a purely deterministic golden test without clock injection.\n\n**4. `abort()` check uses a Redis key lookup per job execution**\n```python\nabort_job_ids = await self.pool.smembers(self.queue.abort_id)\nif job_id in abort_job_ids:\n    ...\n```\nThis adds a Redis round-trip to every job execution. The behavioral guarantee (abort flag is checked before retry decision) is correct but creates a latency contract that's not tested.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R5",
+  "unit_id": "ham-R5_opus-4.6_D",
+  "input": {
+    "repo": "python-arq/arq",
+    "commit": "fda407c4cb5e",
+    "file": "arq/worker.py",
+    "lines": "1-313",
+    "code_sha256": "0e38f49f81a5adf4cca7817eae92be7ec08880c09b2a336d750cba3598247fb7"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.497233+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "a724dcb97a352b711ac1b60f1f451debc9c0dedba679a78cf6df09cea6efe4bd",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# cheese-R4_opus-4.6_B\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: marshmallow schema.py — Cognitive Complexity\n\n### Overall assessment\nThis code contains several functions with significantly elevated complexity that would challenge both human reviewers and LLM-based analysis tools.\n\n### Function complexity estimates\n\n**`_deserialize` (~CC 24, grade D) — high risk**\nThe most complex function in this set. Complexity drivers:\n- Dual-mode operation (many=True recursive dispatch vs single-item)\n- Five distinct `partial` handling variants (None, True, False, str collection, nested prefix)\n- Three `unknown` handling branches (EXCLUDE, INCLUDE, RAISE)\n- Inner `getter` closure with default-argument capture — a subtle Python idiom that creates implicit coupling between closure and loop iteration\n- Per-field `d_kwargs` construction with conditional partial sub-resolution\n\nThe combination of these concerns makes this function extremely difficult to reason about in isolation.\n\n**`_init_fields` (~CC 19, grade C) — high risk**\nBuilds three field dictionaries (`fields`, `load_fields`, `dump_fields`) with several validation steps:\n- `only` option processing and intersection with available fields\n- `exclude` option processing with difference operations\n- Invalid field detection and error accumulation\n- Duplicate `data_key` detection (O(n²) implementation with `.count()` inside set comprehension)\n- Duplicate `attribute` detection (same pattern)\n\n**`_do_load` (~CC 13, grade C) — medium risk**\nAn orchestration function for the full deserialization pipeline. Problematic because:\n- Pre-load processors, deserialization, field validators, schema validators (invoked twice with different `pass_collection`), and post-load processors are all inlined\n- The reason for the two schema validator calls is not documented\n- Error accumulation from multiple sources into a single `errors` dict obscures which stage failed\n\n**`_run_validator` (~CC 8, grade B) — low-medium risk**\nError key resolution logic involves a multi-branch lookup: field exists in `self.fields`? No? Try `declared_fields`? Found? Use data_key? No data_key? Use field_name. This chain is functional but non-obvious.\n\n**`__init__` (Schema) (~CC 3, grade A) — acceptable**\nStraightforward attribute assignment with basic validation guards.\n\n### Nesting depth violations\n`_deserialize` exceeds 5 levels at its deepest. `_init_fields` reaches 4 levels. Both violate the 3-level threshold.\n\n### Placement issues\n1. The `getter` closure should be a method — it captures loop state via default arg binding, which is an antipattern\n2. `_do_load`'s inline orchestration should delegate to named methods for each phase\n3. The O(n²) duplicate detection in `_init_fields` should use `collections.Counter`\n\n### Refactoring recommendations\n- Split `_deserialize` into `_deserialize_many` and `_deserialize_one`\n- Extract `_resolve_nested_partial(attr_name, partial)` \n- Extract `_detect_duplicate_keys(fields)` with Counter\n- Add docstring to `_do_load` explaining the two schema validator invocations\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R4",
+  "unit_id": "cheese-R4_opus-4.6_B",
+  "input": {
+    "repo": "marshmallow-code/marshmallow",
+    "commit": "dd20a8092a8b",
+    "file": "src/marshmallow/schema.py",
+    "lines": "1-396",
+    "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0"
+  }
+}

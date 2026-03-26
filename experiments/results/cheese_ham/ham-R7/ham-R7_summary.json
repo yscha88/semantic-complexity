@@ -1,0 +1,43 @@
+{
+  "experiment_id": "ham-R7",
+  "session_dir": "experiments/results/session/ham-R7",
+  "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0",
+  "models": [
+    "sonnet-4.6",
+    "opus-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "total_units": 4,
+  "completed": 4,
+  "skipped": [],
+  "results": [
+    {
+      "unit_id": "ham-R7_sonnet-4.6_B",
+      "model": "sonnet-4.6",
+      "group": "B",
+      "prompt_sha256": "718a26f38c6adc28f245769b5e865dfbc99db337e2ab4e216550730478c1356d"
+    },
+    {
+      "unit_id": "ham-R7_sonnet-4.6_D",
+      "model": "sonnet-4.6",
+      "group": "D",
+      "prompt_sha256": "5323730aaae543c3c0860e9d1eb474fc93977eff8c53a1d8d1837cd0b383e403"
+    },
+    {
+      "unit_id": "ham-R7_opus-4.6_B",
+      "model": "opus-4.6",
+      "group": "B",
+      "prompt_sha256": "718a26f38c6adc28f245769b5e865dfbc99db337e2ab4e216550730478c1356d"
+    },
+    {
+      "unit_id": "ham-R7_opus-4.6_D",
+      "model": "opus-4.6",
+      "group": "D",
+      "prompt_sha256": "5323730aaae543c3c0860e9d1eb474fc93977eff8c53a1d8d1837cd0b383e403"
+    }
+  ],
+  "timestamp": "2026-03-26T11:32:09.778755+00:00"
+}

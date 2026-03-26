@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.601034+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "eb60b31982c5a814a2a97df7b374474d38a8b0f45ff4cf46a29e5637b229434f",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# cheese-R7_opus-4.6_B\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: arq/worker.py — Cognitive Complexity\n\n### Overall assessment\nThis is an async Redis-based job queue worker. `run_job` is a high-complexity function that combines multiple concerns. Other functions are moderate complexity typical of queue worker implementations.\n\n### Function analysis\n\n**`run_job` (~CC 37, grade E) — critical**\nThis function is the heart of the worker and has accumulated significant complexity over time. It handles:\n- Job data retrieval and deserialization (with corrupt data handling)\n- Function lookup and `coroutine_function` type checking  \n- Timeout-bounded execution with `asyncio.wait_for`\n- Exception handling with three distinct paths: `CancelledError` (re-raise), `asyncio.TimeoutError` (possible retry), generic `Exception` (retry logic)\n- Retry decision: attempt count vs max, score expiry, abort flag\n- Exponential backoff calculation: `1000 * backoff * (2 ** (job_try - 2))`\n- Result serialization and storage\n- In-progress key cleanup\n\nThe `CancelledError` re-raise is correct for asyncio task cancellation but is easy to accidentally remove during maintenance.\n\n**`_poll_iteration` (~CC 9, grade B)**\nManages burst mode limits, job acquisition from sorted set, abort job cancellation, finished task cleanup, and heartbeat. The burst mode interaction (checking remaining capacity before reading) is correct but adds branches.\n\n**`start_jobs` (~CC 8, grade B)**\nImplements distributed lock via Redis `WATCH`/`MULTI`/`EXEC`. Multiple early-exit guards: job counter limit, already-running detection, score expiry. The counter management (increment before pipeline, decrement on failure) creates a temporary inconsistency window.\n\n**`run_cron` (~CC 9, grade B)**\nCron job scheduling with overlap prevention. The time calculation and `last_run` tracking are correct but dense.\n\n### Critical issues\n\n1. **`run_job` lacks a `finally` block** — Redis in-progress key cleanup is not guaranteed on unexpected exceptions\n2. **Counter increment/decrement in `start_jobs` is not atomic** — creates race condition window in concurrent polling\n3. **Exponential backoff formula is undocumented** — `2 ** (job_try - 2)` means attempt 2 = 1x base, attempt 3 = 2x, attempt 4 = 4x, etc. This is non-obvious.\n\n### Refactoring priority\n1. Extract `run_job` into 4+ methods with a `try/finally` for cleanup\n2. Document the retry backoff formula\n3. Add an assertion comment explaining why `CancelledError` must be re-raised\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R7",
+  "unit_id": "cheese-R7_opus-4.6_B",
+  "input": {
+    "repo": "python-arq/arq",
+    "commit": "fda407c4cb5e",
+    "file": "arq/worker.py",
+    "lines": "1-313",
+    "code_sha256": "0e38f49f81a5adf4cca7817eae92be7ec08880c09b2a336d750cba3598247fb7"
+  }
+}

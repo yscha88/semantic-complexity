@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.777609+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "718a26f38c6adc28f245769b5e865dfbc99db337e2ab4e216550730478c1356d",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# ham-R7_sonnet-4.6_B\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: marshmallow/schema.py — Behavioral Preservation\n\n### Critical paths\n\n**`_do_load()` — highest risk**\nThe full deserialization pipeline. Critical behavioral sequence:\n1. Pre-load processors transform data\n2. `_deserialize()` runs per-field deserialization\n3. Field validators run on deserialized result\n4. Schema validators run twice (with and without collection context)\n5. Post-load processors transform result\n6. `ValidationError` raised if any errors accumulated\n\nThis 5-phase pipeline is the core behavioral contract of marshmallow. Any reordering changes observable behavior. The double schema validator call is particularly fragile — removing one call silently drops a class of validation.\n\n**`_init_fields()` — medium risk**\nInitializes `self.fields`, `self.load_fields`, `self.dump_fields`. If this initialization changes, all downstream load/dump operations change. The `only`/`exclude` option processing must produce the exact same field sets.\n\n**`_deserialize()` — high risk**\nPer-field deserialization with `unknown` field handling. The three `unknown` modes (RAISE/INCLUDE/EXCLUDE) are the core schema behavior that users configure.\n\n### Behavioral contracts (from public API perspective)\n\n1. `schema.load(data)` raises `ValidationError` with structured `errors` dict\n2. `schema.load(data, many=True)` accepts a list, returns a list\n3. `schema.load(data, partial=['field'])` ignores missing `field`\n4. `schema.load(data, unknown=INCLUDE)` passes through unknown fields\n5. `schema.load(data, unknown=RAISE)` raises on unknown fields\n\n### Test coverage assessment\n\nmarshmallow is a mature library with substantial tests elsewhere. For this code in isolation:\n- No golden tests visible\n- The double schema validator call behavior is the most likely to be accidentally broken\n- The `partial` dot-notation nested field resolution is particularly complex\n\n### Refactoring risks\n`_do_load()` cannot be refactored without risk unless the 5-phase pipeline has golden tests that verify each phase's input/output independently.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R7",
+  "unit_id": "ham-R7_sonnet-4.6_B",
+  "input": {
+    "repo": "marshmallow-code/marshmallow",
+    "commit": "dd20a8092a8b",
+    "file": "src/marshmallow/schema.py",
+    "lines": "1-396",
+    "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0"
+  }
+}

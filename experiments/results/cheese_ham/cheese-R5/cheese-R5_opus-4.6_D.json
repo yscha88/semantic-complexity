@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.531385+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "e4f1c9b2079529721f80a73f884cfb584dca8b029cb131c606374657c9d831a8",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# cheese-R5_opus-4.6_D\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: toml/decoder.py — Cognitive Complexity (SKILL)\n\n---\n\n### C1: Cyclomatic Complexity per function\n\n| Function | Estimated CC | Grade | Rating | Primary driver |\n|---|---|---|---|---|\n| `load_value` | 52-56 | F | ❌ fail | 10+ value type dispatch, no abstraction |\n| `load_line` | 37-41 | E | ❌ fail | full line type discrimination |\n| `load_array` | 32-36 | E | ❌ fail | recursive + type homogeneity + comments |\n| `load_inline_object` | 15-17 | C | ❌ fail | comma-split with string awareness |\n| `_load_date` | 11-13 | C | ❌ fail | ISO 8601 without library |\n\nThis is among the highest average complexity per function of any Python library this size. The absence of parser combinators or a tokenizer stage is the architectural root cause.\n\n---\n\n### C2: Nesting Depth\n\n**`_load_date` — ❌ fail** (depth 5 confirmed):\n```\ntry:                                   # depth 1\n  if len(val) > 19:                    # depth 2\n    if val[19] == '.':                 # depth 3\n      if val[-1].upper() == 'Z':      # depth 4\n        ...\n      else:\n        if '+' in subsecondvalandtz:   # depth 5\n```\n\n**`load_value` — ❌ fail**: The string-type detection section reaches depth 4, and the escape character processing within multiline strings reaches depth 5.\n\n**`load_array` — ❌ fail**: `while` loop → `if` type check → `if atype != type(val)` → recursive call stack. Depth 4+ with implicit recursion depth unbounded.\n\n**`load_inline_object` — ⚠️ warning**: Max depth 3-4, borderline.\n\n---\n\n### C3: Single Responsibility\n\n**`load_value` — ❌ fail**: Ten distinct type parsers in one function. Each has different validation requirements, escape semantics, and error conditions:\n- Basic string (`\"...\"`)\n- Literal string (`'...'`)\n- Multiline basic string (`triple-quote...triple-quote`)\n- Multiline literal string (`triple-single-quote...triple-single-quote`)\n- Integer (decimal)\n- Integer (hex/octal/binary)\n- Float (including special values)\n- Boolean\n- Datetime\n- Array\n- Inline table\n\nDecomposition: `_parse_string(val)`, `_parse_number(val)`, `_parse_datetime(val)`, `_parse_collection(val)`.\n\n**`load_line` — ❌ fail**: Discriminates between comment lines, section headers, array-of-table headers, key-value pairs, and multiline continuation — five distinct line types.\n\n**`load_array` — ⚠️ warning**: Parsing + type checking are mixed, but both relate to array semantics.\n\n---\n\n### C4: Code Placement\n\n**`_load_date` position arithmetic — ❌ fail**:\n```python\nint(val[:4]), int(val[5:7]), int(val[8:10]),\nint(val[11:13]), int(val[14:16]), int(val[17:19])\n```\nThese magic slice positions implement ISO 8601 date format parsing. Python 3.7+ includes `datetime.fromisoformat()` that handles all standard cases. The manual implementation is both fragile and unnecessary for Python 3.7+ targets.\n\n**`load_inline_object` retry loop — ❌ fail**:\n```python\nwhile len(candidate_groups) > 0:\n    candidate_group = candidate_groups.pop(0)\n    ...\n    elif len(candidate_groups) > 0:\n        candidate_groups[0] = candidate_group + \",\" + candidate_groups[0]\n```\nThis implements a scan-and-reassemble algorithm for splitting comma-separated values while respecting quoted strings. The algorithm is non-trivial and has no documentation or extracted name. Should be `_tokenize_inline_table(line)`.\n\n---\n\n### Free-form analysis\n\n**1. Unbounded recursion in `load_array`**\nNested TOML arrays like `[[[[...]]]]` cause unbounded recursion. There is no recursion depth limit. A deeply nested structure could cause `RecursionError`. Python's default recursion limit (1000) is the only protection.\n\n**2. Type homogeneity check uses Python `type()` equality**\n```python\nif atype != type(val):\n    raise ValueError(...)\n```\nTOML 1.0 spec: arrays may contain mixed types as long as all elements are valid TOML values (the homogeneity requirement was relaxed in TOML 1.0). This check may incorrectly reject valid TOML 1.0 arrays.\n\n**3. `_load_date` silent `return None` on failure**\nTwo separate `except ValueError: return None` branches make it impossible to distinguish \"this string is not a date\" from \"this string is malformed\". Callers check for `None` without knowing which failure occurred.\n\n**4. `load_value` is not testable as a unit**\nTesting the boolean parser requires invoking the entire 50+ branch dispatch. There are no internal seams. This makes it impossible to write focused unit tests for individual value types without mocking.\n\n**5. String escape processing is O(n²)**\nThe multiline string escape handling in `load_value` uses repeated string `replace()` calls rather than a single-pass scanner. For large strings with many escape sequences, this degrades quadratically.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R5",
+  "unit_id": "cheese-R5_opus-4.6_D",
+  "input": {
+    "repo": "uiri/toml",
+    "commit": "65bab7582ce1",
+    "file": "toml/decoder.py",
+    "lines": "1-357",
+    "code_sha256": "460c858e2b9f2318ad5d3edd0d57ad0bd5dd2a295d7c968667f5ae1faa46c308"
+  }
+}

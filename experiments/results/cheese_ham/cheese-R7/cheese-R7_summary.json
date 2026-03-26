@@ -1,0 +1,43 @@
+{
+  "experiment_id": "cheese-R7",
+  "session_dir": "experiments/results/session/cheese-R7",
+  "code_sha256": "0e38f49f81a5adf4cca7817eae92be7ec08880c09b2a336d750cba3598247fb7",
+  "models": [
+    "sonnet-4.6",
+    "opus-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "total_units": 4,
+  "completed": 4,
+  "skipped": [],
+  "results": [
+    {
+      "unit_id": "cheese-R7_sonnet-4.6_B",
+      "model": "sonnet-4.6",
+      "group": "B",
+      "prompt_sha256": "eb60b31982c5a814a2a97df7b374474d38a8b0f45ff4cf46a29e5637b229434f"
+    },
+    {
+      "unit_id": "cheese-R7_sonnet-4.6_D",
+      "model": "sonnet-4.6",
+      "group": "D",
+      "prompt_sha256": "c09f486ef3c16eb736800b76f4de0fa63742ee03d8ce20344fe594c79dd0ce6c"
+    },
+    {
+      "unit_id": "cheese-R7_opus-4.6_B",
+      "model": "opus-4.6",
+      "group": "B",
+      "prompt_sha256": "eb60b31982c5a814a2a97df7b374474d38a8b0f45ff4cf46a29e5637b229434f"
+    },
+    {
+      "unit_id": "cheese-R7_opus-4.6_D",
+      "model": "opus-4.6",
+      "group": "D",
+      "prompt_sha256": "c09f486ef3c16eb736800b76f4de0fa63742ee03d8ce20344fe594c79dd0ce6c"
+    }
+  ],
+  "timestamp": "2026-03-26T11:32:09.601355+00:00"
+}

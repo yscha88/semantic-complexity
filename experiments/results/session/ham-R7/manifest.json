@@ -1,0 +1,59 @@
+{
+  "experiment_id": "ham-R7",
+  "repo": "marshmallow-code/marshmallow",
+  "commit": "dd20a8092a8b",
+  "file": "src/marshmallow/schema.py",
+  "lines": "1-396",
+  "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0",
+  "models": [
+    "sonnet-4.6",
+    "opus-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "units": [
+    {
+      "unit_id": "ham-R7_sonnet-4.6_B",
+      "model_name": "sonnet-4.6",
+      "model_id": "claude-sonnet-4-6",
+      "group": "B",
+      "prompt_sha256": "718a26f38c6adc28f245769b5e865dfbc99db337e2ab4e216550730478c1356d",
+      "prompt_file": "experiments/results/session/ham-R7/ham-R7_sonnet-4.6_B.prompt.md",
+      "response_file": "experiments/results/session/ham-R7/ham-R7_sonnet-4.6_B.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "ham-R7_sonnet-4.6_D",
+      "model_name": "sonnet-4.6",
+      "model_id": "claude-sonnet-4-6",
+      "group": "D",
+      "prompt_sha256": "5323730aaae543c3c0860e9d1eb474fc93977eff8c53a1d8d1837cd0b383e403",
+      "prompt_file": "experiments/results/session/ham-R7/ham-R7_sonnet-4.6_D.prompt.md",
+      "response_file": "experiments/results/session/ham-R7/ham-R7_sonnet-4.6_D.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "ham-R7_opus-4.6_B",
+      "model_name": "opus-4.6",
+      "model_id": "claude-opus-4-6",
+      "group": "B",
+      "prompt_sha256": "718a26f38c6adc28f245769b5e865dfbc99db337e2ab4e216550730478c1356d",
+      "prompt_file": "experiments/results/session/ham-R7/ham-R7_opus-4.6_B.prompt.md",
+      "response_file": "experiments/results/session/ham-R7/ham-R7_opus-4.6_B.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "ham-R7_opus-4.6_D",
+      "model_name": "opus-4.6",
+      "model_id": "claude-opus-4-6",
+      "group": "D",
+      "prompt_sha256": "5323730aaae543c3c0860e9d1eb474fc93977eff8c53a1d8d1837cd0b383e403",
+      "prompt_file": "experiments/results/session/ham-R7/ham-R7_opus-4.6_D.prompt.md",
+      "response_file": "experiments/results/session/ham-R7/ham-R7_opus-4.6_D.response.md",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-03-26T10:52:22.308887+00:00"
+}

@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.778063+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "5323730aaae543c3c0860e9d1eb474fc93977eff8c53a1d8d1837cd0b383e403",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# ham-R7_sonnet-4.6_D\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: marshmallow/schema.py — Behavioral Preservation (SKILL)\n\n---\n\n### H1: Golden Tests\n\n**`_do_load()` — ❌ fail (highest priority)**\nThe 5-phase pipeline has multiple observable checkpoints:\n1. Pre-load processor output → what does `_do_load` pass to `_deserialize`?\n2. `_deserialize` output → what field values are produced?\n3. Field validator effects → which errors accumulate?\n4. Schema validator ×2 → both pass_collection=True and False are invoked?\n5. Post-load output → final returned value\n\nGolden tests should verify: given input X with schema Y, result is Z and errors are W.\n\n**`_deserialize()` unknown field handling — ❌ fail**\nThree observable behaviors:\n- `unknown=RAISE` → `ValidationError` with unknown field names\n- `unknown=INCLUDE` → unknown fields passed through in result\n- `unknown=EXCLUDE` → unknown fields silently dropped\n\nEach requires a golden test to pin.\n\n**`_init_fields()` field selection — ⚠️ warning**\nThe observable output is `self.fields`, `self.load_fields`, `self.dump_fields`. For a given schema class with `only`, `exclude`, `Meta.fields`, the exact set of fields must be pinned.\n\n---\n\n### H2: Contract Tests\n\n**Schema ↔ Field contract — ❌ fail**\n`_deserialize` calls `field_obj.deserialize(val, field_name, data, **d_kwargs)`. This calling convention is a contract between schema and field classes. No contract test verifies it.\n\n**`_do_load` processor calling convention — ❌ fail**\nPre/post load processors are called as `processor(schema_obj, data, many, **kwargs)`. This calling convention is a behavioral contract for all `@pre_load` / `@post_load` decorated methods.\n\n---\n\n### H3: Structural vs Behavioral Separation\n\n**`_do_load()` — ❌ fail**\nThe 5-phase pipeline cannot be structurally refactored. Each phase transition has a behavioral contract:\n- Phase 1→2: processed_data (after pre-load) is what gets deserialized, not original data\n- Phase 2→3: field validators run on deserialized result, not original data\n- Phase 3→4: schema validators have access to both result AND error_store\n- Phase 4→5: post-load only runs if NO errors\n\nThe phrase \"post-load only runs if no errors\" is encoded as:\n```python\nif not errors and postprocess and self._hooks[POST_LOAD]:\n```\nThis is a behavioral invariant — post-load must NOT run when there are field errors.\n\n**`_deserialize()` collection dispatch — ⚠️ warning**\nThe `many=True` recursive dispatch could be extracted structurally only after pinning that the recursive call produces identical results to calling `_deserialize` directly with `many=False`.\n\n---\n\n### H4: Critical Path Coverage\n\n| Path | Coverage | Behavioral importance |\n|---|---|---|\n| `_do_load()` success | ❌ | Critical |\n| `_do_load()` ValidationError raised | ❌ | Critical |\n| `_do_load()` post-load skipped on errors | ❌ | High |\n| `_deserialize()` unknown=RAISE | ❌ | High |\n| `_deserialize()` unknown=INCLUDE | ❌ | High |\n| `_deserialize()` partial nested | ❌ | High |\n| `_init_fields()` only+exclude | ❌ | Medium |\n\n---\n\n### Free-form analysis\n\n**1. Double schema validator call is the most brittle behavioral invariant**\n```python\nself._invoke_schema_validators(..., pass_collection=True, ...)\nself._invoke_schema_validators(..., pass_collection=False, ...)\n```\nWhy two calls? Schema validators decorated with `@validates_schema(pass_many=True)` receive the full collection; those without receive per-item. Both must run. If someone changes this to a single call, validators annotated for collection-level validation silently stop running. This invariant is not documented or tested.\n\n**2. `error_store` vs `errors` dict transition**\n`_do_load` converts from `error_store.errors` (accumulated during deserialization) to a `ValidationError(errors)`. If this conversion changes (e.g., error message format changes), all callers who parse `exception.messages` for specific field names break silently.\n\n**3. `_init_fields()` is called in `__init__` without test isolation**\nSince `_init_fields()` runs during `__init__`, testing it in isolation requires constructing a complete schema instance. This makes it impossible to unit test the field selection logic without triggering the full initialization chain.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R7",
+  "unit_id": "ham-R7_sonnet-4.6_D",
+  "input": {
+    "repo": "marshmallow-code/marshmallow",
+    "commit": "dd20a8092a8b",
+    "file": "src/marshmallow/schema.py",
+    "lines": "1-396",
+    "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0"
+  }
+}

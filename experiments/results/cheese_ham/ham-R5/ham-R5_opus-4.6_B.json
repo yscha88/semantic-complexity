@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.707414+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "a222863074a4e1c8effaa9ef3fe6fd596f5adbdeddf4f2e5be9cdc478edb8c44",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# ham-R5_opus-4.6_B\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: arq/worker.py — Behavioral Preservation\n\n### Summary\narq's worker has a high ratio of critical-path code to test coverage. The `run_job` function alone carries behavioral contracts that are impossible to verify without integration tests against a real or mock Redis instance.\n\n### Critical paths and behavioral contracts\n\n**`run_job()` — critical, no golden tests**\nObservable behaviors that must be preserved:\n1. Successful job → result stored in Redis with correct key format\n2. Exception → retry logic: re-enqueued with `timestamp + exponential_backoff` score\n3. Abort key present → skip retry regardless of attempt count  \n4. In-progress key deleted in all terminal paths (success, failure, abort)\n5. `CancelledError` re-raised without being swallowed\n\nContract violation example: if the in-progress key TTL changes, stuck jobs last longer. If the retry score formula changes, retry timing breaks for all existing `RetryError` users.\n\n**`start_jobs()` — medium risk**\nThe Redis `WATCH/MULTI/EXEC` distributed locking ensures at-most-once job start across multiple workers. This behavioral guarantee is untestable without concurrent execution tests.\n\n**`run_cron()` — medium risk**\nCron overlap prevention (`if coro_id in self.tasks`) prevents a cron job from running twice simultaneously. This is a behavioral guarantee that would break if the task tracking structure changes.\n\n### What breaks silently without tests\n\n1. Rename `in_progress_key_prefix` → stuck job detection breaks\n2. Change retry formula → all configured `defer` values produce wrong delays\n3. Remove `CancelledError` re-raise → graceful shutdown stops working\n4. Change result serialization format → clients reading results get `None` or corrupt data\n5. Reorder exception handlers → `TimeoutError` might hit wrong branch\n\n### Recommendations\n1. Add `run_job()` golden tests using a mock or test Redis instance\n2. Add a test specifically for `CancelledError` propagation (cancellation test)\n3. Add a test for retry backoff: given `RetryError(attempts=3, defer=1.0)`, verify score is set to `now + 1000ms` on first retry\n4. Pin the in-progress key naming as a named constant with a test\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R5",
+  "unit_id": "ham-R5_opus-4.6_B",
+  "input": {
+    "repo": "python-arq/arq",
+    "commit": "fda407c4cb5e",
+    "file": "arq/worker.py",
+    "lines": "1-313",
+    "code_sha256": "0e38f49f81a5adf4cca7817eae92be7ec08880c09b2a336d750cba3598247fb7"
+  }
+}

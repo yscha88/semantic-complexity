@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.565009+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "f851b88e3298da1cdafb3c80d87f377716a82e652ceccb6af03674521e4309fe",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# cheese-R6_sonnet-4.6_D\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: h2/connection.py — Cognitive Complexity (SKILL)\n\n---\n\n### C1: Cyclomatic Complexity per function\n\n| Function | Estimated CC | Grade | Rating |\n|---|---|---|---|\n| `send_headers` | 8 | B | ⚠️ warning |\n| `send_data` | 8 | B | ⚠️ warning |\n| `acknowledge_received_data` | 7 | B | ⚠️ warning |\n| `_receive_headers_frame` | 7 | B | ⚠️ warning |\n| `__init__` (H2ConnectionStateMachine) | 1 | A | ✅ pass |\n| `__init__` (H2Connection) | 1 | A | ✅ pass |\n\nAll B-grade functions are flagged as warnings. No F/E/D/C grade functions present. This is a well-controlled complexity level for an HTTP/2 protocol implementation.\n\n---\n\n### C2: Nesting Depth\n\nAll functions — ✅ pass. Maximum observed depth is 3 (condition → loop → condition). The codebase appears to use early-return patterns effectively to avoid deep nesting.\n\n---\n\n### C3: Single Responsibility\n\n**`send_headers` — ⚠️ warning**: Two concerns are mixed:\n1. **Header validation** (authority pseudo-header presence, TE header restriction, stream state preconditions)\n2. **Header encoding and frame construction** (HPACK encoding, CONTINUATION frame splitting)\n\nThese could be separated as `_validate_send_headers(headers, stream_id)` and the actual encoding pipeline.\n\n**`send_data` — ✅ pass**: Single responsibility — send a DATA frame respecting flow control constraints.\n\n**`_receive_headers_frame` — ⚠️ warning**: Client-side and server-side header frame handling are both present in one method, dispatched by `self.config.client_side`. Protocol handling for client vs server is distinct enough to warrant separate methods.\n\n**`acknowledge_received_data` — ✅ pass**: Single responsibility — update flow control and emit WINDOW_UPDATE if needed.\n\n---\n\n### C4: Code Placement\n\n**Security-related defaults in `__init__` — ✅ pass**: The `MAX_CONCURRENT_STREAMS: 100` and `MAX_HEADER_LIST_SIZE` defaults are explained with inline CVE references. This is appropriate placement for security defaults that would otherwise look arbitrary.\n\n**`_receive_headers_frame` client/server dispatch — ⚠️ warning**: The `if self.config.client_side` dispatch could be moved to a virtual method pattern (`_receive_headers_client_side` / `_receive_headers_server_side`) to avoid the branching inside the method.\n\n---\n\n### Free-form analysis\n\n**1. Flow control window can reach zero without detection**\nIn `send_data`, when `flow_controlled_length > 0` is checked but the actual minimum of connection and stream window is used. If both windows are at exactly 0 but `flow_controlled_length` is still called with a positive length, the behavior depends on the caller to check `data_to_send` length. This implicit contract could cause silent data loss in edge cases.\n\n**2. `H2Connection.__init__` is cognitively dense despite low CC**\nThe `__init__` contains ~50 attribute assignments across settings objects, buffers, and stream tracking structures. The CC is 1, but understanding what all these attributes do requires reading both the HTTP/2 RFC and the h2 documentation. This is inherent to protocol implementation but would benefit from grouping attributes into `_init_settings()`, `_init_flow_control()`, `_init_buffers()` sections at minimum via comments.\n\n**3. `_header_frames` is a private accumulator with no invariant documentation**\n```python\nself._header_frames: list[Frame] = []\n```\nThis list accumulates header frames until CONTINUATION frame processing is complete. The invariant (when it's empty vs non-empty, what operations are valid in each state) is not documented.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R6",
+  "unit_id": "cheese-R6_sonnet-4.6_D",
+  "input": {
+    "repo": "python-hyper/h2",
+    "commit": "latest-master",
+    "file": "src/h2/connection.py",
+    "lines": "1-418",
+    "code_sha256": "85f9fa277984ad081386a89ad3b10d24dbfb244be88eb1362f1fd8e6d204efb2"
+  }
+}

@@ -56,9 +56,11 @@ decision criteria
 | ORM domain-specific SKILL adds TP | medium | γ gpt+sonnet 모두 |
 | Filesystem domain-specific SKILL adds TP | low | γ GPT에서만, Sonnet 미확인 |
 | Auth B1-B4 content adds value over general | **none** | γ에서 부정됨 |
+| **🧀 Cheese SKILL (B vs D)** | **medium** | **5레포 4/5(80%) D>B — CC 등급 정확도, 추가 발견 3-4개. h2(B급) 예외** |
+| **🥓 Ham SKILL (B vs D)** | **medium** | **5레포 5/5(100%) D>B — critical path +1-3개, 추가 발견 3-4개** |
 | these specific drafts are broadly production-ready | low | β/γ에서만 제한적 계시 |
 
-## 실험 이력 (2026-03-18 구성)
+## 실험 이력 (2026-03-26 갱신)
 
 | Phase | 실험 | 레포/모델 | 핵심 발견 |
 |-------|------|-----------|----------|
@@ -66,3 +68,5 @@ decision criteria
 | β | D vs B (다양한 코드) | 12레포, 2모델 | D > B 4/12 TP, 8/12 precision |
 | γ | D-general vs D-specific | 4도메인, 2모델 | ORM↑, filesystem(GPT만)↑, auth 동등, crypto 실패 |
 | cost-tier | 소형모델 D-specific | 3도메인, mini/nano/flash | ORM/filesystem: mini 유효, nano 유사 |
+| **🧀 Cheese B vs D** | **🧀 CC 품질 분석** | **5레포, 2모델(sonnet/opus)** | **D>B 4/5(80%) — h2(B급)만 동등. CC 등급 정확도, C1-C4 구조화, 추가 발견 3-4개** |
+| **🥓 Ham B vs D** | **🥓 행동 보존 분석** | **5레포, 2모델(sonnet/opus)** | **D>B 5/5(100%) — H1-H4 구조화, critical path +1-3개, 추가 발견 3-4개** |

@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.530600+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "9ac907efa6115525d389dfe7628b827631e1099062417b9fd1765fb6dda5c2e5",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# cheese-R5_sonnet-4.6_B\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: toml/decoder.py — Cognitive Complexity\n\n### Function complexity estimates\n\n**`load_value` (~CC 50+, grade F) — extreme**\nThis function is a hand-written dispatch table for TOML value types. Every possible TOML value type (strings with multiple quote styles, arrays, inline tables, integers in multiple bases, floats with special values, booleans, datetime) is handled with cascading if/elif chains. The string parsing section alone spans multiple branches for raw strings, multiline strings, and escape sequences. Exceptional complexity — likely the most complex function in the entire toml library.\n\n**`load_line` (~CC 37, grade E) — very high**\nHandles comment stripping, key-value parsing, array-of-tables detection, section headers, and multi-key handling. Multiple regex applications and string manipulations are interleaved with state management for multikey/multibackslash modes.\n\n**`load_array` (~CC 32, grade E) — very high**\nRecursive TOML array parser. Handles nested arrays, mixed-type detection (TOML requires uniform array types), and whitespace/comment stripping between elements. The type homogeneity check branches over all TOML types.\n\n**`load_inline_object` (~CC 15, grade C) — high**\nSplits on commas but must handle commas inside quoted strings. Uses a re-assembly loop that is subtle: candidate groups are popped, and if a value doesn't match a terminal type, the next candidate is prepended and retried.\n\n**`_load_date` (~CC 11, grade C) — medium-high**\nDatetime parsing without a library. Nested conditionals parse subsecond precision and timezone from position-based string indexing. The positions (19, 20, -1) are magic numbers with no comments.\n\n### Nesting depth\n`_load_date` reaches depth 5+ with nested `if len(val) > 19` → `if val[19] == '.'` → `if val[-1].upper() == 'Z'` → further timezone parsing. `load_value` and `load_array` both exceed 4 levels.\n\n### Single Responsibility\n`load_value` handles 10+ distinct value types in one function. Each type (integer, float, string, datetime, boolean, array, inline table) could be a separate `_parse_integer`, `_parse_string`, etc.\n\n### Code placement\nMagic-number string indexing in `_load_date` (positions 0:4, 5:7, 8:10, 11:13, 14:16, 17:19) should be named constants or use `datetime.fromisoformat` (Python 3.7+).\n\nThe comma-splitting retry loop in `load_inline_object` is the most algorithmically complex part and deserves an extracted helper with a clear docstring.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R5",
+  "unit_id": "cheese-R5_sonnet-4.6_B",
+  "input": {
+    "repo": "uiri/toml",
+    "commit": "65bab7582ce1",
+    "file": "toml/decoder.py",
+    "lines": "1-357",
+    "code_sha256": "460c858e2b9f2318ad5d3edd0d57ad0bd5dd2a295d7c968667f5ae1faa46c308"
+  }
+}

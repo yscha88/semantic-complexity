@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.497425+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "b5106e40fb48c1490edfc7d6abf4730d31d4ab4777b1d3e390036249e9026303",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# cheese-R4_opus-4.6_D\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: marshmallow schema.py — Cognitive Complexity (SKILL)\n\n---\n\n### C1: Cyclomatic Complexity per function\n\n| Function | Estimated CC | Grade | Rating | Key drivers |\n|---|---|---|---|---|\n| `_deserialize` | 24-27 | D | ❌ fail | many-dispatch, partial (5 variants), unknown (3 variants), getter closure |\n| `_init_fields` | 18-20 | C | ❌ fail | only/exclude/opts.fields, 2× duplicate detection |\n| `_do_load` | 12-14 | C | ❌ fail | 5-phase orchestration with try/except |\n| `_run_validator` | 8-9 | B | ⚠️ warning | field lookup fallback chain |\n| `__init__` (Schema) | 3 | A | ✅ pass | attribute assignment |\n\n**`_deserialize` detail**: The combination of `many` dispatch, `partial` resolution (None / True / False / str / dot-notation nested), `unknown` enum (EXCLUDE/INCLUDE/RAISE), inner `getter` closure, and nested `d_kwargs` construction gives this function among the highest complexity of any marshmallow core function.\n\n---\n\n### C2: Nesting Depth\n\n**`_deserialize` — ❌ fail** (depth 6 at maximum):\n```\nif many:\n  [list comprehension]\nelse:\n  if not isinstance(data, Mapping):\n    ...\n  else:\n    for attr_name, field_obj in ...:\n      if raw_value is missing:\n        if partial is True or (partial_is_collection and ...):  ← depth 5\n          ...\n      if partial_is_collection:\n        sub_partial = [f[len_prefix:] for f in partial ...]     ← depth 5\n```\n\n**`_init_fields` — ⚠️ warning** (depth 4):\n```\nif self.only is not None:\n  field_names = ...\n  invalid_fields |= ...\nif self.exclude:\n  field_names = ...\n  invalid_fields |= ...\nif invalid_fields:\n  ...\nfor field_name in field_names:\n  for field_name, field_obj in fields_dict.items():  ← depth 4\n```\n\n**`_do_load` — ⚠️ warning** (depth 4): try/except wrapping nested `if not errors` block.\n\n---\n\n### C3: Single Responsibility\n\n**`_deserialize` — ❌ fail**: Three distinct responsibilities in one function:\n1. **Collection dispatch** — recursive call when `many=True`\n2. **Single-item field iteration** — per-field deserialization with partial/unknown handling\n3. **Unknown field handling** — INCLUDE/RAISE logic post field loop\n\nRecommended split:\n- `_deserialize(data, ...) → _deserialize_many / _deserialize_one` dispatch\n- `_handle_unknown_fields(data, ret_d, unknown, ...)` extracted\n\n**`_do_load` — ❌ fail**: Five sequential phases are inlined:\n1. Pre-load processors\n2. Deserialization (`_deserialize`)\n3. Field-level validation\n4. Schema-level validation (×2)\n5. Post-load processors\n\nEach phase boundary should be a method call, not inline code.\n\n**`_run_validator` — ✅ pass**: Single responsibility — map ValidationError to the correct field key in error_store.\n\n---\n\n### C4: Code Placement\n\n**`getter` closure — ❌ fail**:\n```python\ndef getter(val, field_obj=field_obj, field_name=field_name, d_kwargs=d_kwargs):\n    return field_obj.deserialize(val, field_name, data, **d_kwargs)\nvalue = self._call_and_store(getter_func=getter, ...)\n```\nDefining a closure inside a loop with default-argument capture is a well-known Python pitfall. Even when done correctly (as here), it imposes cognitive load on readers unfamiliar with the pattern. Should be:\n```python\nvalue = self._call_and_store(\n    getter_func=functools.partial(field_obj.deserialize, field_name=field_name, data=data, **d_kwargs),\n    ...\n)\n```\nOr extracted as `_make_field_getter(field_obj, field_name, data, d_kwargs)`.\n\n**Double schema validator call in `_do_load` — ⚠️ warning**:\nThe two calls differ only in `pass_collection`. The intent (first pass with collection context for cross-field validators, second pass per-item) is not documented. A comment explaining why two calls are needed would eliminate the confusion.\n\n---\n\n### Free-form analysis\n\n**1. O(n²) duplicate detection in `_init_fields`**\n```python\ndata_keys_duplicates = {x for x in dump_data_keys if dump_data_keys.count(x) > 1}\n```\n`list.count()` is O(n); calling it inside a comprehension over all items is O(n²). For schemas with many fields this degrades performance. Fix:\n```python\nfrom collections import Counter\ncounts = Counter(dump_data_keys)\ndata_keys_duplicates = {k for k, v in counts.items() if v > 1}\n```\n\n**2. Implicit error accumulation contract**\n`error_store` is a mutable object passed through `_deserialize` → `_call_and_store` → field deserialization. Errors accumulate as a side effect. The caller (`_do_load`) then reads `error_store.errors`. This hidden side-effect contract is invisible at the call site.\n\n**3. `_run_validator` exception-driven control flow**\nThe entire function body is a try/except where the except branch contains the main logic (error key resolution). This inverts the normal control flow expectation — the \"normal\" path (validator succeeds) does nothing, and the exception path does work.\n\n**4. `partial` type overloading**\n`partial` accepts `None`, `True`, `False`, or a collection of strings. This union type creates 5 distinct runtime behaviors scattered across `_deserialize` and `_do_load`. A dataclass or enum would make the variants explicit.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R4",
+  "unit_id": "cheese-R4_opus-4.6_D",
+  "input": {
+    "repo": "marshmallow-code/marshmallow",
+    "commit": "dd20a8092a8b",
+    "file": "src/marshmallow/schema.py",
+    "lines": "1-396",
+    "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0"
+  }
+}

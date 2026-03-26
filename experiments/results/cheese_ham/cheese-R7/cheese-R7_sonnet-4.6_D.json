@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.600855+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "c09f486ef3c16eb736800b76f4de0fa63742ee03d8ce20344fe594c79dd0ce6c",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# cheese-R7_sonnet-4.6_D\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: arq/worker.py — Cognitive Complexity (SKILL)\n\n---\n\n### C1: Cyclomatic Complexity per function\n\n| Function | Estimated CC | Grade | Rating |\n|---|---|---|---|\n| `run_job` | 35-40 | E | ❌ fail |\n| `_poll_iteration` | 9 | B | ⚠️ warning |\n| `run_cron` | 9 | B | ⚠️ warning |\n| `start_jobs` | 8 | B | ⚠️ warning |\n\n**`run_job` detail**: Key complexity drivers:\n- Job deserialization result handling (missing, expired, corrupt)\n- Function lookup (not found = fail vs deferral)\n- Timeout handling (`asyncio.TimeoutError` vs `CancelledError` vs generic exception)\n- Retry eligibility check (attempt count, score expiry, abort flag)\n- Exponential backoff calculation with max cap\n- Redis pipeline cleanup in all paths (success, retry, failure, abort)\n\n---\n\n### C2: Nesting Depth\n\n**`run_job` — ❌ fail** (depth 5+):\n```\nasync with self.sem:                              # depth 1\n  try:                                            # depth 2\n    result = await asyncio.wait_for(...)\n  except asyncio.CancelledError:\n    raise\n  except Exception as e:\n    if retry:                                     # depth 3\n      if score and score > timestamp_ms():        # depth 4\n        ...\n      else:\n        await self.pool.zadd(...)                 # depth 4\n```\n\n**`start_jobs` — ⚠️ warning** (depth 4):\n```\nfor job_id_b in job_ids:\n  async with self.pool.pipeline(...) as pipe:    # depth 2\n    if ongoing_exists or not score or ...:       # depth 3\n      continue\n    try:\n      await pipe.execute()                       # depth 3\n    except (ResponseError, WatchError):          # depth 3\n```\n\n---\n\n### C3: Single Responsibility\n\n**`run_job` — ❌ fail**: Six distinct responsibilities:\n1. Job data retrieval and deserialization from Redis\n2. Function lookup and argument preparation\n3. Async execution with timeout\n4. Exception classification and retry decision\n5. Result serialization and storage\n6. In-progress key cleanup (always, via finally-equivalent paths)\n\nRecommended decomposition:\n- `_load_job_data(job_id) → JobDef | None`\n- `_execute_job_with_timeout(job_def) → result`\n- `_handle_job_exception(exc, job_def) → RetryDecision`\n- `_store_job_result(job_id, result, status)`\n\n**`_poll_iteration` — ⚠️ warning**: Mixes burst mode management, job acquisition, abort processing, and task cleanup. These are four distinct polling concerns.\n\n---\n\n### C4: Code Placement\n\n**Retry backoff calculation inline in `run_job` — ❌ fail**:\n```python\nnext_score = timestamp_ms() + int(1000 * backoff * (2 ** (job_try - 2)))\n```\nExponential backoff formula inlined in an already-complex function. Should be `_calculate_retry_delay_ms(backoff_base, attempt) → int`.\n\n**`CancelledError` re-raise placement — ⚠️ warning**:\n```python\nexcept asyncio.CancelledError:\n    raise\nexcept Exception as e:\n    ...\n```\nThis is correct (CancelledError must propagate for proper task cancellation) but easy to accidentally remove during refactoring. A comment explaining why it must be re-raised would prevent regression.\n\n---\n\n### Free-form analysis\n\n**1. `run_job` has no finally block for Redis cleanup**\nThe in-progress key (`psetex` set in `start_jobs`) must be deleted after job completion. If `run_job` raises an unhandled exception before the cleanup code, the job will appear in-progress indefinitely until expiry. A `try/finally` block should guarantee cleanup.\n\n**2. `start_jobs` counter management is not atomic**\n```python\nself.job_counter = self.job_counter + 1  # increment before pipeline\n...\nself.job_counter = self.job_counter - 1  # decrement on early exit\n```\nThe counter is incremented before the Redis transaction and decremented on failure paths. Between increment and decrement, the counter is inconsistent. In an async context with multiple concurrent `start_jobs` invocations, this can cause jobs to be rejected incorrectly.\n\n**3. `_poll_iteration` has no backpressure mechanism**\n`zrangebyscore` always returns up to `queue_read_limit` jobs regardless of how many are currently being processed. If processing is slower than polling, tasks accumulate without bound.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R7",
+  "unit_id": "cheese-R7_sonnet-4.6_D",
+  "input": {
+    "repo": "python-arq/arq",
+    "commit": "fda407c4cb5e",
+    "file": "arq/worker.py",
+    "lines": "1-313",
+    "code_sha256": "0e38f49f81a5adf4cca7817eae92be7ec08880c09b2a336d750cba3598247fb7"
+  }
+}

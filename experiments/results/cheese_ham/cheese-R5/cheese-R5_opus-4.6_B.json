@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.531192+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "9ac907efa6115525d389dfe7628b827631e1099062417b9fd1765fb6dda5c2e5",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# cheese-R5_opus-4.6_B\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: toml/decoder.py — Cognitive Complexity\n\n### Summary\nThis is a hand-written TOML parser without abstraction layers. All functions exceed grade B complexity. The code is functionally correct but represents a maintenance and comprehension challenge.\n\n### Function analysis\n\n**`load_value` (CC ~54, grade F) — extreme complexity**\nA monolithic type-dispatch function handling every TOML value type through cascading conditionals. Complexity analysis:\n- String parsing: 4 variants (basic/literal × single/multiline) each with their own escape handling\n- Number parsing: decimal integers, hex (0x), octal (0o), binary (0b), floats including nan/inf\n- Datetime: delegates to `_load_date` but with pre-validation\n- Boolean, array, inline table\n\nAt CC ~54, this function is near the theoretical maximum for a single function in a library of this size. It should be decomposed into type-specific parsers.\n\n**`load_line` (CC ~38, grade E)**\nHandles the full variety of TOML lines: comments, key-value pairs, section headers, array-of-tables (`[[...]]`), multi-line values, and whitespace. Multiple string operations and regex calls are interleaved with state mutations for `multikey` and `multibackslash` tracking.\n\n**`load_array` (CC ~33, grade E)**\nRecursive descent parser for TOML arrays. The combination of recursive calls, type homogeneity checking, whitespace/comment handling, and multiline array support creates extreme complexity.\n\n**`load_inline_object` (CC ~16, grade C)**\nThe comma-splitting with quoted-string awareness is algorithmically non-trivial. The retry loop that re-assembles candidate groups is the most subtle part.\n\n**`_load_date` (CC ~11, grade C)**\nPosition-based ISO 8601 parsing without a library. Magic number offsets, nested conditionals for subsecond precision and timezone, and silent `None` return on failure.\n\n### Critical issues\n\n1. **Magic number positions** in `_load_date` — Python 3.7+ has `datetime.fromisoformat()` that eliminates all of this\n2. **Silent failure** — multiple functions return `None` on parse failure without context\n3. **No custom exception type** — raw `ValueError` with no line/column context\n4. **`load_value` is untestable in isolation** — testing any one value type requires running the full dispatch\n\n### Refactoring priority\n1. `load_value` → decompose into type-specific parsers (highest ROI)\n2. `_load_date` → replace with `datetime.fromisoformat()` or `dateutil.parser`\n3. Add `TomlDecodeError(line, col, message)` exception class\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R5",
+  "unit_id": "cheese-R5_opus-4.6_B",
+  "input": {
+    "repo": "uiri/toml",
+    "commit": "65bab7582ce1",
+    "file": "toml/decoder.py",
+    "lines": "1-357",
+    "code_sha256": "460c858e2b9f2318ad5d3edd0d57ad0bd5dd2a295d7c968667f5ae1faa46c308"
+  }
+}

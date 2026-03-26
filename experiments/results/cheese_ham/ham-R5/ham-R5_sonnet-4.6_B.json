@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.706657+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "a222863074a4e1c8effaa9ef3fe6fd596f5adbdeddf4f2e5be9cdc478edb8c44",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# ham-R5_sonnet-4.6_B\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: arq/worker.py — Behavioral Preservation\n\n### Critical paths\n\n**`run_job()` — highest risk**\nThe entire job execution pipeline is in one function. Critical behaviors that must be preserved:\n- In-progress key (`psetex`) set before execution, deleted after\n- `CancelledError` must propagate (never swallowed)\n- Retry logic: job re-enqueued with score = `timestamp + backoff_delay`\n- Abort check: if `abort` key exists in Redis, job is not retried\n- Result stored in Redis with serialization\n\nNo golden tests visible. The exact serialization format of results and the retry key naming (`in_progress_key_prefix + job_id`) are implicit contracts.\n\n**`start_jobs()` — medium risk**\nDistributed lock acquisition via Redis `WATCH/MULTI/EXEC`. The race condition handling (retry on `WatchError`) is a behavioral contract. If refactored to use Lua scripts, the behavior must be exactly equivalent.\n\n**`_poll_iteration()` — medium risk**\nThe ordering of operations (pick jobs → cancel aborted → cleanup finished) is behavioral. Reordering could cause jobs to be polled after abort signals are processed, changing which jobs are aborted.\n\n**`run_cron()` — medium risk**\nOverlap prevention (checking if a cron task is already running) is behavioral. The timing calculation for \"is this cron job due?\" must remain exact.\n\n### Key behavioral contracts (implicit)\n\n1. A job's in-progress key is set atomically with job start and deleted on completion/retry/failure\n2. `CancelledError` propagates — shutdown works correctly\n3. Retry scores are set correctly for delayed re-execution\n4. Job counter reflects actual in-flight count\n\n### Refactoring risks\n`run_job` cannot be safely decomposed without tests because:\n- The exception handling sequence (CancelledError → re-raise; TimeoutError → retry check; Exception → retry check) must be preserved exactly\n- The Redis cleanup sequence must run in all paths\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R5",
+  "unit_id": "ham-R5_sonnet-4.6_B",
+  "input": {
+    "repo": "python-arq/arq",
+    "commit": "fda407c4cb5e",
+    "file": "arq/worker.py",
+    "lines": "1-313",
+    "code_sha256": "0e38f49f81a5adf4cca7817eae92be7ec08880c09b2a336d750cba3598247fb7"
+  }
+}

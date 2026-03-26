@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.565430+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "f851b88e3298da1cdafb3c80d87f377716a82e652ceccb6af03674521e4309fe",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# cheese-R6_opus-4.6_D\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: h2/connection.py — Cognitive Complexity (SKILL)\n\n---\n\n### C1: Cyclomatic Complexity per function\n\n| Function | Estimated CC | Grade | Rating | Notes |\n|---|---|---|---|---|\n| `send_headers` | 8 | B | ⚠️ warning | RFC-driven branching |\n| `send_data` | 8 | B | ⚠️ warning | flow control math |\n| `acknowledge_received_data` | 7 | B | ⚠️ warning | WINDOW_UPDATE hysteresis |\n| `_receive_headers_frame` | 7 | B | ⚠️ warning | stream state dispatch |\n| `__init__` (H2ConnectionStateMachine) | 1 | A | ✅ pass | — |\n| `__init__` (H2Connection) | 1 | A | ✅ pass | dense but low CC |\n\n**Key observation**: All complexity here is RFC 7540-driven. Each branch corresponds to a protocol requirement. This is qualitatively different from accidental complexity — it cannot be reduced without violating the HTTP/2 specification.\n\n---\n\n### C2: Nesting Depth\n\nAll functions — ✅ **pass**. Maximum depth observed: 3. The code uses early-return and guard clauses effectively. This is notably better than the B-grade complexity level would suggest — the complexity is \"wide\" (many branches) rather than \"deep\" (nested branches).\n\n---\n\n### C3: Single Responsibility\n\n**`send_headers` — ⚠️ warning**: Two logical phases:\n1. **Precondition validation** — stream state check, authority header presence, TE header restriction\n2. **Frame construction** — HPACK encoding, CONTINUATION frame splitting\n\nRecommendation: `_validate_send_headers_preconditions(headers, stream_id)` extracted as a guard clause before encoding.\n\n**`_receive_headers_frame` — ⚠️ warning**: Handles both client-side and server-side header reception via `if self.config.client_side`. The two paths have different semantics (client receives responses/push promises, server receives requests). While the dispatch is simple, it creates a maintenance burden when either path needs to diverge.\n\n**`send_data`, `acknowledge_received_data` — ✅ pass**: Both have tight, single-purpose implementations.\n\n---\n\n### C4: Code Placement\n\n**Security defaults with CVE comments in `__init__` — ✅ pass**:\n```python\nSettingCodes.MAX_CONCURRENT_STREAMS: 100,  # CVE: unbounded resources\nSettingCodes.MAX_HEADER_LIST_SIZE: DEFAULT_MAX_HEADER_LIST_SIZE,  # CVE-2016-6581\n```\nExcellent practice: security-significant defaults are explained inline with their rationale. This is the correct placement.\n\n**`H2Connection.__init__` attribute density — ⚠️ warning**: ~50 attributes initialized without logical grouping. Recommend section comments:\n```python\n# --- Settings ---\nself.local_settings = ...\nself.remote_settings = ...\n# --- Flow control ---\nself.outbound_flow_control_window = ...\n# --- Frame buffering ---\nself.incoming_buffer = ...\nself._data_to_send = ...\n# --- Stream tracking ---\nself.streams = ...\nself._header_frames = ...\n```\n\n---\n\n### Free-form analysis\n\n**1. `_header_frames` accumulator invariant is undocumented**\n```python\nself._header_frames: list[Frame] = []\n```\nThis accumulates HEADERS frames during CONTINUATION frame sequences. The invariant — \"non-empty means we're mid-header-block, and no other frame types are legal until complete\" — is a critical RFC constraint (RFC 7540 §6.10) that is not stated. A violation causes connection error, but the code doesn't document when this list should and should not be empty.\n\n**2. `send_data` implicit frame size contract**\nThe `max_outbound_frame_size` attribute from `__init__` is used to split DATA frames but its relationship to SETTINGS_MAX_FRAME_SIZE negotiation is implicit. If `remote_settings.max_frame_size` changes during a connection (SETTINGS frame received), `max_outbound_frame_size` must be updated — this coupling is not documented at the `send_data` call site.\n\n**3. `acknowledge_received_data` threshold is hardcoded**\n```python\nif increment > 0:\n```\nThe WINDOW_UPDATE is sent when any data is consumed. RFC 7540 recommends implementing a hysteresis threshold (e.g., only send when window drops below half of initial) to reduce WINDOW_UPDATE traffic. The current implementation may send more WINDOW_UPDATE frames than necessary.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R6",
+  "unit_id": "cheese-R6_opus-4.6_D",
+  "input": {
+    "repo": "python-hyper/h2",
+    "commit": "latest-master",
+    "file": "src/h2/connection.py",
+    "lines": "1-418",
+    "code_sha256": "85f9fa277984ad081386a89ad3b10d24dbfb244be88eb1362f1fd8e6d204efb2"
+  }
+}

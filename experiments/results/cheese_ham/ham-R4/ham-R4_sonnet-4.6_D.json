@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.671182+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "eb4dfad1bb23f70392f2866f29330507b5a2c9675a9cc100853c01874e83e74e",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# ham-R4_sonnet-4.6_D\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: saq/worker.py — Behavioral Preservation (SKILL)\n\n---\n\n### H1: Golden Tests\n\n**`process()` — ❌ fail**\n`process()` is the most critical path in the worker. It orchestrates:\n1. `before_process` hook invocation\n2. Job function execution\n3. `after_process` hook invocation\n4. Job status update\n\nNo golden tests exist that pin this sequence as an input/output contract. The exact behavior on exception during step 2 (does step 3 still run? does status become `failed`?) is critical and untested.\n\n**`__init__` configuration — ⚠️ warning**\nThe initialization sets up cron jobs, concurrency limits, and lifecycle hooks. The behavior of these at runtime is not pinned by initialization tests.\n\n**`abort()` shutdown sequence — ❌ fail**\nThe graceful shutdown sequence (signal tasks → wait for completion within grace period → force cancel) is a critical path with no behavioral test.\n\n---\n\n### H2: Contract Tests\n\n**Worker as async task queue consumer — ❌ fail**\nThere are no consumer-provider contract tests between `Worker` and `Queue`. The implicit contract is:\n- Worker calls `queue.dequeue(timeout)` to get jobs\n- Worker calls `queue.finish(ctx, status, ...)` after completion\n- Worker calls `queue.abort(ctx, error)` on unrecoverable failure\n\nThese contracts are not explicitly verified. A mock queue that validates these call patterns would constitute a contract test.\n\n---\n\n### H3: Structural vs Behavioral Change Separation\n\n**`process()` refactoring risk — ❌ fail**\n`process()` cannot currently be refactored structurally (e.g., extracting `_run_hooks`) without also potentially changing behavioral contracts (hook execution ordering, exception propagation). The structural and behavioral concerns are entangled.\n\n**`__init__` parameter handling — ⚠️ warning**\nThe 20+ parameters with defaults mean any structural change to initialization could silently change defaults for existing callers.\n\n---\n\n### H4: Critical Path Coverage\n\n| Critical path | Test coverage | Rating |\n|---|---|---|\n| `process()` happy path | Not observed | ❌ |\n| `process()` → exception → after_process runs | Not observed | ❌ |\n| Concurrency limit enforcement | Not observed | ❌ |\n| `abort()` graceful shutdown | Not observed | ❌ |\n| Cron job scheduling | Not observed | ❌ |\n| Job dequeue timeout | Not observed | ❌ |\n\nEstimated coverage of critical paths: <20%.\n\n---\n\n### Free-form analysis (beyond H1-H4)\n\n**1. Semaphore release on exception is not explicit**\nIn `process()`, the concurrency semaphore (`sem.acquire()` at start) must be released even if the job function raises. If `after_process` or `queue.finish()` raises an exception before `sem.release()`, the semaphore is permanently decremented, causing the worker to think it has one more job running than it does. Over time, the worker could stop accepting new jobs.\n\n**2. `job_task_contexts` dict is mutated during iteration risk**\nThe `abort()` method iterates over `self.job_task_contexts` while `process()` may be deleting from it. In asyncio, this yields between awaits — so during `abort()`'s `await task` call, `process()` could modify the dict. This is a potential `RuntimeError: dictionary changed size during iteration`.\n\n**3. `cron_jobs` behavioral contract is untestable**\nCron jobs are scheduled based on real wall clock time. There is no dependency injection for the clock, making it impossible to unit test cron scheduling without sleeping or mocking time globally.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R4",
+  "unit_id": "ham-R4_sonnet-4.6_D",
+  "input": {
+    "repo": "tobymao/saq",
+    "commit": "fe86758c5063",
+    "file": "saq/worker.py",
+    "lines": "1-281",
+    "code_sha256": "ecb9a2d7e7d762c9e11ee128f3659d41f1631a863e0e9b6b8bc9ca174b170d43"
+  }
+}

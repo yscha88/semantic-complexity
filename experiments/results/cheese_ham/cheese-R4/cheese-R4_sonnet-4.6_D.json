@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.497042+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "b5106e40fb48c1490edfc7d6abf4730d31d4ab4777b1d3e390036249e9026303",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# cheese-R4_sonnet-4.6_D\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: marshmallow schema.py — Cognitive Complexity (SKILL)\n\n---\n\n### C1: Cyclomatic Complexity per function\n\n| Function | Estimated CC | Grade | Rating |\n|---|---|---|---|\n| `_deserialize` | 23-26 | D | ❌ fail |\n| `_init_fields` | 18-20 | C | ❌ fail |\n| `_do_load` | 12-14 | C | ❌ fail |\n| `_run_validator` | 8-9 | B | ⚠️ warning |\n| `__init__` (Schema) | 3 | A | ✅ pass |\n\n**`_deserialize` — fail**: Branches over `many`, `Mapping` check, `partial` (bool vs iterable), per-field partial prefix decomposition, `unknown` (EXCLUDE/INCLUDE/RAISE). CC ~25.\n\n**`_init_fields` — fail**: Set operations on `only`/`exclude`/`opts.fields`, duplicate detection for `data_key` and `attribute` via two separate list comprehensions. CC ~19.\n\n**`_do_load` — fail**: Orchestrates pre-load, deserialize, field-validators, schema-validators (×2 with different `pass_collection`), post-load, all in one method with nested try/except. CC ~13.\n\n---\n\n### C2: Nesting Depth\n\n**`_deserialize` — fail**: `if many` → `for attr_name` → `if raw_value is missing` → `if partial is True or (partial_is_collection and ...)` → list comprehension for `sub_partial`. Depth ≥ 5.\n\n**`_init_fields` — warning**: Max depth ~4 inside the duplicate detection blocks.\n\n**`_do_load` — warning**: try/except nesting + inner `if not errors` block reaches depth 4.\n\n---\n\n### C3: Single Responsibility\n\n**`_deserialize` — fail**: Two distinct responsibilities:\n1. Collection mode dispatch (recursive call when `many=True`)\n2. Single-item deserialization with field iteration + unknown handling\n\nThese should be split: `_deserialize_many()` and `_deserialize_one()`.\n\n**`_do_load` — fail**: Orchestrates 5 distinct phases (pre-load, deserialize, field-validate, schema-validate×2, post-load). Each phase should be a delegated method call, not inline code.\n\n**`_run_validator` — pass**: Single purpose — invoke a validator and map errors to field keys.\n\n---\n\n### C4: Code Placement\n\n**`getter` closure inside `_deserialize` — fail**:\n```python\ndef getter(val, field_obj=field_obj, field_name=field_name, d_kwargs=d_kwargs):\n    return field_obj.deserialize(val, field_name, data, **d_kwargs)\n```\nThis closure uses Python default-argument capture to freeze loop variables — a well-known but non-obvious pattern. It should be extracted as `_deserialize_field(field_obj, field_name, data, d_kwargs)` or replaced with `functools.partial`.\n\n**`_do_load` schema-validator double call — warning**:\n```python\nself._invoke_schema_validators(..., pass_collection=True, ...)\nself._invoke_schema_validators(..., pass_collection=False, ...)\n```\nThe reason for calling twice (once with collection context, once without) is not explained and not obvious. A comment or a wrapper method would help.\n\n---\n\n### Free-form analysis (beyond C1-C4)\n\n**1. Partial field prefix decomposition is implicit**\n```python\nprefix = attr_name + \".\"\nsub_partial = [f[len_prefix:] for f in partial if f.startswith(prefix)]\n```\nThis implements dot-notation nested field resolution inline inside `_deserialize`. It is a non-trivial algorithm that should be extracted as `_resolve_nested_partial(attr_name, partial)`.\n\n**2. `error_store` passed by reference through deep call stack**\n`_deserialize` takes `error_store` as a parameter and mutates it, then errors are read back in `_do_load`. This shared-mutation pattern makes the call chain hard to reason about in isolation.\n\n**3. `_init_fields` duplicate detection is O(n²) in disguise**\n```python\nif len(dump_data_keys) != len(set(dump_data_keys)):\n    data_keys_duplicates = {x for x in dump_data_keys if dump_data_keys.count(x) > 1}\n```\n`dump_data_keys.count(x)` is called inside a set comprehension — O(n²). For large schemas this could be slow. A `Counter` would be O(n).\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R4",
+  "unit_id": "cheese-R4_sonnet-4.6_D",
+  "input": {
+    "repo": "marshmallow-code/marshmallow",
+    "commit": "dd20a8092a8b",
+    "file": "src/marshmallow/schema.py",
+    "lines": "1-396",
+    "code_sha256": "c035b0eec8fe2094db366513f55d9842c74de63b9ea79fa10a33d832a2d85af0"
+  }
+}

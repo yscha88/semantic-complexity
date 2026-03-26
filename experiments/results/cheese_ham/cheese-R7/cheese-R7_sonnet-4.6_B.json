@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.600481+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "eb60b31982c5a814a2a97df7b374474d38a8b0f45ff4cf46a29e5637b229434f",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# cheese-R7_sonnet-4.6_B\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: arq/worker.py — Cognitive Complexity\n\n### Function complexity estimates\n\n**`run_job` (~CC 37, grade E) — very high**\nThe most complex function in this set. Combines: job deserialization, function lookup, timeout management, exception handling (including CancelledError, asyncio.TimeoutError, and generic exceptions), retry logic with exponential backoff calculation, job result serialization, and Redis state cleanup in a single async function. The error path branches alone (retry eligible? score expired? abort requested?) add 10+ branches.\n\n**`_poll_iteration` (~CC 9, grade B) — moderate**\nBurst mode limit checking, job acquisition with score-based filtering, abort job cancellation, and finished task cleanup are all present. The interaction between `allow_pick_jobs`, `allow_abort_jobs`, and burst mode creates multiple conditional paths.\n\n**`run_cron` (~CC 9, grade B) — moderate**\nIterates over cron jobs, checks if they're due based on current time, handles overlapping execution prevention, and manages task lifecycle. The time comparison and overlap detection add branches.\n\n**`start_jobs` (~CC 8, grade B) — moderate**\nRedis pipeline with `WATCH`/`MULTI`/`EXEC` transaction for distributed lock acquisition. Multiple early-exit conditions: job counter limit, already-running check, score expiry check, and `WatchError`/`ResponseError` handling.\n\n### Nesting depth\n`run_job` exceeds 5 levels at its deepest: async context manager → try/except → if retry → if score check → further conditionals.\n`start_jobs` reaches 4 levels with the pipeline transaction block.\n\n### Single Responsibility\n`run_job` violates SRP severely:\n- Job deserialization from Redis\n- Function lookup and argument preparation\n- Execution with timeout\n- Exception classification (retry vs abort vs failure)\n- Result serialization\n- Redis key cleanup\n\nThese are at least 4 distinct responsibilities.\n\n### Code placement\nThe retry backoff calculation is inlined in `run_job` rather than extracted as `_calculate_retry_delay(job_def, attempt)`. The CancelledError re-raise in the middle of error handling is correct but easy to miss.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "cheese-R7",
+  "unit_id": "cheese-R7_sonnet-4.6_B",
+  "input": {
+    "repo": "python-arq/arq",
+    "commit": "fda407c4cb5e",
+    "file": "arq/worker.py",
+    "lines": "1-313",
+    "code_sha256": "0e38f49f81a5adf4cca7817eae92be7ec08880c09b2a336d750cba3598247fb7"
+  }
+}

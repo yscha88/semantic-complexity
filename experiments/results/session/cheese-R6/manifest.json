@@ -1,0 +1,59 @@
+{
+  "experiment_id": "cheese-R6",
+  "repo": "python-hyper/h2",
+  "commit": "latest-master",
+  "file": "src/h2/connection.py",
+  "lines": "1-418",
+  "code_sha256": "85f9fa277984ad081386a89ad3b10d24dbfb244be88eb1362f1fd8e6d204efb2",
+  "models": [
+    "sonnet-4.6",
+    "opus-4.6"
+  ],
+  "groups": [
+    "B",
+    "D"
+  ],
+  "units": [
+    {
+      "unit_id": "cheese-R6_sonnet-4.6_B",
+      "model_name": "sonnet-4.6",
+      "model_id": "claude-sonnet-4-6",
+      "group": "B",
+      "prompt_sha256": "7a0b217bbc62b83f1f31cc356efcf344e3bbe2d0c986a170cd1aafcb32659af5",
+      "prompt_file": "experiments/results/session/cheese-R6/cheese-R6_sonnet-4.6_B.prompt.md",
+      "response_file": "experiments/results/session/cheese-R6/cheese-R6_sonnet-4.6_B.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "cheese-R6_sonnet-4.6_D",
+      "model_name": "sonnet-4.6",
+      "model_id": "claude-sonnet-4-6",
+      "group": "D",
+      "prompt_sha256": "f851b88e3298da1cdafb3c80d87f377716a82e652ceccb6af03674521e4309fe",
+      "prompt_file": "experiments/results/session/cheese-R6/cheese-R6_sonnet-4.6_D.prompt.md",
+      "response_file": "experiments/results/session/cheese-R6/cheese-R6_sonnet-4.6_D.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "cheese-R6_opus-4.6_B",
+      "model_name": "opus-4.6",
+      "model_id": "claude-opus-4-6",
+      "group": "B",
+      "prompt_sha256": "7a0b217bbc62b83f1f31cc356efcf344e3bbe2d0c986a170cd1aafcb32659af5",
+      "prompt_file": "experiments/results/session/cheese-R6/cheese-R6_opus-4.6_B.prompt.md",
+      "response_file": "experiments/results/session/cheese-R6/cheese-R6_opus-4.6_B.response.md",
+      "status": "pending"
+    },
+    {
+      "unit_id": "cheese-R6_opus-4.6_D",
+      "model_name": "opus-4.6",
+      "model_id": "claude-opus-4-6",
+      "group": "D",
+      "prompt_sha256": "f851b88e3298da1cdafb3c80d87f377716a82e652ceccb6af03674521e4309fe",
+      "prompt_file": "experiments/results/session/cheese-R6/cheese-R6_opus-4.6_D.prompt.md",
+      "response_file": "experiments/results/session/cheese-R6/cheese-R6_opus-4.6_D.response.md",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-03-26T10:52:18.150644+00:00"
+}

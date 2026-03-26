@@ -91,6 +91,21 @@ MODEL_REGISTRY = {
         "temperature": 0,
         "max_tokens": 4096,
     },
+    # ── 세션 모델 (이 파일로 직접 실행 불가 — run_session.py 사용) ──
+    "sonnet-4.6-session": {
+        "provider": "session",
+        "model_id": "claude-sonnet-4-6",
+        "env_key": None,
+        "temperature": 0,
+        "max_tokens": None,
+    },
+    "opus-4.6-session": {
+        "provider": "session",
+        "model_id": "claude-opus-4-6",
+        "env_key": None,
+        "temperature": 0,
+        "max_tokens": None,
+    },
 }
 
 
@@ -195,10 +210,21 @@ def call_google(model_config: dict, prompt: str) -> dict:
     }
 
 
+def call_session(model_config: dict, prompt: str) -> dict:
+    """세션 모델은 run_session.py를 사용한다."""
+    raise RuntimeError(
+        f"모델 '{model_config['model_id']}'은 세션 모델입니다.\n"
+        f"  → run_experiment.py 대신 run_session.py를 사용하세요.\n"
+        f"  예시: python experiments/run_session.py prepare "\
+        f"--inputs <input.json> --models sonnet-4.6 --groups B D --output-dir <dir>"
+    )
+
+
 PROVIDER_DISPATCH = {
     "openai": call_openai,
     "anthropic": call_anthropic,
     "google": call_google,
+    "session": call_session,  # Anthropic 세션 모델 — run_session.py 사용
 }
 
 
@@ -252,6 +278,12 @@ def run_single(model_name: str, prompt: str, prompt_group: str) -> dict:
 
     config = MODEL_REGISTRY[model_name]
 
+    if config["provider"] == "session":
+        raise RuntimeError(
+            f"'{model_name}'은 세션 모델입니다. run_session.py를 사용하세요.\n"
+            f"  python experiments/run_session.py prepare --inputs <input.json> "
+            f"--models {model_name.replace('-session', '')} --groups B D --output-dir <dir>"
+        )
     if config["env_key"] not in os.environ:
         raise EnvironmentError(
             f"{config['env_key']}가 .env에 없습니다. 모델 {model_name} 실행 불가."

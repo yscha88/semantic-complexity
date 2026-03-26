@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.670504+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "8f36b5eb50c587196aea9a673e6e28f4f36a1a3d0091a6a6669b56db01d4e46d",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# ham-R4_sonnet-4.6_B\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: saq/worker.py — Behavioral Preservation\n\n### Critical path coverage assessment\n\n**`process()` — main job execution loop**\nThis is the core of the worker. It runs the before_process hooks, executes the job function, runs after_process hooks, and updates job status. No golden tests identified. The sequence (before → execute → after → status_update) must be preserved exactly — any reordering breaks hook contract semantics. Particularly risky: the error path (exception during job execution) must still run after_process hooks.\n\n**`__init__`**\nConfigures 15+ interdependent attributes. The cron scheduling, concurrency semaphore, and lifecycle hooks are all initialized here. Missing or wrongly-ordered initialization would break downstream behavior silently.\n\n**`start()` / `abort()`**\nThese control the worker lifecycle. `abort()` in particular must cancel tasks and wait for graceful shutdown — refactoring this without a characterization test risks changing shutdown behavior (e.g., jobs being killed vs allowed to complete within grace period).\n\n### Test coverage gaps\n\nBased on code inspection (no test files present in this code):\n- No visible golden tests for `process()` happy path\n- No tests for `process()` exception → after_process hook execution ordering\n- No tests for concurrent job limit enforcement\n- No tests for cron job scheduling timing\n- No tests for graceful shutdown sequence\n\n### Behavioral preservation risks on refactoring\n1. **Hook execution ordering** — if `before_process`/`after_process` are extracted, the interleaving with exception handling must be preserved exactly\n2. **Job status transitions** — `queued → active → complete/failed/aborted` transitions must remain atomic relative to the queue\n3. **Concurrency semaphore** — the `sem.acquire()` / `sem.release()` in `process()` must remain paired even on exception paths\n4. **Cron overlap prevention** — the check that prevents a cron job from running twice concurrently is behavioral state that must not be lost\n\n### Contract observations\nThe `Worker` class implicitly promises:\n- Jobs run at most once concurrently (enforced by semaphore)\n- All lifecycle hooks run even on failure\n- Graceful shutdown completes in-flight jobs up to `shutdown_grace_period_s`\n\nNone of these contracts are tested by observable assertions in this code.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R4",
+  "unit_id": "ham-R4_sonnet-4.6_B",
+  "input": {
+    "repo": "tobymao/saq",
+    "commit": "fe86758c5063",
+    "file": "saq/worker.py",
+    "lines": "1-281",
+    "code_sha256": "ecb9a2d7e7d762c9e11ee128f3659d41f1631a863e0e9b6b8bc9ca174b170d43"
+  }
+}

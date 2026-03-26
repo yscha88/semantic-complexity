@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.707231+00:00",
+  "model_name": "sonnet-4.6",
+  "prompt_group": "D",
+  "prompt_sha256": "086e76a6f444eef94a34aeff88b2bd76001cf2e5e47772bd94ce5981f42e99ab",
+  "config": {
+    "model_id": "claude-sonnet-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-sonnet-4-6",
+    "model_id_actual": "claude-sonnet-4-6",
+    "content": "# ham-R5_sonnet-4.6_D\n\n- model: claude-sonnet-4-6\n- model_actual: claude-sonnet-4-6\n- provider: anthropic-session\n- group: D\n\n---\n\n## Analysis: arq/worker.py — Behavioral Preservation (SKILL)\n\n---\n\n### H1: Golden Tests\n\n**`run_job()` — ❌ fail (critical)**\nThe most critical function. Contract:\n- Input: `job_id` in Redis with serialized function + args\n- Expected: function executes, result stored, in-progress key deleted\n- Exception path: retry if eligible (re-enqueue with delay), else mark failed\n- Abort path: if abort key exists, do not retry\n\nNo golden tests observed. The Redis key naming convention (`in_progress_key_prefix + job_id`, result key format) is an implicit serialization contract that could silently change.\n\n**`start_jobs()` distributed lock — ❌ fail**\nThe `WATCH/MULTI/EXEC` pattern's observable behavior (exactly-once job start under concurrent workers) is not tested. A golden test would verify that two concurrent `start_jobs()` calls for the same job_id result in exactly one job starting.\n\n**`_poll_iteration()` scheduling — ⚠️ warning**\nThe burst mode behavior (`max_burst_jobs` limit) and the `allow_pick_jobs`/`allow_abort_jobs` flags have observable effects but no pinned tests.\n\n---\n\n### H2: Contract Tests\n\n**Worker ↔ Redis schema contract — ❌ fail**\nThe implicit Redis schema:\n- Queue sorted set: `job_id → score (timestamp_ms)` \n- In-progress key: `in_progress:{job_id}` with TTL\n- Result key: key format from `serialize_result()`\n- Abort key: checked before retry\n\nThis schema is a contract between the worker and any client enqueuing jobs. No contract test verifies it.\n\n**`run_job()` exception type contract — ❌ fail**\nThe distinction between `CancelledError` (propagate), `asyncio.TimeoutError` (retry if configured), and `Exception` (retry based on attempt count) is a critical contract. No test verifies this three-way dispatch.\n\n---\n\n### H3: Structural vs Behavioral Separation\n\n**`run_job()` — ❌ fail**: Cannot be structurally refactored. The exception handling, retry logic, and Redis cleanup are interleaved:\n```python\ntry:\n    result = await asyncio.wait_for(coro, timeout)\nexcept asyncio.CancelledError:\n    raise                        # ← behavioral: must propagate\nexcept Exception as e:\n    ...                          # ← retry decision + Redis operations\nelse:\n    ...                          # ← result storage + cleanup\n```\nAny extraction risks changing the exception propagation behavior.\n\n---\n\n### H4: Critical Path Coverage\n\n| Path | Coverage | Risk |\n|---|---|---|\n| `run_job()` → success → result stored | ❌ none | Critical |\n| `run_job()` → exception → retry re-enqueue | ❌ none | Critical |\n| `run_job()` → CancelledError → propagates | ❌ none | Critical |\n| `run_job()` → abort key present → no retry | ❌ none | High |\n| `start_jobs()` → concurrent call → exactly one starts | ❌ none | High |\n| `_poll_iteration()` → burst limit → stops | ❌ none | Medium |\n\nEstimated critical path coverage: **<5%**.\n\n---\n\n### Free-form analysis\n\n**1. In-progress key cleanup is not guaranteed on unhandled exception**\n```python\n# set in start_jobs:\npipe.psetex(in_progress_key, int(self.in_progress_timeout_s * 1000), b'1')\n# deleted in run_job — but only if code reaches cleanup\n```\nIf `run_job` raises an unhandled exception before cleanup (e.g., during result serialization), the in-progress key remains until TTL expiry. During that window, the job appears running and won't be picked up. No test covers this failure mode.\n\n**2. `CancelledError` re-raise is a silent contract**\nThe `except asyncio.CancelledError: raise` is correct for asyncio shutdown semantics but creates a behavioral invariant that future maintainers might inadvertently remove. Without a test that verifies cancellation propagates, this could silently break graceful worker shutdown.\n\n**3. Retry backoff formula is an implicit contract**\n```python\nnext_score = timestamp_ms() + int(1000 * backoff * (2 ** (job_try - 2)))\n```\nThe formula `2 ** (job_try - 2)` (exponential backoff starting at 1× for attempt 2) is a behavioral contract with callers who set `job_retry=RetryError(attempts=N, defer=backoff)`. No test pins this formula.\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R5",
+  "unit_id": "ham-R5_sonnet-4.6_D",
+  "input": {
+    "repo": "python-arq/arq",
+    "commit": "fda407c4cb5e",
+    "file": "arq/worker.py",
+    "lines": "1-313",
+    "code_sha256": "0e38f49f81a5adf4cca7817eae92be7ec08880c09b2a336d750cba3598247fb7"
+  }
+}

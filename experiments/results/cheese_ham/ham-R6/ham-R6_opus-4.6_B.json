@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-03-26T11:32:09.742288+00:00",
+  "model_name": "opus-4.6",
+  "prompt_group": "B",
+  "prompt_sha256": "5a105ef475d760ccb1f79fcf3dd4fcb59c977d13fefe92c7499dd051321fd476",
+  "config": {
+    "model_id": "claude-opus-4-6",
+    "provider": "anthropic-session",
+    "temperature": 0,
+    "seed": null,
+    "max_tokens": null,
+    "note": "Claude 세션에서 직접 실행 — API 호출 없음"
+  },
+  "response": {
+    "model_id_requested": "claude-opus-4-6",
+    "model_id_actual": "claude-opus-4-6",
+    "content": "# ham-R6_opus-4.6_B\n\n- model: claude-opus-4-6\n- model_actual: claude-opus-4-6\n- provider: anthropic-session\n- group: B\n\n---\n\n## Analysis: procrastinate/worker.py — Behavioral Preservation\n\n### Assessment\nProcrastinate is a PostgreSQL-backed task queue. The behavioral contracts involve database state transitions, log emissions, and exception type semantics that are all implicit.\n\n### Critical paths\n\n**`_process_job()` — critical, no golden tests**\nFive distinct outcomes need golden tests:\n1. **Success**: execute → status=SUCCEEDED → log INFO\n2. **JobRetry**: catch → re-queue → status=ABORTED → log INFO  \n3. **JobError**: catch → status=FAILED → log ERROR with traceback\n4. **TaskNotFound**: raise exception (skips status update)\n5. **Unexpected exception**: behavior undefined — test needed\n\n**`_log_job_outcome()` — medium risk**\nThe log level (ERROR vs INFO) and `exc_info` (True vs False) are observable behaviors. Any monitoring system that parses logs depends on these being correct. The `[:250]` truncation of `job_result.result` is a behavioral contract for result display.\n\n**`_fetch_and_process_jobs()` — medium risk**\nBatch job fetching with `batch_size` limit. The behavior of fetching exactly `batch_size` jobs per iteration (vs one at a time) affects throughput and memory usage. This is a performance contract.\n\n### Key behavioral invariants\n\n1. `FAILED` + no retry → `logging.ERROR`; everything else → `logging.INFO`\n2. `JobRetry` → job re-enqueued (not marked failed)\n3. `exc_info=True` only for FAILED status (not retry, not success)\n4. Result truncated to 250 chars in log output\n\n### Refactoring recommendations\n\n1. **`_process_job()` needs golden tests first** — the exception type hierarchy (`JobRetry` < `JobError` < `Exception`) determines which path runs\n2. **Clock injection** — `job_result.start_timestamp` / `end_timestamp` should be injectable for testing\n3. **Extract `_execute_task(context)` → (result, exception)** — then `_process_job` only handles outcome classification\n4. **Pin log level contract with a test** — `FAILED` → ERROR is the most important observable behavior to protect\n",
+    "finish_reason": "session",
+    "usage": {
+      "prompt_tokens": null,
+      "completion_tokens": null,
+      "total_tokens": null
+    },
+    "response_id": null,
+    "elapsed_seconds": null
+  },
+  "experiment_id": "ham-R6",
+  "unit_id": "ham-R6_opus-4.6_B",
+  "input": {
+    "repo": "procrastinate-org/procrastinate",
+    "commit": "b75bd5b1d622",
+    "file": "procrastinate/worker.py",
+    "lines": "1-251",
+    "code_sha256": "7cdbb24ba2355acbcc26627607ebd712e7bdb769698647b20c6d2b57bb34c99b"
+  }
+}
