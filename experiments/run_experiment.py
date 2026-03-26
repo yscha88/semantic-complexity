@@ -42,14 +42,14 @@ MODEL_REGISTRY = {
     },
     "sonnet-4.6": {
         "provider": "anthropic",
-        "model_id": "claude-sonnet-4-20250514",
+        "model_id": "claude-sonnet-4-6",  # migrated from claude-sonnet-4-20250514 (2026-03-26)
         "env_key": "ANTHROPIC_API_KEY",
         "temperature": 0,
         "max_tokens": 4096,
     },
     "opus-4.6": {
         "provider": "anthropic",
-        "model_id": "claude-opus-4-20250514",
+        "model_id": "claude-opus-4-6",  # migrated from claude-opus-4-20250514 (2026-03-26)
         "env_key": "ANTHROPIC_API_KEY",
         "temperature": 0,
         "max_tokens": 4096,
